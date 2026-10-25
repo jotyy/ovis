@@ -286,6 +286,10 @@
   --primary-sheen: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.1) 100%);
   --scrim-blur: blur(3px);
   --popover-blur: blur(12px);
+  /* a switch's thumb and a QR code's field: white in either mode, like a PDF page; a QR code's
+     modules black, so any phone camera reads it on any theme */
+  --thumb: #ffffff;
+  --qr-module: #000000;
 }
 
 [data-theme="light"] {
@@ -372,7 +376,8 @@
   --shadow-dialog: 0 24px 48px rgba(0, 0, 0, 0.18), 0 8px 16px rgba(0, 0, 0, 0.1), 0 0 0 1px var(--ink-2);
   --shadow-tooltip: 0 8px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--ink-2);
   --shadow-primary: 0 2px 6px color-mix(in srgb, var(--primary) 22%, transparent), 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--ink-1);
-  --text-shadow-engraved: none;
+  /* an empty shadow, not none: a rule that lists a second shadow after it stays valid */
+  --text-shadow-engraved: 0 0 0 transparent;
   --divider: linear-gradient(to bottom, var(--ink-2) 0, var(--ink-2) 1px, var(--edge-light) 1px);
   --surface-sheen: linear-gradient(178deg, rgba(255, 255, 255, 0.7) 4%, rgba(255, 255, 255, 0) 75%);
   --raised-face: linear-gradient(to bottom, color-mix(in srgb, var(--bg-elevated) 40%, white) 0%, var(--bg-elevated) 100%);
@@ -613,10 +618,10 @@
   --primary-tint: rgba(80, 22, 255, 0.18);
   --status-idle: #8a8a93;
   --status-working: #59ebf0;
-  --status-blocked: #f05959;
+  --status-blocked: #f57a7a;
   --status-done: #59f089;
   --status-working-tint: rgba(89, 235, 240, 0.14);
-  --status-blocked-tint: rgba(240, 89, 89, 0.14);
+  --status-blocked-tint: rgba(245, 122, 122, 0.14);
   --status-done-tint: rgba(89, 240, 137, 0.14);
   --danger-tint: rgba(227, 62, 49, 0.12);
   --notice: #ffb575;
@@ -651,7 +656,7 @@
   --border: #e4e4e7;
   --border-strong: #d1d1d6;
   --text: #27272a;
-  --text-dim: #6b6b74;
+  --text-dim: #62626b;
   --text-strong: #0a0a0b;
   --accent: #5016ff;
   --accent-tint: rgba(80, 22, 255, 0.1);
@@ -659,14 +664,14 @@
   --primary-hover: #4812e6;
   --primary-text: #ffffff;
   --primary-tint: rgba(80, 22, 255, 0.12);
-  --status-idle: #6b6b74;
-  --status-working: #0e7490;
-  --status-blocked: #d13438;
-  --status-done: #1a7f3c;
-  --status-working-tint: rgba(14, 116, 144, 0.12);
-  --status-blocked-tint: rgba(209, 52, 56, 0.12);
-  --status-done-tint: rgba(26, 127, 60, 0.12);
-  --danger-tint: rgba(209, 52, 56, 0.1);
+  --status-idle: #62626b;
+  --status-working: #0a5a6d;
+  --status-blocked: #a8282c;
+  --status-done: #136029;
+  --status-working-tint: rgba(10, 90, 109, 0.12);
+  --status-blocked-tint: rgba(168, 40, 44, 0.12);
+  --status-done-tint: rgba(19, 96, 41, 0.12);
+  --danger-tint: rgba(168, 40, 44, 0.1);
   --notice: #a85a00;
   --danger-text: #9b1c1c;
   --scrim: rgba(10, 10, 11, 0.4);
@@ -681,7 +686,7 @@
   --term-blue: #0b6e8a;
   --term-magenta: #6f42c1;
   --term-cyan: #0f6f74;
-  --term-white: #6b6b74;
+  --term-white: #62626b;
   --term-bright-black: #4e4b47;
   --term-bright-red: #c92d24;
   --term-bright-green: #277d3f;
@@ -695,7 +700,7 @@
   --syntax-keyword: #c0392b;
   --syntax-string: #1f7a3f;
   --syntax-number: #a85a00;
-  --syntax-type: #0e7490;
+  --syntax-type: #0a5a6d;
   --syntax-variable: #27272a;
   --syntax-meta: #7c3aed;
   --bubble-border: var(--border);
@@ -1760,7 +1765,9 @@ button {
   color: inherit;
 }
 
-:focus-visible {
+/* the offset ring is for controls without a box of their own; a shadcn component (data-slot)
+   draws its focus as a ring inside its box (ui/*.tsx), so it is left out here */
+:focus-visible:not([data-slot]) {
   outline: var(--ring);
   outline-offset: var(--ring-offset);
 }

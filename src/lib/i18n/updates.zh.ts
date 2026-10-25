@@ -12,7 +12,6 @@ export const UPDATES_ZH: Record<string, string> = {
   "Version {version} is available.": "有新版本 {version} 可用。",
   "What's new": "更新内容",
   "Earlier releases not shown here: {count}.": "此处未显示的更早版本：{count} 个。",
-  "Full changelog": "完整更新日志",
   "What the last update brought": "上次更新的内容",
   "New features": "新功能",
   "Improvements": "改进",

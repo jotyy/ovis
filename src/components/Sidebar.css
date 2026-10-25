@@ -127,8 +127,13 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   height: var(--side-row);
   padding-right: var(--side-row);
   padding-left: var(--side-box);
+  /* the Input's own text-strong is lost to its text-input size (tailwind.css names both "input"),
+     and the page's :focus-visible outline lands over its focus ring: said here until those are fixed */
+  color: var(--text-strong);
   text-overflow: ellipsis;
 }
+
+.sidebar-filter-input:focus-visible { outline: none; }
 
 /* the clear is the field's own, drawn once below; the browser's cancel glyph would make two */
 .sidebar-filter-input::-webkit-search-cancel-button,

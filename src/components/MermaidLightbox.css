@@ -1,40 +1,23 @@
-/* above the file viewer (modal + 1), which opens diagrams of its own markdown */
+/* above the file viewer (modal + 1), which opens diagrams of its own markdown; the page behind
+   shows through the scrim's blur, dimmed almost to the base so the diagram reads alone */
 .mermaid-lightbox-scrim {
   z-index: calc(var(--z-modal) + 2);
   padding: 0;
-  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
 }
 
 .mermaid-lightbox {
   position: relative;
   width: 100%;
   height: 100%;
-  background: var(--bg);
   overflow: hidden;
 }
 
+/* the bar of controls (the menu surface, MermaidLightbox.tsx) clear of a notch or a rounded corner:
+   the page is laid out with viewport-fit=cover */
 .mermaid-lightbox-bar {
-  position: absolute;
   top: calc(var(--space-3) + env(safe-area-inset-top, 0px));
   right: calc(var(--space-3) + env(safe-area-inset-right, 0px));
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  background: var(--bg-elevated);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-pop);
-}
-
-.mermaid-lightbox-zoom {
-  min-width: 4ch;
-  text-align: center;
-  color: var(--text-dim);
-  font-family: var(--font-mono);
-  font-size: var(--fs-xs);
-  font-variant-numeric: tabular-nums;
 }
 
 /* the stage never scrolls: the diagram moves inside it, and the page behind stays put */

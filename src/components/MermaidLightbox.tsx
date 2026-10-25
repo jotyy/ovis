@@ -12,6 +12,7 @@ import "./MermaidLightbox.css";
 import { useT } from "../lib/i18n.ts";
 import { usePhoneSheetBack } from "../lib/sheetHistory.ts";
 import { nativeModalOver, useFocusTrap } from "../lib/useFocusTrap.ts";
+import { IconButton, TooltipProvider } from "./ui/index.ts";
 
 // the view model is shared with ImageLightbox, which zooms a chat picture the same way
 export const MIN_ZOOM = 0.5;
@@ -22,6 +23,11 @@ export const PAN_STEP = 80;
 /** `scale` 1 is the diagram fitted to the stage; `x`/`y` move it in stage pixels. */
 export interface View { scale: number; x: number; y: number }
 export const FIT: View = { scale: 1, x: 0, y: 0 };
+
+/** a lightbox's floating bar of controls: the menu surface, glass under a deep shadow, over the scrim */
+export const lightboxBar = "absolute z-[1] flex items-center gap-1 rounded-lg bg-[color-mix(in_srgb,var(--bg-elevated)_92%,transparent)] p-1 shadow-popover backdrop-popover";
+/** the zoom read-out between its buttons */
+export const lightboxZoom = "min-w-[4ch] text-center font-mono text-xs text-dim tabular-nums";
 
 const clamp = (value: number): number => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
 
@@ -119,32 +125,34 @@ export function MermaidLightbox({ svg, onClose }: { svg: string; onClose: () => 
   };
 
   return createPortal(
-    <div className="modal-scrim mermaid-lightbox-scrim">
-      <div ref={surface} className="mermaid-lightbox" role="dialog" aria-modal="true" aria-label={t("Diagram")} tabIndex={-1}>
-        <div className="mermaid-lightbox-bar">
-          <button type="button" className="icon-button" onClick={() => zoomBy(1 / STEP)} disabled={view.scale <= MIN_ZOOM} aria-label={t("Zoom out")}><Minus aria-hidden="true" /></button>
-          <span className="mermaid-lightbox-zoom" aria-live="off">{Math.round(view.scale * 100)}%</span>
-          <button type="button" className="icon-button" onClick={() => zoomBy(STEP)} disabled={view.scale >= MAX_ZOOM} aria-label={t("Zoom in")}><Plus aria-hidden="true" /></button>
-          <button type="button" className="icon-button" onClick={() => setView(FIT)} aria-label={t("Fit to screen")} title={t("Fit to screen")}><Scan aria-hidden="true" /></button>
-          <button ref={close} type="button" className="icon-button" onClick={onClose} aria-label={t("Close")}><X aria-hidden="true" /></button>
-        </div>
-        <div
-          ref={stage}
-          className={`mermaid-lightbox-stage${dragging ? " is-dragging" : ""}`}
-          onPointerDown={down}
-          onPointerMove={move}
-          onPointerUp={up}
-          onPointerCancel={up}
-          onDoubleClick={toggle}
-        >
+    <TooltipProvider>
+      <div className="modal-scrim mermaid-lightbox-scrim">
+        <div ref={surface} className="mermaid-lightbox" role="dialog" aria-modal="true" aria-label={t("Diagram")} tabIndex={-1}>
+          <div className={`mermaid-lightbox-bar ${lightboxBar}`}>
+            <IconButton label={t("Zoom out")} side="bottom" onClick={() => zoomBy(1 / STEP)} disabled={view.scale <= MIN_ZOOM}><Minus aria-hidden="true" /></IconButton>
+            <span className={`mermaid-lightbox-zoom ${lightboxZoom}`} aria-live="off">{Math.round(view.scale * 100)}%</span>
+            <IconButton label={t("Zoom in")} side="bottom" onClick={() => zoomBy(STEP)} disabled={view.scale >= MAX_ZOOM}><Plus aria-hidden="true" /></IconButton>
+            <IconButton label={t("Fit to screen")} side="bottom" onClick={() => setView(FIT)}><Scan aria-hidden="true" /></IconButton>
+            <IconButton ref={close} label={t("Close")} side="bottom" onClick={onClose}><X aria-hidden="true" /></IconButton>
+          </div>
           <div
-            className="mermaid-lightbox-canvas"
-            style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}
-            dangerouslySetInnerHTML={{ __html: svg }}
-          />
+            ref={stage}
+            className={`mermaid-lightbox-stage${dragging ? " is-dragging" : ""}`}
+            onPointerDown={down}
+            onPointerMove={move}
+            onPointerUp={up}
+            onPointerCancel={up}
+            onDoubleClick={toggle}
+          >
+            <div
+              className="mermaid-lightbox-canvas"
+              style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}
+              dangerouslySetInnerHTML={{ __html: svg }}
+            />
+          </div>
         </div>
       </div>
-    </div>,
+    </TooltipProvider>,
     document.body,
   );
 }

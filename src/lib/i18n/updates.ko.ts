@@ -12,7 +12,6 @@ export const UPDATES_KO: Record<string, string> = {
   "Version {version} is available.": "{version} 버전이 나왔습니다.",
   "What's new": "업데이트 내용",
   "Earlier releases not shown here: {count}.": "여기에 표시되지 않은 이전 릴리스: {count}개.",
-  "Full changelog": "전체 변경 내역",
   "What the last update brought": "지난 업데이트 내용",
   "New features": "새 기능",
   "Improvements": "개선",

@@ -261,6 +261,22 @@ const BASE: Record<string, string> = {
   // t3code ports (d)
   "Change PC": "PCを切り替え",
   "Selected": "選択中",
+  "Confirm remove PC": "PC の削除を確認",
+  "Connection error": "接続エラー",
+  "Disconnect": "切断",
+  "Disconnected": "切断されました",
+  "Loading PCs…": "PC を読み込んでいます…",
+  "Managed by herdr. Rename, disable or remove it there.": "herdr で管理されています。名前の変更、無効化、削除は herdr で行ってください。",
+  "PC {name}": "PC {name}",
+  "PC name": "PC 名",
+  "Reconnect / setup": "再接続 / セットアップ",
+  "Remove PC": "PC を削除",
+  "Removes this registration. Remote sessions keep running.": "この登録のみを削除します。リモートのセッションは実行されたままです。",
+  "Rename": "名前を変更",
+  "Setup needed": "セットアップが必要です",
+  "The computer this app runs on": "このアプリが動作しているコンピューター",
+  "Update bridge…": "ブリッジを更新…",
+  "Full changelog": "すべての変更履歴",
 };
 
 /** The parts JA is made of; src/lib/i18n.test.ts fails when a key is in two parts, since a spread keeps only the last. */

@@ -74,8 +74,8 @@ export function FilesDialog({ start, paneId, viewing, onOpenFile, onOpenDiff, on
             <DialogBody>
               {/* the dialog stays open across a pane switch (Next pane): the browser starts over on the new
                   pane's folder, as Changes reads the new pane, instead of listing the pane it was opened on */}
-              <TabsContent value="browse" forceMount><DirectoryBrowser key={paneId} start={start} onOpenFile={onOpenFile} onFolder={(path) => { folder.current = { pane: paneId, path }; }} /></TabsContent>
-              <TabsContent value="changes" forceMount>{changesVisited && <RepoChanges paneId={paneId} directory={start} onOpenDiff={onOpenDiff} />}</TabsContent>
+              <TabsContent value="browse" forceMount hidden={tab !== "browse"}><DirectoryBrowser key={paneId} start={start} onOpenFile={onOpenFile} onFolder={(path) => { folder.current = { pane: paneId, path }; }} /></TabsContent>
+              <TabsContent value="changes" forceMount hidden={tab !== "changes"}>{changesVisited && <RepoChanges paneId={paneId} directory={start} onOpenDiff={onOpenDiff} />}</TabsContent>
             </DialogBody>
           </Tabs>
         </TooltipProvider>

@@ -259,6 +259,22 @@ const BASE: Record<string, string> = {
   // t3code ports (d)
   "Change PC": "PC 바꾸기",
   "Selected": "선택됨",
+  "Confirm remove PC": "PC 제거 확인",
+  "Connection error": "연결 오류",
+  "Disconnect": "연결 끊기",
+  "Disconnected": "연결 끊김",
+  "Loading PCs…": "PC 불러오는 중…",
+  "Managed by herdr. Rename, disable or remove it there.": "herdr에서 관리합니다. 이름 변경, 비활성화 또는 삭제는 herdr에서 하세요.",
+  "PC {name}": "PC {name}",
+  "PC name": "PC 이름",
+  "Reconnect / setup": "재연결 / 설정",
+  "Remove PC": "PC 제거",
+  "Removes this registration. Remote sessions keep running.": "이 등록만 지웁니다. 원격 세션은 계속 돕니다.",
+  "Rename": "이름 바꾸기",
+  "Setup needed": "설정 필요",
+  "The computer this app runs on": "이 앱이 실행되는 컴퓨터",
+  "Update bridge…": "브리지 업데이트…",
+  "Full changelog": "전체 변경 내역",
 };
 
 /** The parts KO is made of; src/lib/i18n.test.ts fails when a key is in two parts, since a spread keeps only the last. */

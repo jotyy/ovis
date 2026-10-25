@@ -3,6 +3,7 @@ import { X } from "../lib/icons.ts";
 import { flickVelocity, onDroplet, type PressSample, type QueuedDroplet } from "../lib/droplet.ts";
 import { useT } from "../lib/i18n.ts";
 import { AgentMark } from "./AgentMark.tsx";
+import { Button } from "./ui/index.ts";
 import "./Droplet.css";
 
 /**
@@ -200,9 +201,10 @@ export function Droplet({ onOpen }: { onOpen: (machineId: string, paneId: string
         </span>
         <span className="droplet-dot" aria-hidden="true" />
       </button>
-      <button type="button" className="droplet-close" aria-label={t("Dismiss")} title={t("Dismiss")} onClick={leave}>
+      {/* a sibling of the card (a button holds no button), laid over its right end: a ghost button in the island's own ink */}
+      <Button variant="ghost" size="icon-sm" className="droplet-close rounded-full text-(--droplet-text-dim) hover:bg-(--droplet-mark-bg) hover:text-(--droplet-text) active:bg-(--droplet-mark-bg)" aria-label={t("Dismiss")} title={t("Dismiss")} onClick={leave}>
         <X size={16} aria-hidden="true" />
-      </button>
+      </Button>
     </div>
   );
 }

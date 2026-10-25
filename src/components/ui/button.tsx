@@ -33,16 +33,17 @@ export const buttonVariants = cva(
       },
       size: {
         xs: "h-6 px-2 text-xs",
-        sm: "h-control px-3 text-sm",
-        md: "h-input px-4 text-sm",
-        lg: "h-10 px-5 text-md",
-        /** a glyph alone, a square the control's size */
-        icon: "size-control [&_svg]:size-icon",
-        "icon-sm": "size-6 [&_svg]:size-4",
-        "icon-lg": "size-9 [&_svg]:size-5",
+        sm: "h-control px-3 text-sm coarse:h-touch",
+        md: "h-input px-4 text-sm coarse:h-touch",
+        lg: "h-10 px-5 text-md coarse:h-touch",
+        /** a glyph alone, a square the control's size; on a touch screen a finger's square */
+        icon: "size-control [&_svg]:size-icon coarse:size-touch",
+        /** a small glyph in a dense row: its box stays, an invisible expander reaches the finger's target */
+        "icon-sm": "relative size-6 [&_svg]:size-4 coarse:before:absolute coarse:before:-inset-2.5 coarse:before:content-['']",
+        "icon-lg": "size-9 [&_svg]:size-5 coarse:size-touch",
         /** the editor's field button: a glyph with a word, tighter on the glyph's side */
-        field: "h-control gap-2 pl-1.5 pr-2 text-sm [&_svg]:size-[18px]",
-        block: "h-input w-full gap-2 px-2 text-sm [&_svg]:size-[18px]",
+        field: "h-control gap-2 pl-1.5 pr-2 text-sm [&_svg]:size-[18px] coarse:h-touch",
+        block: "h-input w-full gap-2 px-2 text-sm [&_svg]:size-[18px] coarse:h-touch",
         bare: "",
       },
     },

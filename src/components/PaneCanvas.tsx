@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type DragEvent, type MouseEvent, type MutableRefObject, type PointerEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, type DragEvent, type MouseEvent, type MutableRefObject, type PointerEvent, type ReactNode } from "react";
 import { Columns2, Ellipsis, Eraser, Maximize2, Pencil, Rows2, ArrowLeftRight, X } from "../lib/icons.ts";
+import { Alert, AlertDescription, Button, DialogBody, DialogFooter, DialogHeader, Field, Input } from "./ui/index.ts";
 import { createPortal } from "react-dom";
 import type { HerdrPane, PaneLayoutSnapshot, SessionSnapshot } from "../../shared/protocol.ts";
 import { useMachineApi, useMachineId } from "../lib/machineContext.tsx";
@@ -302,8 +303,8 @@ export function PaneCanvas({ snapshot, pane, selectedPaneId, onSelect, onChanged
             event.dataTransfer.setData(PANE_DRAG_TYPE, paneDragData({ machineId, paneId: item.pane_id }));
           }}>
           <span className="pane-frame-title">{displayPaneTitle(item)}</span>
-          <button type="button" className="icon-button pane-frame-menu" aria-label={t("Pane actions for {name}", { name: displayPaneTitle(item) })}
-            onClick={(event) => showMenu(item, event.currentTarget)}><Ellipsis aria-hidden="true" /></button>
+          <Button variant="ghost" size="icon" className="pane-frame-menu text-dim" aria-label={t("Pane actions for {name}", { name: displayPaneTitle(item) })}
+            onClick={(event) => showMenu(item, event.currentTarget)}><Ellipsis aria-hidden="true" /></Button>
         </div>
         <div className="pane-frame-body"><PaneCachedContext.Provider value={cell.cached && !cell.retained}><PanePresentedContext.Provider value={!offTab}><PaneShownContext.Provider value={!hidden}>{renderPane(item, active, alone === null && cells.length > 1)}</PaneShownContext.Provider></PanePresentedContext.Provider></PaneCachedContext.Provider></div>
       </section>;
@@ -329,7 +330,7 @@ export function PaneCanvas({ snapshot, pane, selectedPaneId, onSelect, onChanged
           run(() => api.setSplitRatio(layout.tab_id, path, Math.max(0.1, Math.min(0.9, item.ratio + step))));
         }} />;
     })}
-    {error && <div className="pane-canvas-error" role="alert">{error.message}{error.detail !== null && <><br /><code>{error.detail}</code></>}<button className="icon-button" aria-label={t("Dismiss")} onClick={() => setError(null)}><X /></button></div>}
+    {error && <Alert tone="danger" className="pane-canvas-error items-center"><AlertDescription className="min-w-0 flex-1 text-danger-text [overflow-wrap:anywhere]">{error.message}{error.detail !== null && <><br /><code className="font-mono text-xs">{error.detail}</code></>}</AlertDescription><Button variant="ghost" size="icon-sm" className="shrink-0 text-danger-text" aria-label={t("Dismiss")} onClick={() => setError(null)}><X aria-hidden="true" /></Button></Alert>}
     {menu && target && <RowMenu anchor={menu.anchor} point={menu.point} restoreFocusTo={menu.previousFocus} title={t("Pane actions for {name}", { name: displayPaneTitle(target) })} items={items} onClose={closeMenu} />}
     {renaming && <PaneRename pane={renaming} onClose={() => setRenaming(null)} onSave={async (label) => { await api.renamePane(renaming.pane_id, label); onChanged(); }} />}
     {closing && <ConfirmDialog title={t("Close pane {name}?", { name: displayPaneTitle(closing) })}
@@ -341,6 +342,7 @@ export function PaneCanvas({ snapshot, pane, selectedPaneId, onSelect, onChanged
 function PaneRename({ pane, onClose, onSave }: { pane: HerdrPane; onClose: () => void; onSave: (label: string) => Promise<void> }) {
   const t = useT();
   const input = useRef<HTMLInputElement>(null);
+  const nameId = useId();
   const surface = useFocusTrap<HTMLDivElement>(true, { initialFocus: input });
   const [value, setValue] = useState(pane.label ?? "");
   const [busy, setBusy] = useState(false);
@@ -354,9 +356,12 @@ function PaneRename({ pane, onClose, onSave }: { pane: HerdrPane; onClose: () =>
   return createPortal(<div className="modal-scrim" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) onClose(); }}>
     <div ref={surface} className="modal" role="dialog" aria-modal="true" aria-label={t("Rename pane")}>
       <form className="pane-rename-form" onSubmit={(event) => { event.preventDefault(); if (busy) return; setBusy(true); void onSave(value.trim()).then(onClose, (reason) => { setError(userErrorMessage(reason)); setBusy(false); }); }}>
-        <header className="modal-header"><h2 className="modal-title">{t("Rename pane")}</h2></header>
-        <div className="modal-body"><label>{t("Pane name")}<input ref={input} className="input" value={value} disabled={busy} maxLength={80} onFocus={(event) => event.currentTarget.select()} onChange={(event) => setValue(event.target.value)} /></label>{error && <p role="alert">{error.message}{error.detail !== null && <><br /><code>{error.detail}</code></>}</p>}</div>
-        <footer className="modal-footer"><button type="button" className="btn" disabled={busy} onClick={onClose}>{t("Cancel")}</button><button className="btn btn-primary" disabled={busy}>{t("Save")}</button></footer>
+        <DialogHeader><h2 className="text-lg font-medium text-strong text-engraved">{t("Rename pane")}</h2></DialogHeader>
+        <DialogBody className="flex flex-col gap-3">
+          <Field label={t("Pane name")} htmlFor={nameId}><Input ref={input} id={nameId} className="coarse:h-touch" value={value} disabled={busy} maxLength={80} onFocus={(event) => event.currentTarget.select()} onChange={(event) => setValue(event.target.value)} /></Field>
+          {error && <Alert tone="danger"><AlertDescription className="text-danger-text">{error.message}{error.detail !== null && <><br /><code className="font-mono text-xs">{error.detail}</code></>}</AlertDescription></Alert>}
+        </DialogBody>
+        <DialogFooter><Button variant="field" size="sm" disabled={busy} onClick={onClose}>{t("Cancel")}</Button><Button type="submit" variant="accent" size="sm" disabled={busy}>{t("Save")}</Button></DialogFooter>
       </form>
     </div>
   </div>, document.body);

@@ -12,7 +12,6 @@ export const UPDATES_JA: Record<string, string> = {
   "Version {version} is available.": "バージョン {version} が利用可能です。",
   "What's new": "更新内容",
   "Earlier releases not shown here: {count}.": "ここに表示されていない以前のリリース: {count} 件。",
-  "Full changelog": "すべての変更履歴",
   "What the last update brought": "前回のアップデートの内容",
   "New features": "新機能",
   "Improvements": "改善",

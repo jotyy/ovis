@@ -10,9 +10,9 @@ export const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 export const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 export const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 
-export const menuSurface = "z-30 min-w-[180px] overflow-x-hidden overflow-y-auto rounded-lg bg-[color-mix(in_srgb,var(--bg-elevated)_92%,transparent)] p-1.5 text-text shadow-popover backdrop-popover outline-none data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out";
+export const menuSurface = "z-30 min-w-[180px] overflow-x-hidden overflow-y-auto rounded-lg bg-[color-mix(in_srgb,var(--bg-elevated)_92%,transparent)] p-1.5 text-text shadow-popover backdrop-popover outline-none data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out motion-reduce:animate-none";
 
-export const menuItem = "relative flex h-control cursor-pointer select-none items-center gap-2 rounded-md px-2 text-sm text-text outline-none transition-colors duration-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-40 data-[highlighted]:bg-fill-3 data-[highlighted]:text-strong [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-dim data-[highlighted]:[&_svg]:text-text";
+export const menuItem = "relative flex h-control cursor-pointer select-none items-center gap-2 rounded-md px-2 text-sm text-text outline-none transition-colors duration-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-40 data-[highlighted]:bg-fill-3 data-[highlighted]:text-strong [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-dim data-[highlighted]:[&>svg]:text-text";
 
 export function DropdownMenuContent({ className, sideOffset = 6, ...props }: ComponentProps<typeof DropdownMenuPrimitive.Content>) {
   return (
@@ -30,7 +30,7 @@ export function DropdownMenuCheckboxItem({ className, children, checked, ...prop
   return (
     <DropdownMenuPrimitive.CheckboxItem data-slot="dropdown-menu-checkbox-item" className={cn(menuItem, "pl-8", className)} checked={checked} {...props}>
       <span className="pointer-events-none absolute left-2 flex size-4 items-center justify-center rounded-sm shadow-[inset_0_0_0_1px_var(--fill-4)]">
-        <DropdownMenuPrimitive.ItemIndicator className="flex size-4 items-center justify-center rounded-sm bg-primary text-primary-text shadow-[inset_0_1px_0_var(--edge-light-strong)]"><Check className="size-3!" stroke={2.5} /></DropdownMenuPrimitive.ItemIndicator>
+        <DropdownMenuPrimitive.ItemIndicator className="flex size-4 items-center justify-center rounded-sm bg-primary text-primary-text shadow-[inset_0_1px_0_var(--edge-light-strong)]"><Check className="size-3" stroke={2.5} /></DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}
     </DropdownMenuPrimitive.CheckboxItem>

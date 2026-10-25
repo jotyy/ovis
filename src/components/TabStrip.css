@@ -120,8 +120,12 @@
   height: var(--chip-h);
   margin: 0 var(--space-2);
   padding: 0 var(--space-1);
+  /* as the sidebar's filter (Sidebar.css): the Input's text colour and the page's outline, until fixed there */
+  color: var(--text-strong);
   font-size: var(--fs-sm);
 }
+
+.tab-strip-rename:focus-visible { outline: none; }
 
 .tab-strip-dot {
   flex: 0 0 auto;

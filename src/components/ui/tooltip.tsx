@@ -13,7 +13,7 @@ export const TooltipTrigger = TooltipPrimitive.Trigger;
 export function TooltipContent({ className, sideOffset = 8, children, ...props }: ComponentProps<typeof TooltipPrimitive.Content>) {
   return (
     <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Content data-slot="tooltip-content" sideOffset={sideOffset} className={cn("z-40 w-fit max-w-[280px] origin-(--radix-tooltip-content-transform-origin) rounded-md bg-hover px-2 py-1 text-xs font-medium text-strong shadow-tooltip data-[state=delayed-open]:animate-pop-in data-[state=closed]:animate-pop-out", className)} {...props}>
+      <TooltipPrimitive.Content data-slot="tooltip-content" sideOffset={sideOffset} className={cn("z-40 w-fit max-w-[280px] origin-(--radix-tooltip-content-transform-origin) rounded-md bg-hover px-2 py-1 text-xs font-medium text-strong shadow-tooltip data-[state=delayed-open]:animate-pop-in data-[state=closed]:animate-pop-out motion-reduce:animate-none", className)} {...props}>
         {children}
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>

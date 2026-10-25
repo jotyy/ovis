@@ -46,7 +46,10 @@ export default defineConfig({
     proxy: {
       // not the string shorthand: Vite gives that changeOrigin, and the server's same-origin check
       // compares the browser's Origin (:5173) with the Host it was sent, which must stay :5173
-      "/api": { target: `http://localhost:${process.env["OVIS_PORT"] ?? 7317}`, changeOrigin: false },
+      // agent: false: Bun closes an idle keep-alive connection after its idle timeout, and a request
+      // the proxy then sends down that half-closed socket hangs until the browser gives up; a
+      // connection per request never meets one
+      "/api": { target: `http://localhost:${process.env["OVIS_PORT"] ?? 7317}`, changeOrigin: false, agent: false },
       "/ws": { target: `ws://localhost:${process.env["OVIS_PORT"] ?? 7317}`, ws: true },
     },
   },

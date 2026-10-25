@@ -24,8 +24,8 @@ export function QrCode({ value, label, size = 168 }: { value: string; label: str
   }, [value]);
   return (
     <svg className="qr" viewBox={`0 0 ${cells} ${cells}`} width={size} height={size} role="img" aria-label={label} shapeRendering="crispEdges">
-      <rect width={cells} height={cells} fill="#ffffff" />
-      <path d={path} fill="#000000" />
+      <rect width={cells} height={cells} fill="var(--thumb)" />
+      <path d={path} fill="var(--qr-module)" />
     </svg>
   );
 }

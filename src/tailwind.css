@@ -55,8 +55,12 @@
   }
 }
 
-@custom-variant hover (@media (hover: hover) { &:hover });
-@custom-variant coarse (@media (pointer: coarse) { & });
+/* hover: Tailwind v4's own already applies only where a pointer can hover. coarse: a finger */
+@custom-variant coarse {
+  @media (pointer: coarse) {
+    @slot;
+  }
+}
 
 @theme inline {
   --color-*: initial;
@@ -98,6 +102,7 @@
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
   --color-edge: var(--edge-light);
+  --color-thumb: var(--thumb);
 
   --font-*: initial;
   --font-sans: var(--font-ui);
@@ -113,7 +118,8 @@
   --text-lg: var(--fs-lg);
   --text-xl: var(--fs-xl);
   --text-display: var(--fs-display);
-  --text-input: var(--fs-input);
+  /* `field`, not `input`: input is a colour name too, and text-input would resolve to it */
+  --text-field: var(--fs-input);
 
   --font-weight-*: initial;
   --font-weight-regular: var(--fw-regular);
@@ -163,6 +169,7 @@
   --animate-fade-in: fade-in var(--dur-base) var(--ease-out) both;
   --animate-pop-in: pop-in var(--dur-fast) var(--ease-out) both;
   --animate-pop-out: pop-out 100ms var(--ease-out) both;
+  --animate-fade-out: fade-out 150ms var(--ease-out) both;
   --animate-sheet-in: sheet-in var(--dur-sheet) var(--ease-spring) both;
   --animate-sheet-out: sheet-out var(--dur-sheet-out) var(--ease-out) both;
 
@@ -177,6 +184,10 @@
   @keyframes pop-out {
     from { opacity: 1; transform: scale(1); }
     to { opacity: 0; transform: scale(0.97); }
+  }
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
   }
 }
 

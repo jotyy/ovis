@@ -1116,6 +1116,9 @@ function OpenSettingsDialog({ section = null, linkPage = null, linkSection = nul
   const surface = useRef<HTMLDivElement>(null);
   useSheetSwipe(surface, onClose);
   const shown = useRef<{ page: SettingsPage | null; keyBar: boolean } | null>(null);
+  // the content lives in a portal that mounts a commit after this one: the first placing of the
+  // focus waits for Radix's open event, when the rows and groups are in the document
+  const [ready, setReady] = useState(false);
   // the group a landing named, followed into view until the reader moves the page
   const following = useRef<{ group: HTMLElement; page: SettingsPage | null } | null>(null);
   const label = (id: SettingsPage): string => t(id === "appearance" ? "Appearance" : id === "chat" ? "Chat" : id === "terminal" ? "Terminal" : id === "alerts" ? "Alerts" : id === "voice" ? "Voice input"
@@ -1131,6 +1134,7 @@ function OpenSettingsDialog({ section = null, linkPage = null, linkSection = nul
   };
   const tab = (id: SettingsPage | null): HTMLElement | null => tabsRef.current?.querySelector<HTMLElement>(id === null ? '[role="tab"]' : `[data-settings-page="${id}"]`) ?? null;
   useLayoutEffect(() => {
+    if (!ready) return;
     const before = shown.current;
     shown.current = { page, keyBar: keyBarOpen };
     if (keyBarOpen) backRef.current?.focus();
@@ -1169,7 +1173,7 @@ function OpenSettingsDialog({ section = null, linkPage = null, linkSection = nul
     observer.observe(follow.group);
     for (const move of moves) body?.addEventListener(move, stop, { passive: true });
     return unsubscribe;
-  }, [page, keyBarOpen, narrow, section]);
+  }, [ready, page, keyBarOpen, narrow, section]);
   // server-side: the web server updates PC bridges, so it keeps this choice
   const [pcSettings, setPcSettings] = useState<MachineSettings | null>(null);
   const [pcSettingsError, setPcSettingsError] = useState<string | null>(null);
@@ -1227,7 +1231,7 @@ function OpenSettingsDialog({ section = null, linkPage = null, linkSection = nul
         tabIndex={-1}
         className={cn("settings-dialog grid", overPreview && "z-[calc(var(--z-modal)+2)]")}
         // the focus is placed by the layout effect above: the open page's row, or the Back button on a phone
-        onOpenAutoFocus={(event) => event.preventDefault()}
+        onOpenAutoFocus={(event) => { event.preventDefault(); setReady(true); }}
         onEscapeKeyDown={(event) => {
           // an Escape that cancels an IME composition (the editor's Character field) is the IME's
           if (event.isComposing || event.keyCode === 229) { event.preventDefault(); return; }

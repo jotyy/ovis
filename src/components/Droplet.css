@@ -92,36 +92,16 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-/* a sibling of the card (a button holds no button), laid over its right end */
+/* where the close button (a ghost Button, Droplet.tsx) sits: over the card's right end, moving with it */
 .droplet-close {
   position: absolute;
   top: calc(var(--droplet-top) + (var(--droplet-h) - var(--droplet-close)) / 2);
   left: calc(50% + var(--droplet-w) / 2 - var(--droplet-close) - var(--droplet-close-inset));
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: var(--droplet-close);
   height: var(--droplet-close);
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--droplet-text-dim);
-  cursor: pointer;
   pointer-events: auto;
   translate: 0 var(--droplet-drag, 0px);
-  -webkit-tap-highlight-color: transparent;
   animation: droplet-reveal 260ms 560ms var(--ease-out) both;
-}
-
-.droplet-close:hover {
-  background: var(--droplet-mark-bg);
-  color: var(--droplet-text);
-}
-
-.droplet-close:focus-visible {
-  outline: var(--ring);
-  outline-offset: var(--ring-offset);
 }
 
 .droplet[data-phase="out"] .droplet-close {

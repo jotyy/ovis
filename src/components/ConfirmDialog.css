@@ -1,9 +1,6 @@
+/* the confirm dialog is the narrowest card: a question, two buttons */
 .confirm-dialog {
-  width: min(100%, 420px);
-}
-
-.confirm-dialog:focus {
-  outline: none;
+  max-width: 420px;
 }
 
 .confirm-body {

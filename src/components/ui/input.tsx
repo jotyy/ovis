@@ -9,11 +9,11 @@ import { cn } from "../../lib/cn.ts";
 export const fieldSurface = "rounded-md bg-input text-sm text-strong shadow-surface outline-none transition-[box-shadow,background-color] duration-150 ease-in-out placeholder:text-dim hover:not-focus-visible:bg-[color-mix(in_srgb,var(--bg-input)_70%,var(--bg-hover))] focus-visible:shadow-focus disabled:cursor-not-allowed disabled:opacity-50";
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
-  return <input data-slot="input" className={cn(fieldSurface, "h-input w-full px-3 text-input tabular-nums sm:text-sm", className)} {...props} />;
+  return <input data-slot="input" className={cn(fieldSurface, "h-input w-full px-3 text-field tabular-nums sm:text-sm", className)} {...props} />;
 }
 
 export function Textarea({ className, ...props }: ComponentProps<"textarea">) {
-  return <textarea data-slot="textarea" className={cn(fieldSurface, "min-h-[120px] w-full resize-none rounded-lg px-3 py-1.5 text-input sm:text-sm", className)} {...props} />;
+  return <textarea data-slot="textarea" className={cn(fieldSurface, "min-h-[120px] w-full resize-none rounded-lg px-3 py-1.5 text-field sm:text-sm", className)} {...props} />;
 }
 
 export function Field({ label, htmlFor, hint, action, className, children }: { label: ReactNode; htmlFor?: string; hint?: ReactNode; action?: ReactNode; className?: string; children: ReactNode }) {

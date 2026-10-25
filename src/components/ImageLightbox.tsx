@@ -16,12 +16,14 @@ import { Check, ChevronLeft, ChevronRight, Copy, Download, ImageOff, Minus, Plus
 import "./ImageLightbox.css";
 
 import { canCopyImage, copyImage } from "../lib/clipboard.ts";
+import { cn } from "../lib/cn.ts";
 import { useT } from "../lib/i18n.ts";
 import { actualSizeFactor, arrowAction, wrapIndex, zoomPercent, type GalleryImage } from "../lib/imageViewer.ts";
 import { usePhoneSheetBack } from "../lib/sheetHistory.ts";
 import { useSheetSwipe } from "../lib/sheets.ts";
 import { nativeModalOver, useFocusTrap } from "../lib/useFocusTrap.ts";
-import { FIT, MAX_ZOOM, MIN_ZOOM, PAN_STEP, STEP, zoomAt, type View } from "./MermaidLightbox.tsx";
+import { FIT, lightboxBar, lightboxZoom, MAX_ZOOM, MIN_ZOOM, PAN_STEP, STEP, zoomAt, type View } from "./MermaidLightbox.tsx";
+import { IconButton, TooltipProvider } from "./ui/index.ts";
 
 export function ImageLightbox({ images, index, onClose }: { images: GalleryImage[]; index: number; onClose: () => void }) {
   const t = useT();
@@ -157,54 +159,57 @@ export function ImageLightbox({ images, index, onClose }: { images: GalleryImage
   if (image === undefined) return null;
   const unavailable = failed === image.src;
   return createPortal(
-    <div className="modal-scrim image-lightbox-scrim">
-      <div ref={surface} className="image-lightbox" role="dialog" aria-modal="true" aria-label={t("Image viewer")} tabIndex={-1}>
-        <div className="image-lightbox-bar">
-          <button type="button" className="icon-button" onClick={() => zoomBy(1 / STEP)} disabled={view.scale <= MIN_ZOOM} aria-label={t("Zoom out")} title={t("Zoom out")}><Minus aria-hidden="true" /></button>
-          <span className="image-lightbox-zoom" aria-live="off">{zoomPercent(view.scale, fit)}%</span>
-          <button type="button" className="icon-button" onClick={() => zoomBy(STEP)} disabled={view.scale >= MAX_ZOOM} aria-label={t("Zoom in")} title={t("Zoom in")}><Plus aria-hidden="true" /></button>
-          <button type="button" className="icon-button" onClick={() => setView(FIT)} aria-label={t("Fit to screen")} title={t("Fit to screen")}><Scan aria-hidden="true" /></button>
-          {copyable && <button type="button" className={`icon-button${copied === "done" ? " is-copied" : ""}`} onClick={() => void copy()} disabled={unavailable} aria-label={copied === "done" ? t("Copied") : t("Copy image")} title={copied === "done" ? t("Copied") : t("Copy image")}>
-            {copied === "done" ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-          </button>}
-          <a className="icon-button" href={image.src} download={image.file} aria-label={t("Download")} title={t("Download")}><Download aria-hidden="true" /></a>
-          <button ref={close} type="button" className="icon-button" onClick={onClose} aria-label={t("Close")} title={t("Close")}><X aria-hidden="true" /></button>
-        </div>
-        <div
-          ref={stage}
-          className={`image-lightbox-stage${dragging ? " is-dragging" : ""}`}
-          onPointerDown={down}
-          onPointerMove={move}
-          onPointerUp={up}
-          onPointerCancel={up}
-          onDoubleClick={toggle}
-        >
-          <div className="image-lightbox-canvas" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}>
-            {!unavailable && <img
-              ref={picture}
-              key={image.src}
-              src={image.src}
-              alt={image.name}
-              draggable={false}
-              onLoad={measure}
-              onError={() => setFailed(image.src)}
-            />}
+    <TooltipProvider>
+      <div className="modal-scrim image-lightbox-scrim">
+        <div ref={surface} className="image-lightbox" role="dialog" aria-modal="true" aria-label={t("Image viewer")} tabIndex={-1}>
+          <div className={`image-lightbox-bar ${lightboxBar}`}>
+            <IconButton label={t("Zoom out")} side="bottom" onClick={() => zoomBy(1 / STEP)} disabled={view.scale <= MIN_ZOOM}><Minus aria-hidden="true" /></IconButton>
+            <span className={`image-lightbox-zoom ${lightboxZoom}`} aria-live="off">{zoomPercent(view.scale, fit)}%</span>
+            <IconButton label={t("Zoom in")} side="bottom" onClick={() => zoomBy(STEP)} disabled={view.scale >= MAX_ZOOM}><Plus aria-hidden="true" /></IconButton>
+            <IconButton label={t("Fit to screen")} side="bottom" onClick={() => setView(FIT)}><Scan aria-hidden="true" /></IconButton>
+            {copyable && <IconButton label={copied === "done" ? t("Copied") : t("Copy image")} side="bottom" className={cn(copied === "done" && "is-copied text-done hover:text-done")} onClick={() => void copy()} disabled={unavailable}>
+              {copied === "done" ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+            </IconButton>}
+            <IconButton asChild label={t("Download")} side="bottom"><a href={image.src} download={image.file}><Download aria-hidden="true" /></a></IconButton>
+            <IconButton ref={close} label={t("Close")} side="bottom" onClick={onClose}><X aria-hidden="true" /></IconButton>
           </div>
-          {unavailable && <p className="image-lightbox-failed" role="alert"><ImageOff aria-hidden="true" /><span>{t("Image unavailable")}</span></p>}
-        </div>
-        <div className="image-lightbox-foot">
-          <div className="image-lightbox-foot-row">
-            {many && <button type="button" className="icon-button" onClick={() => step(-1)} aria-label={t("Previous image")} title={t("Previous image")}><ChevronLeft aria-hidden="true" /></button>}
-            <p className="image-lightbox-caption" aria-live="polite">
-              <span className="image-lightbox-name">{image.name}</span>
-              {many && <span className="image-lightbox-count">{t("{n} of {count}", { n: current + 1, count })}</span>}
-            </p>
-            {many && <button type="button" className="icon-button" onClick={() => step(1)} aria-label={t("Next image")} title={t("Next image")}><ChevronRight aria-hidden="true" /></button>}
+          <div
+            ref={stage}
+            className={`image-lightbox-stage${dragging ? " is-dragging" : ""}`}
+            onPointerDown={down}
+            onPointerMove={move}
+            onPointerUp={up}
+            onPointerCancel={up}
+            onDoubleClick={toggle}
+          >
+            <div className="image-lightbox-canvas" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}>
+              {!unavailable && <img
+                ref={picture}
+                key={image.src}
+                src={image.src}
+                alt={image.name}
+                draggable={false}
+                onLoad={measure}
+                onError={() => setFailed(image.src)}
+              />}
+            </div>
+            {unavailable && <p className="image-lightbox-failed" role="alert"><ImageOff aria-hidden="true" /><span>{t("Image unavailable")}</span></p>}
           </div>
-          {copied === "failed" && <p className="image-lightbox-note" role="alert">{t("Couldn't copy the image. Download it instead.")}</p>}
+          {/* the caption and the gallery's steps, centred on the bottom edge, above a phone's home bar */}
+          <div className={`image-lightbox-foot ${lightboxBar} flex-col`}>
+            <div className="flex min-w-0 max-w-full items-center gap-1">
+              {many && <IconButton label={t("Previous image")} onClick={() => step(-1)}><ChevronLeft aria-hidden="true" /></IconButton>}
+              <p className="m-0 flex min-w-0 items-baseline gap-2 px-2 text-sm text-text" aria-live="polite">
+                <span className="image-lightbox-name min-w-0 truncate">{image.name}</span>
+                {many && <span className="image-lightbox-count shrink-0 text-xs text-dim tabular-nums">{t("{n} of {count}", { n: current + 1, count })}</span>}
+              </p>
+              {many && <IconButton label={t("Next image")} onClick={() => step(1)}><ChevronRight aria-hidden="true" /></IconButton>}
+            </div>
+            {copied === "failed" && <p className="m-0 px-2 pb-1 text-center text-xs text-blocked" role="alert">{t("Couldn't copy the image. Download it instead.")}</p>}
+          </div>
         </div>
       </div>
-    </div>,
+    </TooltipProvider>,
     document.body,
   );
 }

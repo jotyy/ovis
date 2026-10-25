@@ -263,6 +263,22 @@ const BASE: Record<string, string> = {
   // t3code ports (d)
   "Change PC": "切换电脑",
   "Selected": "已选择",
+  "Confirm remove PC": "确认移除 PC",
+  "Connection error": "连接错误",
+  "Disconnect": "断开连接",
+  "Disconnected": "已断开连接",
+  "Loading PCs…": "正在加载 PC…",
+  "Managed by herdr. Rename, disable or remove it there.": "由 herdr 管理。请在 herdr 中重命名、禁用或移除。",
+  "PC {name}": "PC {name}",
+  "PC name": "PC 名称",
+  "Reconnect / setup": "重新连接 / 设置",
+  "Remove PC": "移除 PC",
+  "Removes this registration. Remote sessions keep running.": "仅移除此注册。远程会话会继续运行。",
+  "Rename": "重命名",
+  "Setup needed": "需要设置",
+  "The computer this app runs on": "运行此应用的计算机",
+  "Update bridge…": "更新 bridge…",
+  "Full changelog": "完整更新日志",
 };
 
 /** The parts ZH is made of; src/lib/i18n.test.ts fails when a key is in two parts, since a spread keeps only the last. */

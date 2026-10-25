@@ -7,7 +7,7 @@ import type { ComponentProps } from "react";
 import { cn } from "../../lib/cn.ts";
 
 export const badgeVariants = cva(
-  "relative inline-flex h-chip shrink-0 items-center gap-1 overflow-clip whitespace-nowrap rounded-md bg-sheen px-1.5 text-2xs font-medium tabular-nums shadow-chip [text-shadow:var(--text-shadow-engraved),0_4px_6px_color-mix(in_srgb,currentColor_40%,transparent)] [&_svg]:size-3 [&_svg]:shrink-0",
+  "relative inline-flex h-6 shrink-0 items-center gap-1 overflow-clip whitespace-nowrap rounded-md bg-sheen px-1.5 text-xs font-medium tabular-nums shadow-chip [text-shadow:var(--text-shadow-engraved),0_4px_6px_color-mix(in_srgb,currentColor_40%,transparent)] [&_svg]:size-3.5 [&_svg]:shrink-0",
   {
     variants: {
       tone: {
