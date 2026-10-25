@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ComponentType } from "react";
 import { ChevronDown, ChevronRight, Circle, CircleAlert, CircleCheck, CircleDot, CircleSlash, CircleX, Layers, ListChecks, Workflow, type IconProps } from "../lib/icons.ts";
+import { Badge, Button, Progress } from "./ui/index.ts";
 
 import "./BackgroundTasks.css";
 
@@ -191,7 +192,10 @@ export function BackgroundTasks({ paneId, count, omo, claude = false, plan = nul
     ].filter((item) => item !== null).join(" · ");
     const main = <span className="bg-task-main">
       <span className="bg-task-title">{task.title}<span className="sr-only"> ({words[task.status]})</span></span>
-      {(meta.length > 0 || (task.status !== "running" && task.status !== "completed")) && <span className="bg-task-meta">{[task.status !== "running" && task.status !== "completed" ? words[task.status] : null, meta || null].filter((item) => item !== null).join(" · ")}</span>}
+      {(meta.length > 0 || (task.status !== "running" && task.status !== "completed")) && <span className="bg-task-meta">
+        {task.status !== "running" && task.status !== "completed" && <Badge tone={task.status === "cancelled" ? "idle" : "blocked"} className="bg-task-state">{words[task.status]}</Badge>}
+        {meta.length > 0 && <span>{meta}</span>}
+      </span>}
     </span>;
     // a running task opens its detail: what a Claude subagent is doing, or why this PC cannot say
     if (task.status === "running") {
@@ -231,7 +235,8 @@ export function BackgroundTasks({ paneId, count, omo, claude = false, plan = nul
       <ol className="bg-run-waves">{run.waves.map((wave, index) => <li key={index} className="bg-run-wave">
         {wave.map((node) => {
           const Icon = NODE_ICONS[node.state];
-          return <span key={node.id} className={`bg-node is-${node.state}`} title={node.error ?? undefined}><Icon aria-hidden="true" />{node.label}<span className="sr-only"> ({nodeWords[node.state]})</span></span>;
+          const tone = node.state === "running" ? "working" : node.state === "completed" ? "done" : node.state === "failed" || node.state === "blocked" ? "blocked" : "idle";
+          return <Badge key={node.id} tone={tone} className={`bg-node is-${node.state}`} title={node.error ?? undefined}><Icon aria-hidden="true" />{node.label}<span className="sr-only"> ({nodeWords[node.state]})</span></Badge>;
         })}
       </li>)}</ol>
       {failedNodes.filter((node) => node.error !== null).map((node) => <p key={node.id} className="bg-run-error">{node.label}: {node.error}</p>)}
@@ -257,13 +262,16 @@ export function BackgroundTasks({ paneId, count, omo, claude = false, plan = nul
   const stepRow = (step: PlanStep) => {
     const Icon = STEP_ICONS[step.status];
     const elapsed = spanMs(step.started_at, step.ended_at, step.status === "in_progress", now + offset);
-    const meta = [stepWords[step.status], elapsed === null ? null : formatElapsed(elapsed), step.owner].filter((part) => part !== null).join(" · ");
+    const meta = [elapsed === null ? null : formatElapsed(elapsed), step.owner].filter((part) => part !== null).join(" · ");
     return <li key={step.id} className={`bg-task bg-step is-${step.status}`}>
       <Icon className="bg-task-icon" aria-hidden="true" />
       <span className="bg-task-main">
         <span className="bg-task-title">{step.label}</span>
         {step.status === "in_progress" && step.active && step.active !== step.label && <span className="bg-step-active">{step.active}</span>}
-        <span className="bg-task-meta">{meta}</span>
+        <span className="bg-task-meta">
+          <Badge tone={step.status === "in_progress" ? "working" : step.status === "completed" ? "done" : "idle"} className="bg-task-state">{stepWords[step.status]}</Badge>
+          {meta.length > 0 && <span>{meta}</span>}
+        </span>
       </span>
     </li>;
   };
@@ -277,6 +285,7 @@ export function BackgroundTasks({ paneId, count, omo, claude = false, plan = nul
     {open && <div id={id} ref={menu} className="menu bg-tasks-menu" role="dialog" aria-live="off" aria-label={planShown && tasksShown ? t("Plan and background tasks") : planShown ? t("Plan") : t("Background tasks")}>
       {planShown && <>
         <div className="menu-heading">{t("Plan")}{plan && <span className="bg-plan-progress">{t("{done} of {total} done", { done: plan.done, total: plan.total })}</span>}</div>
+        {plan && plan.total > 0 && <Progress className="bg-plan-bar" value={Math.round((plan.done / plan.total) * 100)} aria-label={t("Plan: {done} of {total} done", { done: plan.done, total: plan.total })} indicatorClassName={plan.done === plan.total ? "bg-done" : undefined} />}
         {steps === undefined && !planFailed && <p className="bg-tasks-note">{t("Reading the plan…")}</p>}
         {steps === null && <p className="bg-tasks-note">{t("This session keeps no plan right now")}</p>}
         {planFailed && <p className="bg-tasks-note" role="status">{t("Couldn't read the plan. Trying again…")}</p>}
@@ -293,11 +302,11 @@ export function BackgroundTasks({ paneId, count, omo, claude = false, plan = nul
       {goingRuns.length > 0 && <><div className="menu-heading">{t("Workflows")}</div><ul className="bg-task-list">{goingRuns.map(runView)}</ul></>}
       {running.length > 0 && <><div className="menu-heading">{t("Running")}</div><ul className="bg-task-list">{running.map(row)}</ul></>}
       {summary.ended > 0 && <>
-        <button type="button" className="bg-ended-toggle" aria-expanded={showEnded} aria-controls={endedId} onClick={() => setShowEnded(!showEnded)}>
+        <Button variant="ghost" size="sm" className="bg-ended-toggle" aria-expanded={showEnded} aria-controls={endedId} onClick={() => setShowEnded(!showEnded)}>
           {showEnded ? <ChevronDown aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
           <span>{t("{n} recently ended", { n: summary.ended })}</span>
-          {summary.failed > 0 && <span className="bg-ended-failed">{t("{n} failed", { n: summary.failed })}</span>}
-        </button>
+          {summary.failed > 0 && <Badge tone="blocked" className="bg-ended-failed">{t("{n} failed", { n: summary.failed })}</Badge>}
+        </Button>
         <ul id={endedId} className="bg-task-list" hidden={!showEnded}>{endedRuns.map(runView)}{ended.map(row)}</ul>
       </>}
       </>}

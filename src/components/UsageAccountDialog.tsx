@@ -1,20 +1,31 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { createPortal } from "react-dom";
-import { ArrowLeft, Network, SquareTerminal, X } from "../lib/icons.ts";
+import { ArrowLeft, Network, SquareTerminal } from "../lib/icons.ts";
 import type { CLIProxyStatus } from "../../shared/protocol.ts";
 import type { UsageLoginProvider } from "../../shared/usage-login.ts";
 import { fetchUsageLoginProviders } from "../lib/api.ts";
 import { useT } from "../lib/i18n.ts";
-import { useFocusTrap } from "../lib/useFocusTrap.ts";
+import { useMediaQuery } from "../lib/useMediaQuery.ts";
+import { SHEET_QUERY } from "../lib/sheets.ts";
 import { PROVIDER_MARK, PROVIDER_NAME } from "../lib/usage.ts";
 import { AgentMark } from "./AgentMark.tsx";
 import { CLIProxyAccountLogin } from "./CLIProxyLogin.tsx";
 import { UsageHubConnect } from "./UsageHubConnect.tsx";
 import { UsageLocalLogin } from "./UsageLocalLogin.tsx";
+import { Button, Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle, type ButtonProps } from "./ui/index.ts";
 import "./UsageAccountDialog.css";
 
 type Step = { readonly kind: "provider" } | { readonly kind: "hub"; readonly returnTo: UsageLoginProvider | null }
   | { readonly kind: "account"; readonly provider: UsageLoginProvider; readonly method: "choose" | "local" | "hub" };
+
+/** One way in, as a card: a mark, its name and a sentence (UsageAccountDialog, CLIProxyLogin). */
+export function AccountChoice({ icon, title, description, className, ...props }: ButtonProps & { icon: ReactNode; title: ReactNode; description?: ReactNode }) {
+  return (
+    <Button variant="field" size="bare" className={`account-choice h-auto min-h-touch w-full justify-start gap-3 p-4 text-left whitespace-normal ${className ?? ""}`} {...props}>
+      <span className="flex shrink-0 items-center justify-center text-dim [&_svg]:size-6">{icon}</span>
+      <span className="flex min-w-0 flex-col gap-0.5"><strong className="text-sm font-medium text-strong">{title}</strong>{description && <span className="text-sm font-regular text-dim">{description}</span>}</span>
+    </Button>
+  );
+}
 
 export function UsageAccountDialog({ editHub, hub, onHubChanged, onAccountsChanged, onLocalLogin, onClose }: {
   readonly editHub: boolean;
@@ -25,6 +36,7 @@ export function UsageAccountDialog({ editHub, hub, onHubChanged, onAccountsChang
   readonly onClose: () => void;
 }) {
   const t = useT();
+  const narrow = useMediaQuery(SHEET_QUERY);
   const [step, setStep] = useState<Step>(editHub ? { kind: "hub", returnTo: null } : { kind: "provider" });
   const [providers, setProviders] = useState<readonly UsageLoginProvider[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -34,8 +46,9 @@ export function UsageAccountDialog({ editHub, hub, onHubChanged, onAccountsChang
       .catch((cause: unknown) => { if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : t("Could not load sign-in options")); });
     return () => controller.abort();
   }, [t]);
-  const surface = useFocusTrap<HTMLDivElement>(true);
+  const surface = useRef<HTMLDivElement>(null);
   const content = useRef<HTMLDivElement>(null);
+  // each step starts on its first control; Radix keeps Tab inside and hands the focus back on close
   useLayoutEffect(() => {
     (content.current?.querySelector<HTMLElement>("input, button") ?? surface.current)?.focus();
   }, [step, providers, surface]);
@@ -51,10 +64,9 @@ export function UsageAccountDialog({ editHub, hub, onHubChanged, onAccountsChang
       body = <div className="account-choices account-provider-grid">
         {error && <p className="settings-hint account-error" role="alert">{error}</p>}
         {!providers && !error && <p className="settings-hint" role="status">{t("Loading…")}</p>}
-        {providers?.map((provider) => <button key={provider.id} type="button" className="account-choice" aria-label={PROVIDER_NAME[provider.id]} aria-describedby={`usage-provider-desc-${provider.id}`} onClick={() => setStep({ kind: "account", provider, method: "choose" })}>
-          <AgentMark agent={PROVIDER_MARK[provider.id]} size={24} /><span><strong>{PROVIDER_NAME[provider.id]}</strong><span id={`usage-provider-desc-${provider.id}`} className="settings-hint">{provider.id === "claude" || provider.id === "codex" ? t("On this PC or through the hub") : t("On the server PC")}</span></span>
-        </button>)}
-        <button type="button" className="account-choice" aria-label={t("Hub")} onClick={() => setStep({ kind: "hub", returnTo: null })}><Network size={24} aria-hidden="true" /><span><strong>{t("Hub")}</strong><span className="settings-hint">{t("Import accounts from CLIProxyAPI")}</span></span></button>
+        {providers?.map((provider) => <AccountChoice key={provider.id} aria-label={PROVIDER_NAME[provider.id]} aria-describedby={`usage-provider-desc-${provider.id}`} onClick={() => setStep({ kind: "account", provider, method: "choose" })}
+          icon={<AgentMark agent={PROVIDER_MARK[provider.id]} size={24} />} title={PROVIDER_NAME[provider.id]} description={<span id={`usage-provider-desc-${provider.id}`}>{provider.id === "claude" || provider.id === "codex" ? t("On this PC or through the hub") : t("On the server PC")}</span>} />)}
+        <AccountChoice aria-label={t("Hub")} onClick={() => setStep({ kind: "hub", returnTo: null })} icon={<Network />} title={t("Hub")} description={t("Import accounts from CLIProxyAPI")} />
       </div>;
       break;
     case "hub":
@@ -77,7 +89,7 @@ export function UsageAccountDialog({ editHub, hub, onHubChanged, onAccountsChang
           local = !step.provider.installed
             ? <p className="settings-hint">{t("Install {cli} on the server PC first.", { cli: step.provider.cli })}</p>
             : step.provider.local
-              ? <button type="button" className="account-choice" onClick={() => setStep({ ...step, method: "local" })}><SquareTerminal size={24} aria-hidden="true" /><span><strong>{t("On this PC")}</strong><span className="settings-hint">{t("Official CLI in a new tab")}</span></span></button>
+              ? <AccountChoice onClick={() => setStep({ ...step, method: "local" })} icon={<SquareTerminal />} title={t("On this PC")} description={t("Official CLI in a new tab")} />
               : <p className="settings-hint">{t("Sign in from the Antigravity app on the server PC.")}</p>;
           break;
         case "local":
@@ -95,26 +107,25 @@ export function UsageAccountDialog({ editHub, hub, onHubChanged, onAccountsChang
         {local}
         {showHub && hubProvider !== null && (hub?.ok
           ? <CLIProxyAccountLogin provider={hubProvider} active={active} onStarted={() => setStep({ ...step, method: "hub" })} onAccountsChanged={done} />
-          : <><button type="button" className="account-choice" disabled><Network size={24} aria-hidden="true" /><span><strong>{t("Through the hub")}</strong></span></button><button className="btn btn-ghost" type="button" onClick={() => setStep({ kind: "hub", returnTo: step.provider })}>{t("Connect a hub first")}</button></>)}
+          : <><AccountChoice disabled icon={<Network />} title={t("Through the hub")} /><Button variant="ghost" className="self-start" onClick={() => setStep({ kind: "hub", returnTo: step.provider })}>{t("Connect a hub first")}</Button></>)}
       </div>;
       break;
     }
     default: { const unexpected: never = step; throw new Error(String(unexpected)); }
   }
-  return createPortal(<div className="modal-scrim" onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}
-    onKeyDown={(event) => {
-      if (event.key === "Escape" && !event.nativeEvent.isComposing) { event.preventDefault(); event.stopPropagation(); onClose(); }
-    }}>
-    <div ref={surface} className="modal usage-account-dialog" role="dialog" aria-modal="true" aria-labelledby="usage-account-title" tabIndex={-1}>
-      <div className="modal-header">
-        {current > 0 && <button className="icon-button" type="button" aria-label={t("Back")} onClick={back}><ArrowLeft size={18} aria-hidden="true" /></button>}
-        <h2 className="modal-title" id="usage-account-title">{title}</h2>
-        <button className="icon-button" type="button" aria-label={t("Close")} onClick={onClose}><X size={18} aria-hidden="true" /></button>
-      </div>
-      <div className="modal-body">
-        <ol className="account-steps" aria-label={t("Account setup")}>{steps.map((label, index) => <li key={label} aria-current={index === current ? "step" : undefined}>{label}</li>)}</ol>
-        <div ref={content} className="account-step-content">{body}</div>
-      </div>
-    </div>
-  </div>, document.body);
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent ref={surface} variant={narrow ? "sheet" : "modal"} className="usage-account-dialog" aria-modal="true" aria-labelledby="usage-account-title" aria-describedby={undefined} closeLabel={t("Close")} tabIndex={-1}
+        onOpenAutoFocus={(event) => event.preventDefault()}>
+        <DialogHeader className="flex-row items-center gap-2">
+          {current > 0 && <Button variant="ghost" size="icon" className="-ml-2 text-dim" aria-label={t("Back")} onClick={back}><ArrowLeft /></Button>}
+          <DialogTitle id="usage-account-title" className="min-w-0 flex-1 truncate">{title}</DialogTitle>
+        </DialogHeader>
+        <DialogBody className="flex flex-col gap-4">
+          <ol className="account-steps" aria-label={t("Account setup")}>{steps.map((label, index) => <li key={label} aria-current={index === current ? "step" : undefined}>{label}</li>)}</ol>
+          <div ref={content} className="account-step-content">{body}</div>
+        </DialogBody>
+      </DialogContent>
+    </Dialog>
+  );
 }

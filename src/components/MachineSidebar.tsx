@@ -13,6 +13,10 @@ import { SidebarActivityProvider, type SidebarActivity } from "../lib/sidebarAct
 import { filterSuggestions, machineFilter, sidebarFilter, type SidebarBranchLabels } from "../lib/sidebarFilter.ts";
 import { SidebarFilterProvider, useSidebarFilter } from "../lib/sidebarFilterContext.ts";
 import { UsageMeters } from "./UsageMeters.tsx";
+import { Badge } from "./ui/badge.tsx";
+import { Button, type ButtonProps } from "./ui/button.tsx";
+import { Input, Label } from "./ui/input.tsx";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip.tsx";
 import "./Machines.css";
 import { useT } from "../lib/i18n.ts";
 import { useAnnouncedText } from "../lib/useAnnouncedText.ts";
@@ -26,6 +30,21 @@ export const STATE_WORD: Readonly<Record<MachineState, string>> = {
   disconnected: "Disconnected",
   error: "Connection error",
 };
+
+/**
+ * A glyph-only control of the sidebar: a ghost Button named by a tooltip, and by its label and
+ * title for a reader, a touch screen and the browser regression scripts. Needs App's TooltipProvider.
+ */
+function SideButton({ label, side, className, children, ...props }: Omit<ButtonProps, "variant"> & { label: string; side?: "top" | "right" | "bottom" | "left" }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon-sm" className={className} aria-label={label} title={label} {...props}>{children}</Button>
+      </TooltipTrigger>
+      <TooltipContent side={side}>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 /** `activity`: App's live counters per PC and finishes looked at here; both sidebar lists draw from it */
 interface Props { machines: Machine[]; selectedMachineId: string; selectedPaneId: string | null; activity: SidebarActivity; actions: AppActions; watching?: boolean; /** a phone's drawer is out: closing it clears the filter */ drawerOpen?: boolean; onSelect(machineId: string, paneId: string | null): void; onNew(machineId: string): void; onSetup(machine: Machine, update?: boolean): void }
@@ -74,11 +93,11 @@ export function MachineSidebar(props: Props) {
   return <SidebarActivityProvider value={activity}><SidebarFilterProvider value={filterView}><div className="sidebar-shell">
     <div className="sidebar-filter" role="search" aria-label={t("Filter workspaces and agents")}>
       {/* the field's word is for screen readers; a magnifier in the rows' leading cell says it to the eye */}
-      <label className="sidebar-filter-label visually-hidden" htmlFor={filterId}>{t("Filter")}</label>
+      <Label className="sidebar-filter-label visually-hidden" htmlFor={filterId}>{t("Filter")}</Label>
       <span className="sidebar-filter-glyph" aria-hidden="true"><Search /></span>
-      <input ref={filterInput} id={filterId} className="input sidebar-filter-input" type="search" value={query} aria-label={t("Filter workspaces and agents")} placeholder={t("Filter workspaces and agents")} list={suggestionsId} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="search" onChange={(event) => setQuery(event.target.value)} onKeyDown={onFilterKeyDown} />
+      <Input ref={filterInput} id={filterId} className="sidebar-filter-input" type="search" value={query} aria-label={t("Filter workspaces and agents")} placeholder={t("Filter workspaces and agents")} list={suggestionsId} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="search" onChange={(event) => setQuery(event.target.value)} onKeyDown={onFilterKeyDown} />
       <datalist id={suggestionsId}>{suggestions.map((label) => <option key={label} value={label} />)}</datalist>
-      {query !== "" && <button type="button" className="sidebar-filter-clear" aria-label={t("Clear filter")} title={t("Clear filter")} onClick={clearFilter}><X aria-hidden="true" /></button>}
+      {query !== "" && <SideButton className="sidebar-filter-clear" label={t("Clear filter")} onClick={clearFilter}><X aria-hidden="true" /></SideButton>}
     </div>
     <div className="machine-list" aria-label={t("PCs and workspaces")}>
       <p className={noMatchWords === null ? "visually-hidden" : "tree-state sidebar-filter-empty"} role="status">{noMatchWords}</p>
@@ -88,10 +107,16 @@ export function MachineSidebar(props: Props) {
     <AgentSidebar machines={props.machines} selectedMachineId={props.selectedMachineId} selectedPaneId={props.selectedPaneId} stateWord={(machine) => t(STATE_WORD[machine.state])} watching={props.watching} onSelect={props.onSelect} />
     <footer className="sidebar-footer">
       {/* browsers without an install prompt (iOS, plain HTTP) get the steps instead */}
-      {!installed && <button className="btn btn-ghost sidebar-footer-action" aria-expanded={canInstall ? undefined : installHelpOpen} onClick={() => { if (canInstall) void install(); else setInstallHelpOpen(!installHelpOpen); }}><Download aria-hidden="true" />{t("Install app")}</button>}
+      {!installed && <Button variant="ghost" size="block" className="sidebar-footer-action" aria-expanded={canInstall ? undefined : installHelpOpen} onClick={() => { if (canInstall) void install(); else setInstallHelpOpen(!installHelpOpen); }}><Download aria-hidden="true" />{t("Install app")}</Button>}
       {!installed && !canInstall && installHelpOpen && <p className="sidebar-install-help" role="status">{help}</p>}
       <div className="sidebar-footer-row">
-        <button className="btn btn-ghost sidebar-footer-action sidebar-footer-settings" aria-label={t("Settings")} title={t("Settings (⌘⇧,)")} onClick={props.actions.openSettings}><Settings aria-hidden="true" /></button>
+        {/* both class names stay: the regression scripts click the footer's action by them */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="sidebar-footer-action sidebar-footer-settings" aria-label={t("Settings")} title={t("Settings (⌘⇧,)")} onClick={props.actions.openSettings}><Settings aria-hidden="true" /></Button>
+          </TooltipTrigger>
+          <TooltipContent side="top" align="start">{t("Settings (⌘⇧,)")}</TooltipContent>
+        </Tooltip>
         <UsageMeters />
       </div>
     </footer>
@@ -162,12 +187,24 @@ function MachineGroup({ machine, ...props }: Props & { machine: Machine }) {
         <span className="sidebar-mark machine-mark" aria-hidden="true"><MonitorFilled /><span className={`machine-dot is-${machine.action_required === "setup" ? "setup" : machine.state}`} title={machine.action_required === "setup" ? t("Setup needed") : t(STATE_WORD[machine.state])} /></span>
         <span className="machine-name">{machine.name}</span>
         {/* the computer this app's server runs on; on a phone "this PC" read as the phone */}
-        {machine.kind === "local" && <span className="machine-kind" title={t("The computer this app runs on")}>{t("Host")}</span>}
+        {machine.kind === "local" && <Badge tone="neutral" className="machine-kind" title={t("The computer this app runs on")}>{t("Host")}</Badge>}
       </div>
-      {machine.kind === "ssh" && <button className="sidebar-row-action machine-manage" aria-label={t("Manage {name}", { name: machine.name })} title={t("Manage PC")} aria-expanded={editing} onClick={() => { setEditing(!editing); setConfirmDelete(false); }}><SlidersHorizontal aria-hidden="true" /></button>}
+      {/* the header's controls are ghost icon Buttons; their class names carry Machines.css's room and fold */}
+      {machine.kind === "ssh" && <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" size="icon-sm" className="machine-manage" aria-label={t("Manage {name}", { name: machine.name })} title={t("Manage PC")} aria-expanded={editing} onClick={() => { setEditing(!editing); setConfirmDelete(false); }}><SlidersHorizontal aria-hidden="true" /></Button>
+        </TooltipTrigger>
+        <TooltipContent>{t("Manage PC")}</TooltipContent>
+      </Tooltip>}
       {/* the fold over this PC's workspaces sits beside the + */}
-      <button className="sidebar-row-action machine-toggle" aria-expanded={!folded} aria-label={folded ? t("Expand {name}", { name: machine.name }) : t("Collapse {name}", { name: machine.name })} title={folded ? t("Expand {name}", { name: machine.name }) : t("Collapse {name}", { name: machine.name })} onClick={toggle}>{folded ? <ChevronRight aria-hidden="true" /> : <ChevronDown aria-hidden="true" />}</button>
-      <button className="sidebar-row-action machine-new" disabled={!online} aria-label={t("New workspace on {name}", { name: machine.name })} title={t("New workspace")} onClick={() => props.onNew(machine.id)}><Plus aria-hidden="true" /></button>
+      <SideButton className="machine-toggle" label={folded ? t("Expand {name}", { name: machine.name }) : t("Collapse {name}", { name: machine.name })} aria-expanded={!folded} onClick={toggle}>{folded ? <ChevronRight aria-hidden="true" /> : <ChevronDown aria-hidden="true" />}</SideButton>
+      {/* the + fills the rows' status cell, so a control's size */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="ghost" size="icon" className="machine-new" disabled={!online} aria-label={t("New workspace on {name}", { name: machine.name })} title={t("New workspace")} onClick={() => props.onNew(machine.id)}><Plus aria-hidden="true" /></Button>
+        </TooltipTrigger>
+        <TooltipContent>{t("New workspace")}</TooltipContent>
+      </Tooltip>
     </header>
     {/* connected is the norm and says nothing new; every other state is spelled out */}
     {noticed && <MachineActionNotice machine={machine} onSetup={props.onSetup} />}

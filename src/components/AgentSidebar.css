@@ -6,7 +6,7 @@
   flex-direction: column;
   min-height: 0;
   max-height: 50%;
-  padding: var(--space-2) var(--side-gutter) 0;
+  padding-top: var(--space-2);
 }
 
 .agents-sidebar.is-collapsed,
@@ -17,11 +17,14 @@
   flex: 1 1 auto;
 }
 
-/* positioned: a row's visually hidden label is absolute, and must not size the page instead */
+/* positioned: a row's visually hidden label is absolute, and must not size the page instead. The
+   rows' gutter is this scroll container's own padding, so the selected row's bar at the sidebar's
+   edge (Sidebar.css) lies inside it and is not clipped. */
 .agent-list-contents {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
+  padding-inline: var(--side-gutter);
   overflow-y: auto;
   overscroll-behavior: contain;
   scroll-padding-bottom: var(--space-4);
@@ -44,7 +47,8 @@
 
 .agent-section-toggle {
   flex: 0 0 auto;
-  width: 100%;
+  width: calc(100% - 2 * var(--side-gutter));
+  margin-inline: var(--side-gutter);
   cursor: pointer;
 }
 
@@ -90,7 +94,7 @@
   align-items: center;
   margin-block: calc(var(--side-row-gap) / 2);
   padding-right: var(--side-box);
-  border-radius: var(--radius-md);
+  border-radius: var(--side-radius);
   transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
 
@@ -102,7 +106,7 @@
   min-height: var(--side-row-2);
   padding: 0;
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--side-radius);
   background: transparent;
   color: var(--text);
   font: inherit;
@@ -117,11 +121,13 @@
   .agent-item:not(.is-selected):has(> .agent-row:enabled):hover { background: var(--side-hover); }
 }
 
-/* the selected row is a raised face, as a workspace row's is (Sidebar.css --side-selected) */
+/* the selected row is a raised face with the bar at the sidebar's edge, as a workspace row's is
+   (Sidebar.css --side-selected and the ::before) */
 .agent-item.is-selected {
   background: var(--side-selected);
   background-image: var(--side-selected-face);
   box-shadow: var(--side-selected-edge);
+  color: var(--text-strong);
 }
 
 /* As a workspace row's: the ⋯ takes no room until the row is hovered, focused, selected or its

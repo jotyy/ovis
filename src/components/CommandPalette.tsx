@@ -1,6 +1,8 @@
 import { MachineContext, useMachineApi, useMachineId } from "../lib/machineContext.tsx";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType, type FocusEvent as ReactFocusEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from "react";
-import { Bell, Columns2, CornerLeftUp, Folder, FolderOpen, FolderSearch, History, LoaderCircle, Maximize2, MessageSquarePlus, Minimize2, Monitor, PanelLeft, Pin, Plus, Puzzle, RefreshCw, Rows2, Settings, SunMoon, SwitchCamera, X } from "../lib/icons.ts";
+import { Bell, Columns2, CornerLeftUp, Folder, FolderOpen, FolderSearch, History, LoaderCircle, Maximize2, MessageSquarePlus, Minimize2, Monitor, PanelLeft, Pin, Plus, Puzzle, RefreshCw, Rows2, Search, Settings, SunMoon, SwitchCamera, X } from "../lib/icons.ts";
+import { Alert, AlertDescription, Button, Kbd, menuSurface, ToggleGroup, ToggleGroupItem } from "./ui/index.ts";
+import { cn } from "../lib/cn.ts";
 
 import "./CommandPalette.css";
 
@@ -145,8 +147,21 @@ function ShortcutHint({ shortcutId }: { shortcutId?: ShortcutId }) {
   if (!shortcutId) return null;
   const keys = formatKeys(shortcutDisplayKeys(shortcutId, settings.shortcutOverrides));
   if (keys.length === 0) return null;
-  return <span className="palette-shortcut" aria-label={keys.join(" + ")}>{keys.map((key) => <kbd className="kbd" key={key}>{key}</kbd>)}</span>;
+  return <span className="palette-shortcut ml-auto inline-flex shrink-0 gap-1" aria-label={keys.join(" + ")}>{keys.map((key) => <Kbd key={key}>{key}</Kbd>)}</span>;
 }
+
+/** a row of the list: the menu item, 36px tall, its glyph quiet, the highlighted one on a fill of light */
+const paletteRow = "flex min-h-9 w-full cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-left text-sm text-text outline-none transition-colors duration-100 aria-selected:bg-fill-3 aria-selected:text-strong aria-disabled:text-dim coarse:min-h-touch [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-dim";
+const rowTitle = "palette-row-title flex min-w-0 items-center gap-2 truncate font-medium text-strong";
+const rowSubtitle = "palette-row-subtitle mt-0.5 block truncate text-xs text-dim";
+/** the chosen filter chip in its state's colour, as the badge of that state reads */
+const FILTER_TONE: Readonly<Record<PaletteStatusFilter, string>> = {
+  all: "", idle: "",
+  blocked: "data-[state=on]:text-blocked data-[state=on]:[&_.palette-filter-count]:text-blocked",
+  working: "data-[state=on]:text-working data-[state=on]:[&_.palette-filter-count]:text-working",
+  waiting: "data-[state=on]:text-working data-[state=on]:[&_.palette-filter-count]:text-working",
+  done: "data-[state=on]:text-done data-[state=on]:[&_.palette-filter-count]:text-done",
+};
 
 export function CommandPalette({ open, initialQuery = "", onClose, machines, onSelect, snapshot, online, selectedPaneId, view, actions }: CommandPaletteProps) {
   const t = useT();
@@ -623,30 +638,37 @@ export function CommandPalette({ open, initialQuery = "", onClose, machines, onS
   return (
     <div className="modal-scrim palette-scrim" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       {machines.filter((machine) => machine.state === "connected").map((machine) => <MachineContext.Provider key={machine.id} value={machine.id}><PaletteBranchReader machine={machine} onChange={onInventory} /></MachineContext.Provider>)}
-      <section ref={surface} className="menu command-palette" role="dialog" aria-modal="true" aria-label={t("Command palette")} onKeyDown={onSurfaceKeyDown} onFocus={onSurfaceFocus}>
-        <div className="palette-search">
-          <input ref={inputRef} className="input" type="search" value={query} placeholder={t("Search panes and actions…")} aria-label={t("Search panes and actions")} aria-controls="palette-results" aria-activedescendant={itemCount ? `palette-item-${activeIndex}` : undefined} onKeyDown={onInputKeyDown} onChange={(event) => { setQuery(event.target.value); setSelection(NO_SELECTION); }} />
-          <button type="button" className="icon-button" aria-label={t("Close command palette")} onClick={onClose}><X /></button>
+      <section ref={surface} className={cn(menuSurface, "command-palette z-auto flex min-w-0 animate-none flex-col overflow-hidden p-0")} role="dialog" aria-modal="true" aria-label={t("Command palette")} onKeyDown={onSurfaceKeyDown} onFocus={onSurfaceFocus}>
+        <div className="palette-search flex shrink-0 items-center gap-2 bg-panel p-3 divider-b">
+          {/* a bare input on the field surface, the search glyph before it; the surface shows the focus */}
+          <div className="flex h-input min-w-0 flex-1 items-center gap-2 rounded-md bg-input px-3 shadow-surface transition-[box-shadow] duration-150 ease-in-out focus-within:shadow-focus coarse:h-touch">
+            <Search aria-hidden="true" className="size-4 shrink-0 text-dim" />
+            <input ref={inputRef} data-slot="input" className="h-full min-w-0 flex-1 bg-transparent text-input text-strong outline-none placeholder:text-dim sm:text-sm" type="search" value={query} placeholder={t("Search panes and actions…")} aria-label={t("Search panes and actions")} aria-controls="palette-results" aria-activedescendant={itemCount ? `palette-item-${activeIndex}` : undefined} onKeyDown={onInputKeyDown} onChange={(event) => { setQuery(event.target.value); setSelection(NO_SELECTION); }} />
+          </div>
+          <Button variant="ghost" size="icon" className="text-dim coarse:size-touch" aria-label={t("Close command palette")} onClick={onClose}><X aria-hidden="true" /></Button>
         </div>
         {!actionsOnly && folder === null && (
-          <div className="palette-filters" role="radiogroup" aria-label={t("Filter panes by status")} onKeyDown={onChipsKeyDown}>
-            {STATUS_FILTERS.map((status) => (
-              <button key={status} type="button" role="radio" className="palette-filter" data-status={status} aria-checked={filter === status} tabIndex={filter === status ? 0 : -1} data-empty={counts[status] === 0 || undefined} onClick={(event) => onChipClick(event, status)}>
-                <span className="palette-filter-word">{status === "all" ? t("All") : t(STATUS_WORD[status])}</span>
-                <span className="palette-filter-count">{counts[status]}</span>
-              </button>
-            ))}
+          <div className="palette-filters flex shrink-0 overflow-x-auto bg-panel px-3 py-2 divider-b">
+            <ToggleGroup type="single" value={filter} aria-label={t("Filter panes by status")} onValueChange={(next) => { if (next) applyFilter(next as PaletteStatusFilter); }} onKeyDown={onChipsKeyDown}>
+              {STATUS_FILTERS.map((status) => (
+                <ToggleGroupItem key={status} value={status} className={cn("palette-filter gap-1.5 px-2.5 text-xs data-empty:text-dim/70", FILTER_TONE[status])} data-status={status} data-empty={counts[status] === 0 || undefined} onClick={(event) => onChipClick(event, status)}>
+                  <span className="palette-filter-word">{status === "all" ? t("All") : t(STATUS_WORD[status])}</span>
+                  <span className="palette-filter-count font-mono text-2xs font-regular text-dim tabular-nums">{counts[status]}</span>
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
           </div>
         )}
-        {pluginError !== null && <p className="palette-error" role="alert">{pluginError}</p>}
-        <div ref={resultsRef} className="palette-results" id="palette-results" role="listbox">
+        {pluginError !== null && <Alert tone="danger" className="palette-error mx-3 my-2 w-auto shrink-0 [overscroll-behavior:contain]"><AlertDescription className="text-danger-text whitespace-pre-wrap [overflow-wrap:anywhere]">{pluginError}</AlertDescription></Alert>}
+        <div ref={resultsRef} className="palette-results min-h-0 flex-1 overflow-y-auto p-1.5 [overscroll-behavior:contain]" id="palette-results" role="listbox">
           {sections.map((section) => (
             <div key={section.id} className="palette-section" data-section={section.workspaceId ?? section.id} data-machine={section.machineId}>
-              <div className="menu-heading palette-section-heading">
-                {section.machineName && <span className="palette-section-machine">{section.machineName}</span>}
-                <span className="palette-section-name">{section.heading}</span>
-                {section.branch && <span className="palette-section-branch">{section.branch}</span>}
-                <span className="palette-section-count">{section.rows.length}</span>
+              <div className="palette-section-heading flex items-baseline gap-2 px-2 pt-2 pb-1 text-xs font-medium text-dim">
+                {/* the PC stays beside its workspace, including matching names on different PCs */}
+                {section.machineName && <><span className="palette-section-machine min-w-0 shrink truncate text-text">{section.machineName}</span><span aria-hidden="true">›</span></>}
+                <span className="palette-section-name min-w-0 shrink truncate">{section.heading}</span>
+                {section.branch && <span className="palette-section-branch min-w-0 flex-1 truncate font-mono font-regular">{section.branch}</span>}
+                <span className="palette-section-count ml-auto shrink-0 font-mono font-regular tabular-nums">{section.rows.length}</span>
               </div>
               {section.rows.map((row) => {
                 const index = rowIndex;
@@ -656,24 +678,24 @@ export function CommandPalette({ open, initialQuery = "", onClose, machines, onS
                   const key = pluginActionKey(offered);
                   const busy = running === key;
                   return (
-                    <button key={key} id={`palette-item-${index}`} type="button" role="option" className={busy ? "menu-item palette-plugin-action is-running" : "menu-item palette-plugin-action"} title={offered.action.description ?? undefined} aria-selected={activeIndex === index} aria-busy={busy} aria-disabled={running !== null} onFocus={() => select(index)} onMouseMove={() => select(index)} onClick={() => void runPluginAction(offered)}>
+                    <button key={key} id={`palette-item-${index}`} type="button" data-slot="button" role="option" className={cn(paletteRow, "palette-plugin-action", busy && "is-running")} title={offered.action.description ?? undefined} aria-selected={activeIndex === index} aria-busy={busy} aria-disabled={running !== null} onFocus={() => select(index)} onMouseMove={() => select(index)} onClick={() => void runPluginAction(offered)}>
                       {busy ? <LoaderCircle aria-hidden="true" /> : <Puzzle aria-hidden="true" />}
-                      <span className="menu-item-main"><span className="palette-row-title">{offered.action.title}</span><span className="palette-row-subtitle">{busy ? t("Running…") : offered.plugin.name}</span></span>
+                      <span className="min-w-0 flex-1"><span className={rowTitle}>{offered.action.title}</span><span className={rowSubtitle}>{busy ? t("Running…") : offered.plugin.name}</span></span>
                     </button>
                   );
                 }
                 if (row.kind === "folder") {
                   const Icon = row.icon;
                   return (
-                    <button key={row.id} id={`palette-item-${index}`} type="button" role="option" className="menu-item palette-folder" title={row.path} aria-selected={activeIndex === index} onFocus={() => select(index)} onMouseMove={() => select(index)} onClick={() => browseTo(row.path)}>
+                    <button key={row.id} id={`palette-item-${index}`} type="button" data-slot="button" role="option" className={cn(paletteRow, "palette-folder")} title={row.path} aria-selected={activeIndex === index} onFocus={() => select(index)} onMouseMove={() => select(index)} onClick={() => browseTo(row.path)}>
                       <Icon aria-hidden="true" />
-                      <span className="menu-item-main"><span className="palette-row-title">{row.label}</span>{row.detail !== null && <span className="palette-row-subtitle">{row.detail}</span>}</span>
+                      <span className="min-w-0 flex-1"><span className={rowTitle}>{row.label}</span>{row.detail !== null && <span className={rowSubtitle}>{row.detail}</span>}</span>
                     </button>
                   );
                 }
                 if (row.kind === "action") {
                   const Icon = row.action.icon;
-                  return <button key={row.action.id} id={`palette-item-${index}`} type="button" role="option" className="menu-item" aria-selected={activeIndex === index} onFocus={() => select(index)} onMouseMove={() => select(index)} onClick={() => runAction(row.action)}><Icon />{row.action.detail === undefined ? <span className="menu-item-main">{row.action.label}</span> : <span className="menu-item-main"><span className="palette-row-title">{row.action.label}</span><span className="palette-row-subtitle">{row.action.detail}</span></span>}<ShortcutHint shortcutId={row.action.shortcut} /></button>;
+                  return <button key={row.action.id} id={`palette-item-${index}`} type="button" data-slot="button" role="option" className={paletteRow} aria-selected={activeIndex === index} onFocus={() => select(index)} onMouseMove={() => select(index)} onClick={() => runAction(row.action)}><Icon aria-hidden="true" />{row.action.detail === undefined ? <span className="min-w-0 flex-1 truncate">{row.action.label}</span> : <span className="min-w-0 flex-1"><span className={rowTitle}>{row.action.label}</span><span className={rowSubtitle}>{row.action.detail}</span></span>}<ShortcutHint shortcutId={row.action.shortcut} /></button>;
                 }
                 const { pane } = row;
                 const workspace = row.machine.snapshot?.workspaces.find((item) => item.workspace_id === pane.workspace_id);
@@ -684,34 +706,35 @@ export function CommandPalette({ open, initialQuery = "", onClose, machines, onS
                 const place = multiMachine && section.placeNamesWorkspace ? `${row.machine.name} › ${panePlace}` : panePlace;
                 const selected = row.machineId === machineId && pane.pane_id === selectedPaneId;
                 return (
-                  <button key={targetKey(row)} data-machine={row.machineId} data-pane={pane.pane_id} id={`palette-item-${index}`} type="button" role="option" className="menu-item palette-pane" aria-selected={activeIndex === index} aria-current={selected ? "true" : undefined} onFocus={() => select(index)} onMouseMove={() => select(index)} onClick={() => runPane(row)}>
-                    <span className="palette-mark"><AgentMark agent={pane.agent ?? "shell"} /></span>
-                    <span className="menu-item-main"><span className="palette-row-title">{displayPaneTitle(pane)}{selected && <span className="palette-selected">{t("Selected")}</span>}</span><span className="palette-row-subtitle">{place}</span></span>
+                  <button key={targetKey(row)} data-machine={row.machineId} data-pane={pane.pane_id} id={`palette-item-${index}`} type="button" data-slot="button" role="option" className={cn(paletteRow, "palette-pane")} aria-selected={activeIndex === index} aria-current={selected ? "true" : undefined} onFocus={() => select(index)} onMouseMove={() => select(index)} onClick={() => runPane(row)}>
+                    <span className="palette-mark inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-fill-2 text-dim shadow-chip"><AgentMark agent={pane.agent ?? "shell"} /></span>
+                    <span className="min-w-0 flex-1"><span className={rowTitle}>{displayPaneTitle(pane)}{selected && <span className="palette-selected shrink-0 text-2xs font-semibold tracking-[var(--tracking-caps)] text-accent uppercase">{t("Selected")}</span>}</span><span className={rowSubtitle}>{place}</span></span>
                     <StatusBadge status={paneStatus(pane)} />
                   </button>
                 );
               })}
             </div>
           ))}
-          {(itemCount === 0 || listingFailed) && <p className="palette-empty" role="status">{emptyText}</p>}
+          {(itemCount === 0 || listingFailed) && <p className="palette-empty mx-3 my-6 text-center text-sm text-dim" role="status">{emptyText}</p>}
           {listingFailed && (
-            <p className="palette-empty">
-              <button type="button" className="btn" onClick={(event) => {
+            <p className="palette-empty mx-3 my-6 text-center">
+              <Button variant="field" size="sm" onClick={(event) => {
                 setBrowseAttempt((attempt) => attempt + 1);
                 // the button goes while the listing is asked again: a key or a mouse goes back to the search, a finger keeps its keyboard down
                 if (event.detail === 0 || !touch) inputRef.current?.focus();
-              }}>{t("Try again")}</button>
+              }}>{t("Try again")}</Button>
             </p>
           )}
         </div>
-        <footer className="palette-footer">
-          <div className="palette-footer-where" aria-live="polite">
-            {footerPlace && <span className="palette-footer-place">{footerPlace}</span>}
-            {footerPath && <span className="palette-footer-path" title={footerPath}>{footerPath}</span>}
+        {/* where the picked row goes: its workspace and tab, and its path, as herdr's picker says under its list */}
+        <footer className="palette-footer flex min-h-control shrink-0 items-center gap-3 bg-panel px-3 py-2 text-xs text-dim divider-t">
+          <div className="flex min-w-0 flex-1 flex-col" aria-live="polite">
+            {footerPlace && <span className="truncate font-medium text-text">{footerPlace}</span>}
+            {footerPath && <span className="truncate font-mono text-2xs" title={footerPath}>{footerPath}</span>}
           </div>
-          <div className="palette-footer-keys" aria-hidden="true">
-            <span className="palette-footer-key"><kbd className="kbd">←</kbd><kbd className="kbd">→</kbd>{t("Workspace")}</span>
-            <span className="palette-footer-key"><kbd className="kbd">&gt;</kbd>{t("Actions")}</span>
+          <div className="palette-footer-keys flex shrink-0 gap-3" aria-hidden="true">
+            <span className="inline-flex items-center gap-1"><Kbd>←</Kbd><Kbd>→</Kbd>{t("Workspace")}</span>
+            <span className="inline-flex items-center gap-1"><Kbd>&gt;</Kbd>{t("Actions")}</span>
           </div>
         </footer>
       </section>

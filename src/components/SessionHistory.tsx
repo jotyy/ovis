@@ -13,18 +13,20 @@
  * /api/sessions/resume, which starts it in that store or names the pane already showing it there;
  * a store that changed since the list is read again with its rows held in place and the focus kept
  * on the row that asked, and a bridge that gives no source (an older
- * one, or a store it cannot choose again) offers no Resume rather than one in another store. Escape, the scrim and Cancel close
- * it, Tab stays inside, arrows move along the rows, and focus returns to what opened it. The design follows the resume pickers of Codex CLI (`/resume`)
+ * one, or a store it cannot choose again) offers no Resume rather than one in another store.
+ * A Dialog (ui/dialog; a sheet on a phone): Escape, the scrim and Cancel close it, Tab stays inside,
+ * arrows move along the rows, and focus returns to what opened it. A filter field over the rows
+ * narrows them by their words. The design follows the resume pickers of Codex CLI (`/resume`)
  * and Claude Code (`claude --resume`): one session per row, newest first, the first prompt as its
  * text and the time it was last touched beside it, Enter resuming; here in the worktree dialog's
  * row anatomy, with the agent above the rows in the New workspace dialog's picker (each agent with
  * its mark, no Shell entry), whose open list takes its own Escape.
  */
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent } from "react";
-import { createPortal } from "react-dom";
-import { X } from "../lib/icons.ts";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { Search } from "../lib/icons.ts";
 import "./SessionHistory.css";
 import { AgentPicker } from "./AgentPicker.tsx";
+import { Badge, Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input } from "./ui/index.ts";
 import type { AgentKind, HerdrPane, SessionHistoryAgent, SessionHistoryResponse, SessionHistoryRow, TabCreated, WorkspaceInfo } from "../../shared/protocol.ts";
 import { ApiError, routeMissing } from "../lib/api.ts";
 import { useLocale, useT } from "../lib/i18n.ts";
@@ -32,6 +34,7 @@ import { useMachineApi, useMachineId } from "../lib/machineContext.tsx";
 import { claudeResumeRequest, inFlightGuard, paneShowingRow, resumeTabRequest, rowKey, rowStore, sessionHistoryAgent, sessionHistorySourcePane, sessionRowTime, standingResume, type RecentResume } from "../lib/sessionHistory.ts";
 import { useSheetSwipe } from "../lib/sheets.ts";
 import { usePhoneSheetBack } from "../lib/sheetHistory.ts";
+import { useMediaQuery } from "../lib/useMediaQuery.ts";
 
 interface Props {
   workspace: WorkspaceInfo;
@@ -76,6 +79,8 @@ export function SessionHistory({ workspace, panes, agent: firstAgent, sourcePane
   const [relisted, setRelisted] = useState(false);
   /** the list being read again after a changed store: its rows stay, without their buttons, until the new ones come */
   const [relisting, setRelisting] = useState(false);
+  /** the words the rows are narrowed by */
+  const [filter, setFilter] = useState("");
   const keepRows = useRef(false);
   /** the session whose Resume found the store changed: its row takes the focus back once the list is read again */
   const refocus = useRef<string | null>(null);
@@ -95,20 +100,12 @@ export function SessionHistory({ workspace, panes, agent: firstAgent, sourcePane
   const surface = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const picker = useRef<HTMLButtonElement>(null);
+  const placed = useRef<HTMLElement | null>(null);
+  const phone = useMediaQuery("(max-width: 640px)");
   useSheetSwipe(surface, pending ? null : onClose);
   usePhoneSheetBack(() => { if (pending) return false; onClose(); });
-  const opener = useRef<HTMLElement | null>(null);
-  const placed = useRef<HTMLElement | null>(null);
-  useLayoutEffect(() => {
-    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    // the dialog holds the focus from its first paint: an Escape pressed at once closes it rather
-    // than going to the message box it was opened from
-    picker.current?.focus({ preventScroll: true });
-    placed.current = picker.current;
-    return () => { if (opener.current?.isConnected) opener.current.focus({ preventScroll: true }); };
-  }, []);
   // the first row's button takes the focus once the rows are in; until then the agent field. Focus
-  // the user moved meanwhile (Tab to Cancel, the field opened) stays where they put it
+  // the user moved meanwhile (Tab to Cancel, the field opened, the filter typed in) stays where they put it
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       const again = refocus.current;
@@ -125,20 +122,6 @@ export function SessionHistory({ workspace, panes, agent: firstAgent, sourcePane
     });
     return () => window.cancelAnimationFrame(frame);
   }, [answer]);
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent): void => {
-      if (event.key !== "Escape") return;
-      const active = document.activeElement;
-      if (active && active !== document.body && !surface.current?.contains(active)) return;
-      // the agent picker's open list takes this Escape: it closes the list, not the dialog
-      if (active?.getAttribute("aria-expanded") === "true") return;
-      event.stopPropagation();
-      event.preventDefault();
-      if (!pending) onClose();
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [onClose, pending]);
   useEffect(() => {
     let cancelled = false;
     fetchAgentKinds().then((next) => { if (!cancelled) setKinds(next); }, () => { /* the first agent alone is offered */ });
@@ -202,18 +185,6 @@ export function SessionHistory({ workspace, panes, agent: firstAgent, sourcePane
       (reason: unknown) => failed(row, reason),
     );
   };
-  const closeFromScrim = (event: MouseEvent<HTMLDivElement>): void => {
-    if (!pending && event.target === event.currentTarget) onClose();
-  };
-  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>): void => {
-    if (event.key !== "Tab" || !surface.current) return;
-    const stops = [...surface.current.querySelectorAll<HTMLElement>("button:not(:disabled)")];
-    if (stops.length === 0) return;
-    const index = stops.indexOf(document.activeElement as HTMLElement);
-    const next = event.shiftKey ? (index <= 0 ? stops.length - 1 : index - 1) : (index < 0 || index === stops.length - 1 ? 0 : index + 1);
-    event.preventDefault();
-    stops[next]?.focus();
-  };
   const moveAlongRows = (event: ReactKeyboardEvent<HTMLUListElement>): void => {
     if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key) || !list.current) return;
     const buttons = [...list.current.querySelectorAll<HTMLButtonElement>("button:not(:disabled)")];
@@ -224,27 +195,40 @@ export function SessionHistory({ workspace, panes, agent: firstAgent, sourcePane
     event.preventDefault();
     buttons[next]?.focus();
   };
-  const rows = answer?.sessions ?? null;
+  const all = answer?.sessions ?? null;
+  // the filter reads the words a row shows: its title, its first prompt and its id
+  const words = filter.trim().toLowerCase();
+  const rows = useMemo(() => all === null || words === "" ? all : all.filter((row) => [row.title, row.firstMessage, row.id].some((text) => text !== null && text.toLowerCase().includes(words))), [all, words]);
   const momentAgo = Date.now();
-  return createPortal(
-    <div className="modal-scrim" onMouseDown={closeFromScrim}>
-      <div ref={surface} className="modal session-modal" role="dialog" aria-modal="true" aria-labelledby={`${id}-title`} onKeyDown={onKeyDown}>
-        <header className="modal-header">
-          <h2 className="modal-title" id={`${id}-title`}>{t("Earlier sessions · {name}", { name: workspace.label })}</h2>
-          <button type="button" className="icon-button" aria-label={t("Close session list")} disabled={pending !== null} onClick={onClose}>
-            <X aria-hidden="true" />
-          </button>
-        </header>
-        <div className="modal-body">
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open && !pending) onClose(); }}>
+      <DialogContent ref={surface} variant={phone ? "sheet" : "modal"} className="session-dialog" aria-labelledby={`${id}-title`} closeLabel={t("Close session list")}
+        // the dialog holds the focus from its first paint, on the agent field: an Escape pressed at
+        // once closes it rather than going to the message box it was opened from
+        onOpenAutoFocus={(event) => { event.preventDefault(); picker.current?.focus({ preventScroll: true }); placed.current = picker.current; }}
+        // the agent picker's open list takes its Escape: it closes the list, not the dialog; a Resume on its way holds the dialog
+        onEscapeKeyDown={(event) => { if (pending || document.activeElement?.getAttribute("aria-expanded") === "true") event.preventDefault(); }}
+        onPointerDownOutside={(event) => { if (pending) event.preventDefault(); }}
+        onInteractOutside={(event) => { if (pending) event.preventDefault(); }}>
+        <DialogHeader>
+          <DialogTitle id={`${id}-title`}>{t("Earlier sessions · {name}", { name: workspace.label })}</DialogTitle>
+        </DialogHeader>
+        <DialogBody className="session-body">
           <div className="field session-agent">
             <span className="field-label" id={`${id}-agent`}>{t("Agent")}</span>
             <AgentPicker ref={picker} agents={options} value={agent} shell={false} disabled={pending !== null || relisting} labelledBy={`${id}-agent`} onChange={(kind) => setAgent(kind as SessionHistoryAgent)} />
             {answer && <span className="field-hint session-folder">{t("Sessions started in {folder}", { folder: "\u0000" }).split("\u0000").map((part, index) => index === 0 ? <span key="before">{part}</span> : <span key="after"><code>{answer.cwd}</code>{part}</span>)}</span>}
           </div>
-          {rows === null && !error ? (
+          {all !== null && all.length > 0 && <div className="session-filter">
+            <Search aria-hidden="true" className="session-filter-glyph" />
+            <Input type="search" className="session-filter-input" value={filter} placeholder={t("Filter sessions")} aria-label={t("Filter sessions")} onChange={(event) => setFilter(event.currentTarget.value)} />
+          </div>}
+          {all === null && !error ? (
             <p className="field-hint" role="status">{t("Reading sessions…")}</p>
-          ) : rows && rows.length === 0 ? (
+          ) : all && all.length === 0 ? (
             <p className="field-hint session-empty">{t("No earlier {agent} sessions in this folder.", { agent: agentLabel })}</p>
+          ) : rows && rows.length === 0 ? (
+            <p className="field-hint session-empty" role="status">{t("No session matches the filter.")}</p>
           ) : rows && (
             <ul ref={list} className="session-list" aria-label={t("Earlier sessions")} onKeyDown={moveAlongRows}>
               {rows.map((row) => {
@@ -270,13 +254,13 @@ export function SessionHistory({ workspace, panes, agent: firstAgent, sourcePane
                       {when && <time className="session-time" dateTime={row.updatedAt} title={when.title}>{when.label}</time>}
                       {shown || withheld ? (
                         <span className="session-actions">
-                          <span className="pill">{t("Already open")}</span>
-                          <button type="button" className="btn session-action" disabled={pending !== null || relisting || shown === undefined} aria-label={t("Open the pane showing {title}", { title })} onClick={() => { if (shown) onSelectPane(shown.pane_id); }}>{t("Open")}</button>
+                          <Badge tone="accent" className="pill">{t("Already open")}</Badge>
+                          <Button variant="field" size="xs" className="session-action" disabled={pending !== null || relisting || shown === undefined} aria-label={t("Open the pane showing {title}", { title })} onClick={() => { if (shown) onSelectPane(shown.pane_id); }}>{t("Open")}</Button>
                         </span>
                       ) : unbound ? (
-                        <span className="pill" title={t("This PC can't start this session in the store it was listed from")}>{t("Resume unavailable")}</span>
+                        <Badge tone="idle" className="pill" title={t("This PC can't start this session in the store it was listed from")}>{t("Resume unavailable")}</Badge>
                       ) : resumable && (
-                        <button type="button" className="btn session-action" disabled={pending !== null || relisting} aria-label={t("Resume {title}", { title })} onClick={() => resume(row)}>{t("Resume")}</button>
+                        <Button variant="field" size="xs" className="session-action" disabled={pending !== null || relisting} aria-label={t("Resume {title}", { title })} onClick={() => resume(row)}>{t("Resume")}</Button>
                       )}
                     </span>
                   </li>
@@ -287,12 +271,11 @@ export function SessionHistory({ workspace, panes, agent: firstAgent, sourcePane
           {/* one line kept under the rows, so none of them moves when it speaks: Resuming, Reading again, why it was read again */}
           {rows && rows.length > 0 && <p className="field-hint session-status" role="status">{pending !== null ? t("Resuming…") : relisting ? t("Reading sessions…") : relisted ? t("Claude's store changed; the list was read again.") : null}</p>}
           {error && <p className="field-hint session-error" role="alert">{error}</p>}
-        </div>
-        <footer className="modal-footer">
-          <button type="button" className="btn btn-ghost" disabled={pending !== null} onClick={onClose}>{t("Cancel")}</button>
-        </footer>
-      </div>
-    </div>,
-    document.body,
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="field" size="sm" disabled={pending !== null} onClick={onClose}>{t("Cancel")}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

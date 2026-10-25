@@ -257,7 +257,7 @@
 
 /* the held-input row: the command and its two controls (send, discard), no sentence. Wider than
    a pill because it carries controls, so it takes --radius-md (a control-bearing box, not a chip)
-   and is as tall as its .icon-button pair (--touch-target on a coarse pointer). It only renders
+   and is as tall as its pair of icon buttons (--touch-target on a coarse pointer). It only renders
    while CONNECTED (the reconnecting banner owns the disconnected slot), and it is the one banner
    that accepts pointer events. */
 .terminal-banner-draft {

@@ -3,6 +3,8 @@ import { Network } from "../lib/icons.ts";
 import type { CLIProxyLogin, CLIProxyLoginStatus, CLIProxyProvider } from "../../shared/protocol.ts";
 import { cliProxyRequest } from "../lib/api.ts";
 import { useT } from "../lib/i18n.ts";
+import { AccountChoice } from "./UsageAccountDialog.tsx";
+import { Button, Field, Input } from "./ui/index.ts";
 
 type Pending = CLIProxyLogin & { readonly provider: CLIProxyProvider };
 const json = (method: string, body: unknown): RequestInit => ({ method, headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -105,7 +107,7 @@ export function CLIProxyAccountLogin({ provider, active, onStarted, onAccountsCh
         {pending ? <>
           <p className="settings-label" role="status">{t("Waiting for sign-in…")}</p>
           <a href={pending.url} target="_blank" rel="noopener noreferrer">{t("Open sign-in again")}</a>
-          <button className="btn btn-ghost" type="button" onClick={() => void cancel()}>{t("Cancel")}</button>
+          <Button variant="ghost" className="self-start" onClick={() => void cancel()}>{t("Cancel")}</Button>
           <form onSubmit={(event) => {
             event.preventDefault();
             const form = event.currentTarget;
@@ -116,11 +118,12 @@ export function CLIProxyAccountLogin({ provider, active, onStarted, onAccountsCh
               .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : t("Hub request failed")))
               .finally(() => setBusy(false));
           }}>
-            <label className="settings-label" htmlFor={`cliproxy-redirect-${provider}`}>{t("On another device? Paste the address you landed on.")}</label>
-            <input className="input" id={`cliproxy-redirect-${provider}`} name="redirect_url" type="url" required autoComplete="off" />
-            <button className="btn" type="submit" disabled={busy}>{t("Submit")}</button>
+            <Field label={t("On another device? Paste the address you landed on.")} htmlFor={`cliproxy-redirect-${provider}`}>
+              <Input id={`cliproxy-redirect-${provider}`} name="redirect_url" type="url" required autoComplete="off" />
+            </Field>
+            <Button type="submit" variant="field" size="md" className="self-start" disabled={busy}>{t("Submit")}</Button>
           </form>
-        </> : <button className="account-choice" type="button" disabled={busy} onClick={() => start(provider)}><Network size={24} aria-hidden="true" /><span><strong>{t("Through the hub")}</strong><span className="settings-hint">{t("Sign in with your hub")}</span></span></button>}
+        </> : <AccountChoice disabled={busy} onClick={() => start(provider)} icon={<Network />} title={t("Through the hub")} description={t("Sign in with your hub")} />}
       </div>
   );
 }

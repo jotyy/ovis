@@ -71,7 +71,7 @@ const SKILLS_MS = 300;
 const RECENT_FOLDERS_SHOWN = 8;
 
 /** a native select on the field surface: the regression scripts choose its options as a select's (selectOption) */
-export const nativeSelect = cn(fieldSurface, "h-input w-full cursor-pointer appearance-none px-3 pr-9 text-input font-regular sm:text-sm coarse:h-touch");
+export const nativeSelect = cn(fieldSurface, "m-0 h-input w-full cursor-pointer appearance-none border-0 px-3 pr-9 font-sans text-input font-regular sm:text-sm coarse:h-touch");
 
 function directoryBasename(value: string): string {
   const trimmed = value.replace(/\\/g, "/").replace(/\/+$/, "");

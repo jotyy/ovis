@@ -94,7 +94,7 @@ export function UpdateControls({ updates, bridgesFollow = false }: { updates: Up
   // focusable from code only: a button that points here (the header line's) lands on it
   return <SettingsGroup title={t("Updates")} icon={<Download />} className="settings-updates" section="updates" aria-label={t("Updates")}
     /* always a version: the sidebar no longer carries one */
-    action={<Badge tone="neutral">{runningAppVersion(status, __APP_VERSION__)}</Badge>}>
+    action={<Badge tone="neutral">{t("Running {version}", { version: runningAppVersion(status, __APP_VERSION__) })}</Badge>}>
     <div className="settings-item">
     {tabVersion && reload !== "restart" && <p className="settings-hint">{t("This tab still runs {version} until it is reloaded.", { version: tabVersion })}</p>}
     {installing && !error ? <div role="status"><UpdateProgress status={status} fallback={t(status?.phase === "building" ? "Installing dependencies and building…" : "Restarting the bridge…")} /></div> : <p className="settings-hint" role="status">

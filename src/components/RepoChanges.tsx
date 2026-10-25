@@ -4,9 +4,11 @@ import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Folder, Fold
 import "./RepoChanges.css";
 import { FileGlyph } from "./FileGlyph.tsx";
 import { Skeleton } from "./Skeleton.tsx";
+import { Badge, Button, Field, IconButton, Input, Label, menuItem, menuSurface, ToggleGroup, ToggleGroupItem, TooltipProvider } from "./ui/index.ts";
 
-import type { RepoDiffFile, RepoDiffFileList, RepoDiffRefs, RepoDiffScope } from "../../shared/protocol.ts";
+import type { RepoDiffFile, RepoDiffFileList, RepoDiffRefs, RepoDiffScope, RepoDiffStatus } from "../../shared/protocol.ts";
 import { changeTree, changeTreeFolders, type ChangeTreeEntry } from "../lib/changeTree.ts";
+import { cn } from "../lib/cn.ts";
 import { useLocale, useT } from "../lib/i18n.ts";
 import { useMachineApi } from "../lib/machineContext.tsx";
 import { diffErrorMessage, nothingChangedWord, refName, shortHash, STATUS_MARK, statusWord, type RepoComparison } from "../lib/repoDiff.ts";
@@ -25,6 +27,21 @@ const PENDING: Load = { status: "pending" };
 /** The branches offered as a base: read when the picker opens, never before. */
 type Refs = { status: "idle" } | { status: "pending" } | { status: "failed"; error: unknown } | { status: "ready"; listing: RepoDiffRefs };
 const NO_REFS: Refs = { status: "idle" };
+
+/** a file's status as a tag's tone: added reads as done, deleted as blocked, modified as the accent */
+export function statusTone(status: RepoDiffStatus): "done" | "blocked" | "accent" | "neutral" {
+  switch (status) {
+    case "added": case "untracked": return "done";
+    case "deleted": case "unmerged": return "blocked";
+    case "modified": return "accent";
+    default: return "neutral";
+  }
+}
+
+/** a row of the list, a file's or a folder's: it moves one indent in per level (`--depth`), the fill stays as wide as the list */
+const changeRow = "group flex min-h-9 w-full cursor-pointer items-center gap-2 rounded-md pr-2 pl-[calc(var(--space-2)+var(--depth,0)*var(--repo-change-indent))] text-left text-sm text-text outline-none transition-[background-color,color] duration-150 ease-in-out hover:bg-fill-2 hover:text-strong focus-visible:bg-fill-2 focus-visible:ring-2 focus-visible:ring-accent/60 disabled:pointer-events-none disabled:opacity-50 coarse:min-h-touch";
+
+const note = "m-0 px-3 py-2 text-sm text-dim";
 
 /**
  * What changed in the repository the pane sits in: the working tree, the index, two commits, or
@@ -66,6 +83,8 @@ export function RepoChanges({ paneId, directory, onOpenDiff }: RepoChangesProps)
   const baseInputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
   const baseLabelId = useId();
+  const fromId = useId();
+  const toId = useId();
 
   // another PC, pane or folder: nothing read or chosen for the last one is an answer for this one.
   // Reset while rendering, so the read below never starts the last target's branch comparison here.
@@ -218,13 +237,14 @@ export function RepoChanges({ paneId, directory, onOpenDiff }: RepoChangesProps)
     if (entry.kind === "folder") {
       const open = !folded.has(entry.path);
       return <li key={`folder:${entry.path}`}>
-        <button type="button" className="repo-change-folder" style={indent} aria-expanded={open} onClick={() => toggle(entry.path)}>
-          <span className="repo-change-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
-          {open ? <FolderOpen className="repo-change-glyph" aria-hidden="true" /> : <Folder className="repo-change-glyph" aria-hidden="true" />}
-          <span className="repo-change-folder-name">{entry.name}</span>
-          <span className="repo-change-folder-count" aria-hidden="true">{entry.files.toLocaleString(locale)}</span>
+        <button type="button" data-slot="button" className={cn(changeRow, "repo-change-folder")} style={indent} aria-expanded={open} onClick={() => toggle(entry.path)}>
+          {/* the fold, in the cell a file's status tag takes, so the folder's glyph lines up with the files' */}
+          <span className="repo-change-caret inline-flex w-6 shrink-0 items-center justify-center text-dim [&>svg]:size-3.5" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
+          {open ? <FolderOpen className="repo-change-glyph size-icon shrink-0 text-accent" aria-hidden="true" /> : <Folder className="repo-change-glyph size-icon shrink-0 text-accent" aria-hidden="true" />}
+          <span className="repo-change-folder-name min-w-0 flex-1 truncate font-mono text-xs font-medium">{entry.name}</span>
+          <span className="repo-change-folder-count ml-auto shrink-0 font-mono text-2xs text-dim tabular-nums" aria-hidden="true">{entry.files.toLocaleString(locale)}</span>
         </button>
-        {open && <ul className="repo-change-children">{rows(entry.entries, files, comparison)}</ul>}
+        {open && <ul className="repo-change-children m-0 list-none p-0">{rows(entry.entries, files, comparison)}</ul>}
       </li>;
     }
     const file = files[entry.index]!;
@@ -234,124 +254,127 @@ export function RepoChanges({ paneId, directory, onOpenDiff }: RepoChangesProps)
     // a rename within the folder names only the old file; one from elsewhere says where from
     const sameFolder = file.old_path !== null && file.old_path.slice(0, file.old_path.lastIndexOf("/") + 1) === folder;
     return <li key={file.path}>
-      <button type="button" className="repo-change" style={indent} onClick={() => onOpenDiff(comparison, file)}>
-        <span className="repo-change-mark" data-status={file.status} aria-hidden="true">{STATUS_MARK[file.status]}</span>
+      <button type="button" data-slot="button" className={cn(changeRow, "repo-change")} style={indent} onClick={() => onOpenDiff(comparison, file)}>
+        {/* git's letter for the status, in the tone the rows of that kind take in the diff */}
+        <Badge tone={statusTone(file.status)} className={cn("repo-change-mark w-6 justify-center px-0 font-mono font-bold", file.status === "untracked" && "bg-transparent shadow-[0_0_0_1px_var(--ink-2)]")} data-status={file.status} aria-hidden="true">{STATUS_MARK[file.status]}</Badge>
         <span className="visually-hidden">{word}</span>
-        <FileGlyph name={file.path} className="repo-change-glyph" />
-        <span className="repo-change-path" title={file.old_path === null ? file.path : t("Renamed from {path}", { path: file.old_path })}>
-          {file.old_path !== null && <span className="repo-change-old">{sameFolder && folder !== "" && <span className="visually-hidden">{folder}</span>}{sameFolder ? file.old_path.slice(folder.length) : file.old_path} → </span>}{folder !== "" && <span className="visually-hidden">{folder}</span>}{entry.name}
+        <FileGlyph name={file.path} className="repo-change-glyph size-icon shrink-0 text-dim" />
+        <span className="repo-change-path min-w-0 flex-1 truncate font-mono text-xs" title={file.old_path === null ? file.path : t("Renamed from {path}", { path: file.old_path })}>
+          {file.old_path !== null && <span className="repo-change-old text-dim">{sameFolder && folder !== "" && <span className="visually-hidden">{folder}</span>}{sameFolder ? file.old_path.slice(folder.length) : file.old_path} → </span>}{folder !== "" && <span className="visually-hidden">{folder}</span>}{entry.name}
         </span>
         {file.binary === true
-          ? <span className="repo-change-counts">{t("Binary")}</span>
-          : file.additions !== null && file.deletions !== null && <span className="repo-change-counts">
-            <span className="repo-change-added">+{file.additions.toLocaleString(locale)}</span>
-            <span className="repo-change-deleted">−{file.deletions.toLocaleString(locale)}</span>
+          ? <span className="repo-change-counts ml-auto shrink-0 font-mono text-2xs text-dim">{t("Binary")}</span>
+          : file.additions !== null && file.deletions !== null && <span className="repo-change-counts ml-auto inline-flex shrink-0 gap-1 font-mono text-2xs text-dim tabular-nums">
+            <span className="repo-change-added text-done">+{file.additions.toLocaleString(locale)}</span>
+            <span className="repo-change-deleted text-blocked">−{file.deletions.toLocaleString(locale)}</span>
           </span>}
       </button>
     </li>;
   });
 
   return (
-    <div className="repo-changes" role="group" aria-label={t("Changes")} aria-busy={load.status === "pending" && !awaitingBase}>
-      <div className="repo-changes-bar">
-        <div className="segmented repo-changes-scopes" role="group" aria-label={t("Compare")}>
-          <button type="button" aria-pressed={scope === "workspace"} onClick={() => choose("workspace")}>{t("Working tree")}</button>
-          <button type="button" aria-pressed={scope === "staged"} onClick={() => choose("staged")}>{t("Staged")}</button>
-          <button type="button" aria-pressed={scope === "commit"} onClick={() => choose("commit")}>{t("Commits")}</button>
-          <button type="button" aria-pressed={scope === "branch"} onClick={() => choose("branch")}>{t("Branch")}</button>
-        </div>
-        <div className="repo-changes-tools">
-          <button type="button" className="icon-button" aria-label={allOpen ? t("Collapse all folders") : t("Expand all folders")} title={allOpen ? t("Collapse all folders") : t("Expand all folders")} disabled={folders.length === 0} onClick={() => setFolded(allOpen ? new Set(folders) : new Set())}>
-            {allOpen ? <ChevronsDownUp aria-hidden="true" /> : <ChevronsUpDown aria-hidden="true" />}
-          </button>
-          <button type="button" className="icon-button" aria-label={t("Refresh changes")} title={t("Refresh changes")} disabled={asked === null || load.status === "pending"} onClick={() => asked !== null && read(asked)}>
-            <RefreshCw aria-hidden="true" />
-          </button>
-        </div>
-      </div>
-      {scope === "commit" && (
-        <form className="repo-changes-commits" onSubmit={compare}>
-          <label className="field">
-            <span className="field-label">{t("From commit")}</span>
-            <input className="input" value={base} onChange={(event) => setBase(event.target.value)} placeholder="HEAD~1" autoComplete="off" spellCheck={false} required />
-          </label>
-          <label className="field">
-            <span className="field-label">{t("To commit")}</span>
-            <input className="input" value={head} onChange={(event) => setHead(event.target.value)} placeholder="HEAD" autoComplete="off" spellCheck={false} />
-          </label>
-          <button type="submit" className="btn btn-primary" disabled={base.trim() === ""}>{t("Compare")}</button>
-        </form>
-      )}
-      {scope === "branch" && (
-        <form className="repo-changes-commits repo-changes-base-form" onSubmit={compareBranch}>
-          <div className="field">
-            <span className="field-label" id={baseLabelId}>{t("Base branch")}</span>
-            <div className="repo-changes-base" ref={pickerRef}>
-              <input ref={baseInputRef} className="input repo-changes-base-input" role="combobox" aria-labelledby={baseLabelId} aria-autocomplete="list" aria-expanded={pickerOpen} aria-controls={listId}
-                aria-activedescendant={pickerOpen && activeOption !== undefined ? `${listId}-${activeOption.name}` : undefined}
-                value={baseRef} placeholder={t("Branch or commit")} autoComplete="off" spellCheck={false} required
-                onChange={(event) => { setBaseRef(event.target.value); setActive(0); if (!pickerOpen) openPicker(); }}
-                onClick={() => { if (!pickerOpen) openPicker(); }}
-                onKeyDown={onBaseKeyDown} />
-              <button type="button" className="icon-button repo-changes-base-toggle" aria-label={t("Choose a branch")} title={t("Choose a branch")} aria-expanded={pickerOpen} aria-controls={listId}
-                onClick={() => { if (pickerOpen) setPickerOpen(false); else { openPicker(); baseInputRef.current?.focus(); } }}>
-                <ChevronDown aria-hidden="true" />
-              </button>
-            </div>
+    <TooltipProvider>
+      <div className="repo-changes flex flex-col overflow-clip rounded-lg bg-[color-mix(in_srgb,var(--bg)_40%,var(--bg-elevated))] shadow-panel" role="group" aria-label={t("Changes")} aria-busy={load.status === "pending" && !awaitingBase}>
+        <div className="repo-changes-bar flex items-center justify-between gap-2 p-1 divider-b">
+          <ToggleGroup type="single" className="repo-changes-scopes" value={scope} aria-label={t("Compare")} onValueChange={(value) => { if (value) choose(value as RepoDiffScope); }}>
+            <ToggleGroupItem value="workspace">{t("Working tree")}</ToggleGroupItem>
+            <ToggleGroupItem value="staged">{t("Staged")}</ToggleGroupItem>
+            <ToggleGroupItem value="commit">{t("Commits")}</ToggleGroupItem>
+            <ToggleGroupItem value="branch">{t("Branch")}</ToggleGroupItem>
+          </ToggleGroup>
+          <div className="repo-changes-tools flex shrink-0 items-center gap-1">
+            <IconButton label={allOpen ? t("Collapse all folders") : t("Expand all folders")} className="coarse:size-touch" disabled={folders.length === 0} onClick={() => setFolded(allOpen ? new Set(folders) : new Set())}>
+              {allOpen ? <ChevronsDownUp aria-hidden="true" /> : <ChevronsUpDown aria-hidden="true" />}
+            </IconButton>
+            <IconButton label={t("Refresh changes")} className="coarse:size-touch" disabled={asked === null || load.status === "pending"} onClick={() => asked !== null && read(asked)}>
+              <RefreshCw aria-hidden="true" />
+            </IconButton>
           </div>
-          <button type="submit" className="btn btn-primary" disabled={typed === ""}>{t("Compare")}</button>
-          {/* a row is made active by a pointer moving over it, not by the list opening under a resting one */}
-          {pickerOpen && (
-            <div id={listId} ref={refsRef} className="menu repo-changes-refs" role="listbox" aria-labelledby={baseLabelId} aria-busy={refs.status === "pending"}>
-              {refs.status === "pending" && <div className="repo-changes-refs-note" role="status">{t("Loading…")}</div>}
-              {refs.status === "failed" && <div className="repo-changes-refs-note repo-changes-error" role="alert">{diffErrorMessage(t, refs.error)}</div>}
-              {refsListing !== null && refsListing.refs.length === 0 && <div className="repo-changes-refs-note">{t("This repository has no branches yet; a commit can still be typed.")}</div>}
-              {refsListing !== null && refsListing.refs.length > 0 && options.length === 0 && <div className="repo-changes-refs-note">{t("No branch matches; Compare takes the name as typed.")}</div>}
-              {options.map((ref) => (
-                <div key={ref.name} id={`${listId}-${ref.name}`} className="menu-item repo-changes-ref" role="option" aria-selected={ref === activeOption} title={ref.name}
-                  onPointerMove={() => setActive(options.indexOf(ref))} onMouseDown={(event) => event.preventDefault()} onClick={() => pick(ref)}>
-                  <GitBranch aria-hidden="true" />
-                  <span className="menu-item-main">{refName(ref.name)}</span>
-                  <span className="menu-item-hint">{shortHash(ref.oid)}</span>
-                </div>
-              ))}
-              {refsListing?.truncated && <div className="repo-changes-refs-note" role="status">{t("Only the first {count} branches are listed; another can be typed by name.", { count: refsListing.limits.max_refs.toLocaleString(locale) })}</div>}
+        </div>
+        {scope === "commit" && (
+          <form className="repo-changes-commits divider-b" onSubmit={compare}>
+            <Field label={t("From commit")} htmlFor={fromId} className="min-w-0">
+              <Input id={fromId} className="font-mono coarse:h-touch" value={base} onChange={(event) => setBase(event.target.value)} placeholder="HEAD~1" autoComplete="off" spellCheck={false} required />
+            </Field>
+            <Field label={t("To commit")} htmlFor={toId} className="min-w-0">
+              <Input id={toId} className="font-mono coarse:h-touch" value={head} onChange={(event) => setHead(event.target.value)} placeholder="HEAD" autoComplete="off" spellCheck={false} />
+            </Field>
+            <Button type="submit" variant="accent" size="md" className="coarse:h-touch" disabled={base.trim() === ""}>{t("Compare")}</Button>
+          </form>
+        )}
+        {scope === "branch" && (
+          <form className="repo-changes-commits repo-changes-base-form divider-b" onSubmit={compareBranch}>
+            <div className="flex min-w-0 flex-col gap-1">
+              <Label className="flex h-6 items-center" id={baseLabelId}>{t("Base branch")}</Label>
+              {/* the base field with its picker's toggle at its end, as a select's chevron sits */}
+              <div className="repo-changes-base relative flex items-center" ref={pickerRef}>
+                <Input ref={baseInputRef} className="repo-changes-base-input min-w-0 flex-1 pr-10 font-mono coarse:h-touch coarse:pr-12" role="combobox" aria-labelledby={baseLabelId} aria-autocomplete="list" aria-expanded={pickerOpen} aria-controls={listId}
+                  aria-activedescendant={pickerOpen && activeOption !== undefined ? `${listId}-${activeOption.name}` : undefined}
+                  value={baseRef} placeholder={t("Branch or commit")} autoComplete="off" spellCheck={false} required
+                  onChange={(event) => { setBaseRef(event.target.value); setActive(0); if (!pickerOpen) openPicker(); }}
+                  onClick={() => { if (!pickerOpen) openPicker(); }}
+                  onKeyDown={onBaseKeyDown} />
+                {/* the toggle is a glyph inside the field: the field's edge shows the focus, the glyph's colour the open list */}
+                <IconButton label={t("Choose a branch")} className="repo-changes-base-toggle absolute right-0.5 aria-expanded:bg-transparent coarse:size-touch" aria-expanded={pickerOpen} aria-controls={listId}
+                  onClick={() => { if (pickerOpen) setPickerOpen(false); else { openPicker(); baseInputRef.current?.focus(); } }}>
+                  <ChevronDown aria-hidden="true" />
+                </IconButton>
+              </div>
             </div>
-          )}
-        </form>
-      )}
-      {repository !== null && (
-        <p className="repo-changes-repo" title={repository.root}>
-          <span className="repo-changes-branch"><GitBranch aria-hidden="true" />{branch}</span>
-          <span className="repo-changes-root"><span dir="ltr">{repository.root}</span></span>
-        </p>
-      )}
-      {listing?.comparison && answered?.scope === "branch" && (
-        <p className="repo-changes-repo repo-changes-identity" title={`${listing.comparison.base_oid}\n${listing.comparison.merge_base_oid}`}>
-          <span className="repo-changes-branch"><GitMerge aria-hidden="true" />{t("Compared from {hash}, the merge base with {base}", { hash: shortHash(listing.comparison.merge_base_oid), base: answered.base ?? "" })}</span>
-        </p>
-      )}
-      {load.status === "failed"
-        ? <p className="repo-changes-note repo-changes-error" role="alert">{diffErrorMessage(t, load.error)}</p>
-        : <ul className="repo-changes-list" aria-label={t("Changed files")} data-scope={listing?.scope} data-merge-base={listing?.comparison?.merge_base_oid}>
-          {awaitingBase && <li className="repo-changes-note">{t("Choose a base, then Compare.")}</li>}
-          {load.status === "pending" && !awaitingBase && <li className="repo-changes-loading" role="status">
-            <span className="visually-hidden">{t("Loading…")}</span>
-            {skeletonRows(last === null ? null : last.files.length).map((width, index) => <span key={index} className="repo-change-skeleton" aria-hidden="true">
-              <Skeleton className="repo-change-skeleton-mark" />
-              <Skeleton className="repo-change-skeleton-glyph" />
-              <Skeleton width={width} />
-              <Skeleton className="repo-change-skeleton-counts" />
-            </span>)}
-          </li>}
-          {listing !== null && answered !== null && rows(tree, listing.files, answered)}
-          {listing !== null && listing.files.length === 0 && <li className="repo-changes-note">{nothingChangedWord(t, listing.scope)}</li>}
-          {listing?.truncated && <li className="repo-changes-note" role="status">
-            {listing.total === null
-              ? t("The list was cut short; only the first {count} files are shown.", { count: listing.files.length.toLocaleString(locale) })
-              : t("Showing the first {count} of {total} changed files.", { count: listing.files.length.toLocaleString(locale), total: listing.total.toLocaleString(locale) })}
-          </li>}
-        </ul>}
-    </div>
+            <Button type="submit" variant="accent" size="md" className="coarse:h-touch" disabled={typed === ""}>{t("Compare")}</Button>
+            {/* a row is made active by a pointer moving over it, not by the list opening under a resting one */}
+            {pickerOpen && (
+              <div id={listId} ref={refsRef} className={cn(menuSurface, "repo-changes-refs col-span-full max-h-80 animate-none bg-fill-1 shadow-[0_0_0_1px_var(--ink-1),inset_0_0_0_1px_var(--edge-light)] backdrop-filter-none [overscroll-behavior:contain]")} role="listbox" aria-labelledby={baseLabelId} aria-busy={refs.status === "pending"}>
+                {refs.status === "pending" && <div className="repo-changes-refs-note p-2 text-sm text-dim" role="status">{t("Loading…")}</div>}
+                {refs.status === "failed" && <div className="repo-changes-refs-note repo-changes-error p-2 text-sm text-blocked" role="alert">{diffErrorMessage(t, refs.error)}</div>}
+                {refsListing !== null && refsListing.refs.length === 0 && <div className="repo-changes-refs-note p-2 text-sm text-dim">{t("This repository has no branches yet; a commit can still be typed.")}</div>}
+                {refsListing !== null && refsListing.refs.length > 0 && options.length === 0 && <div className="repo-changes-refs-note p-2 text-sm text-dim">{t("No branch matches; Compare takes the name as typed.")}</div>}
+                {options.map((ref) => (
+                  <div key={ref.name} id={`${listId}-${ref.name}`} className={cn(menuItem, "repo-changes-ref aria-selected:bg-fill-3 aria-selected:text-strong coarse:min-h-touch")} role="option" aria-selected={ref === activeOption} title={ref.name}
+                    onPointerMove={() => setActive(options.indexOf(ref))} onMouseDown={(event) => event.preventDefault()} onClick={() => pick(ref)}>
+                    <GitBranch aria-hidden="true" />
+                    <span className="min-w-0 flex-1 truncate font-mono text-md">{refName(ref.name)}</span>
+                    <span className="shrink-0 font-mono text-xs text-dim">{shortHash(ref.oid)}</span>
+                  </div>
+                ))}
+                {refsListing?.truncated && <div className="repo-changes-refs-note p-2 text-sm text-dim" role="status">{t("Only the first {count} branches are listed; another can be typed by name.", { count: refsListing.limits.max_refs.toLocaleString(locale) })}</div>}
+              </div>
+            )}
+          </form>
+        )}
+        {repository !== null && (
+          <p className="repo-changes-repo m-0 flex items-center gap-2 px-2 py-1 font-mono text-2xs whitespace-nowrap text-dim divider-b" title={repository.root}>
+            <span className="repo-changes-branch inline-flex shrink-0 items-center gap-1 text-strong [&>svg]:size-[1.1em] [&>svg]:text-accent"><GitBranch aria-hidden="true" />{branch}</span>
+            <span className="repo-changes-root min-w-0 flex-1 overflow-hidden text-left text-ellipsis [direction:rtl]"><span dir="ltr">{repository.root}</span></span>
+          </p>
+        )}
+        {listing?.comparison && answered?.scope === "branch" && (
+          <p className="repo-changes-repo repo-changes-identity m-0 flex items-center gap-2 px-2 py-1 font-mono text-2xs text-dim divider-b" title={`${listing.comparison.base_oid}\n${listing.comparison.merge_base_oid}`}>
+            <span className="repo-changes-branch inline-flex min-w-0 flex-1 items-start gap-1 [&>svg]:mt-[0.15em] [&>svg]:size-[1.1em] [&>svg]:shrink-0 [&>svg]:text-accent"><GitMerge aria-hidden="true" />{t("Compared from {hash}, the merge base with {base}", { hash: shortHash(listing.comparison.merge_base_oid), base: answered.base ?? "" })}</span>
+          </p>
+        )}
+        {load.status === "failed"
+          ? <p className={cn(note, "repo-changes-note repo-changes-error text-blocked")} role="alert">{diffErrorMessage(t, load.error)}</p>
+          : <ul className="repo-changes-list m-0 list-none overflow-y-auto p-1 [overscroll-behavior:contain]" aria-label={t("Changed files")} data-scope={listing?.scope} data-merge-base={listing?.comparison?.merge_base_oid}>
+            {awaitingBase && <li className={cn(note, "repo-changes-note")}>{t("Choose a base, then Compare.")}</li>}
+            {load.status === "pending" && !awaitingBase && <li className="repo-changes-loading" role="status">
+              <span className="visually-hidden">{t("Loading…")}</span>
+              {skeletonRows(last === null ? null : last.files.length).map((width, index) => <span key={index} className="repo-change-skeleton flex min-h-9 items-center gap-2 px-2 coarse:min-h-touch" aria-hidden="true">
+                <Skeleton className="repo-change-skeleton-mark h-chip w-6 rounded-sm" />
+                <Skeleton className="repo-change-skeleton-glyph size-icon rounded-sm" />
+                <Skeleton width={width} />
+                <Skeleton className="repo-change-skeleton-counts ml-auto w-[3em]" />
+              </span>)}
+            </li>}
+            {listing !== null && answered !== null && rows(tree, listing.files, answered)}
+            {listing !== null && listing.files.length === 0 && <li className={cn(note, "repo-changes-note")}>{nothingChangedWord(t, listing.scope)}</li>}
+            {listing?.truncated && <li className={cn(note, "repo-changes-note")} role="status">
+              {listing.total === null
+                ? t("The list was cut short; only the first {count} files are shown.", { count: listing.files.length.toLocaleString(locale) })
+                : t("Showing the first {count} of {total} changed files.", { count: listing.files.length.toLocaleString(locale), total: listing.total.toLocaleString(locale) })}
+            </li>}
+          </ul>}
+      </div>
+    </TooltipProvider>
   );
 }

@@ -198,7 +198,7 @@ export function WorktreeDialog({ mode, workspace, onClose, onOpened }: Props) {
               {others.map((entry) => (
                 <li key={entry.path}>
                   {/* a row: the branch glyph, the branch over its path, what stands in the way as a tag, and the way in */}
-                  <button type="button" className="worktree-row group flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left text-text outline-none transition-[background-color,box-shadow] duration-150 ease-in-out hover:bg-fill-2 hover:shadow-surface focus-visible:bg-fill-2 focus-visible:ring-2 focus-visible:ring-accent/60 disabled:cursor-default disabled:opacity-60 coarse:min-h-touch" disabled={pending !== null || entry.is_prunable} onClick={() => open(entry)}>
+                  <button type="button" data-slot="button" className="worktree-row group flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left text-text outline-none transition-[background-color,box-shadow] duration-150 ease-in-out hover:bg-fill-2 hover:shadow-surface focus-visible:bg-fill-2 focus-visible:ring-2 focus-visible:ring-accent/60 disabled:cursor-default disabled:opacity-60 coarse:min-h-touch" disabled={pending !== null || entry.is_prunable} onClick={() => open(entry)}>
                     <GitBranch aria-hidden="true" className="size-[18px] shrink-0 text-accent" />
                     <span className="worktree-copy flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className="worktree-branch truncate text-sm font-medium text-strong">{entry.branch ?? (entry.is_detached ? t("Detached HEAD") : entry.label)}</span>

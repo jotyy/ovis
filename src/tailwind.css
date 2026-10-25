@@ -8,8 +8,52 @@
  * a literal colour never appears in a class (src/conventions.test.ts keeps literals out of the
  * stylesheets, and components/ui keeps them out of the class names).
  */
+/* the layer order up front: a utility must beat the base reset below, whatever the file order */
+@layer theme, base, utilities;
+
 @import "tailwindcss/theme" layer(theme);
 @import "tailwindcss/utilities" layer(utilities);
+
+/* No preflight, so the browser's own control chrome (a 2px outset border on every button, an
+   inset one on every field, its own font) would show through a shadcn component: every element
+   a ui component renders starts bare, in the base layer under the utilities that then dress it. */
+@layer base {
+  /* every button and field, not only the ui components': the legacy stylesheets dress theirs
+     explicitly and win over this layer, so only the browser's own chrome is removed */
+  button,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+  textarea,
+  select,
+  [data-slot="button"],
+  [data-slot="input"],
+  [data-slot="textarea"],
+  [data-slot="select-trigger"],
+  [data-slot="switch"],
+  [data-slot="checkbox"],
+  [data-slot="radio-group-item"],
+  [data-slot="tabs-trigger"],
+  [data-slot="toggle-group-item"],
+  [data-slot="dropdown-menu-trigger"],
+  [data-slot="popover-trigger"],
+  [data-slot="dialog-close"],
+  [data-slot="tooltip-trigger"] {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background-color: transparent;
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  [data-slot="input"]::-webkit-search-cancel-button,
+  [data-slot="input"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
 
 @custom-variant hover (@media (hover: hover) { &:hover });
 @custom-variant coarse (@media (pointer: coarse) { & });

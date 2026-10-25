@@ -1,3 +1,18 @@
+/* Tailwind runs without preflight here, so a shadcn Button keeps the browser's outset border and
+   1px block padding until something resets them: done for the composer and the terminal chrome
+   (the banners, the input line, the find bar, the masked input, the dictation pill, the folder
+   chips and the agent picker). ChatView.css does the same for the chat's surfaces */
+.composer [data-slot="button"],
+.composer-queue [data-slot="button"],
+.terminal-stack [data-slot="button"],
+.find-bar [data-slot="button"],
+.secret-input [data-slot="button"],
+.voice-pill [data-slot="button"],
+.new-session-folder-chips-frame [data-slot="button"] {
+  border: 0;
+  padding-block: 0;
+}
+
 /* The composer is a centered chat surface; PaneTerminal owns its placement above the mobile
    keyboard. Its horizontal padding equals .chat-view's, so the quick replies, the box and the
    transcript share one column edge. The column is --chat-w (Settings → Chat width). */

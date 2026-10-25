@@ -8,7 +8,8 @@ import { AgentMark } from "./AgentMark.tsx";
 import { cliProxyRequest } from "../lib/api.ts";
 import { UsageAccountDialog } from "./UsageAccountDialog.tsx";
 import { ConfirmDialog } from "./ConfirmDialog.tsx";
-import { Segmented, SettingsGroup, SettingsRow, Toggle } from "./SettingsControls.tsx";
+import { Segmented, SettingsCardRow, SettingsGroup, SettingsRow, Toggle } from "./SettingsControls.tsx";
+import { Badge, Button } from "./ui/index.ts";
 import "./UsageSettings.css";
 
 function ProviderAccounts({ id, providers }: { readonly id: UsageProviderId; readonly providers: readonly ProviderUsage[] }) {
@@ -22,29 +23,29 @@ function ProviderAccounts({ id, providers }: { readonly id: UsageProviderId; rea
     const keys = all.map((usage) => usage.id === id ? group[index++] ?? usage.key : usage.key);
     update({ usageOrder: [...keys, ...settings.usageOrder.filter((known) => !keys.includes(known))] });
   };
-  return ordered.length === 0 ? <p className="settings-item settings-hint">{t("No accounts signed in")}</p> : <ol aria-label={PROVIDER_NAME[id]}>
+  return ordered.length === 0 ? <p className="settings-item settings-hint">{t("No accounts signed in")}</p> : <ol className="usage-accounts-list" aria-label={PROVIDER_NAME[id]}>
     {ordered.map((usage, index) => {
       const name = usageName(usage);
       const hidden = settings.usageHidden.includes(usage.key);
       const status = usage.problem === null ? t("Signed in") : {
         expired: t("Expired"), failed: t("Failed"), rate_limited: t("Failed"), locked: t("Failed"),
       }[usage.problem];
-      return <li key={usage.key} className={`usage-accounts-row${hidden ? " is-hidden" : ""}`}>
-        <div className="usage-account-identity">
-          <span className="usage-accounts-account" title={usage.account ?? undefined}>{usage.account ?? PROVIDER_NAME[id]}</span>
-          <span className="usage-account-meta">
+      return <li key={usage.key}>
+        <SettingsCardRow className={`usage-accounts-row${hidden ? " is-hidden" : ""}`}
+          title={<span className="usage-accounts-account" title={usage.account ?? undefined}>{usage.account ?? PROVIDER_NAME[id]}</span>}
+          description={<span className="usage-account-meta">
             <span>{usage.key.startsWith(`${id}:cliproxy:`) ? t("Hub") : t("This PC")}{usage.plan ? ` · ${usage.plan}` : ""}</span>
-            <span className={`usage-account-status${usage.problem ? " has-problem" : ""}`}>{status}</span>
+            <Badge tone={usage.problem ? "blocked" : "done"} className="usage-account-status">{status}</Badge>
+          </span>}>
+          <span className="usage-accounts-actions">
+            <Button variant="ghost" size="icon" className="text-dim" aria-label={t("Move {name} up", { name })} disabled={index === 0} onClick={() => move(usage.key, -1)}><ChevronUp /></Button>
+            <Button variant="ghost" size="icon" className="text-dim" aria-label={t("Move {name} down", { name })} disabled={index === ordered.length - 1} onClick={() => move(usage.key, 1)}><ChevronDown /></Button>
+            <Button variant="ghost" size="icon" className={hidden ? "usage-accounts-visibility text-dim" : "usage-accounts-visibility"} role="switch" aria-checked={!hidden} aria-label={t("Show {name}", { name })}
+              onClick={() => update({ usageHidden: hidden ? settings.usageHidden.filter((key) => key !== usage.key) : [...settings.usageHidden, usage.key] })}>
+              {hidden ? <EyeOff /> : <Eye />}
+            </Button>
           </span>
-        </div>
-        <span className="usage-accounts-actions">
-          <button type="button" className="icon-button" aria-label={t("Move {name} up", { name })} disabled={index === 0} onClick={() => move(usage.key, -1)}><ChevronUp aria-hidden="true" /></button>
-          <button type="button" className="icon-button" aria-label={t("Move {name} down", { name })} disabled={index === ordered.length - 1} onClick={() => move(usage.key, 1)}><ChevronDown aria-hidden="true" /></button>
-          <button type="button" className="icon-button usage-accounts-visibility" role="switch" aria-checked={!hidden} aria-label={t("Show {name}", { name })}
-            onClick={() => update({ usageHidden: hidden ? settings.usageHidden.filter((key) => key !== usage.key) : [...settings.usageHidden, usage.key] })}>
-            {hidden ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-          </button>
-        </span>
+        </SettingsCardRow>
       </li>;
     })}
   </ol>;
@@ -87,28 +88,20 @@ export function UsageSettings({ onLocalLogin }: { readonly onLocalLogin: (paneId
     <div className="usage-accounts-intro">
       <div className="usage-accounts-header">
         <h3 className="usage-accounts-caption">{t("Accounts")} <span className="usage-account-count">{providers.length}</span></h3>
-        <button ref={addButton} className="btn" type="button" onClick={() => setDialog("add")}><Plus size={16} aria-hidden="true" />{t("Add account")}</button>
+        <Button ref={addButton} variant="accent" size="field" className="pr-3" onClick={() => setDialog("add")}><Plus />{t("Add account")}</Button>
       </div>
       {!settings.showUsage && <p className="settings-description settings-note">{t("Turn on plan limits to see accounts.")}</p>}
     </div>
-    {settings.showUsage && orderedIds.map((id) => <SettingsGroup key={id} className="usage-accounts usage-provider" section={`accounts-${id}`}>
-      <div className="settings-item usage-provider-heading">
-        <AgentMark agent={PROVIDER_MARK[id]} size={20} /><span>{PROVIDER_NAME[id]}</span>
-        <span className="usage-account-count">{providers.filter((usage) => usage.id === id).length}</span>
-      </div>
+    {settings.showUsage && orderedIds.map((id) => <SettingsGroup key={id} className="usage-accounts usage-provider" section={`accounts-${id}`} title={PROVIDER_NAME[id]} icon={<AgentMark agent={PROVIDER_MARK[id]} size={22} />} action={<span className="usage-account-count">{providers.filter((usage) => usage.id === id).length}</span>}>
       <ProviderAccounts id={id} providers={providers} />
     </SettingsGroup>)}
     {settings.showUsage && providers.length === 0 && <p className="settings-note settings-hint">{usage.loading ? t("Loading…") : t("No accounts yet.")}</p>}
     {hubError && <p className="settings-hint account-error" role="alert">{hubError}</p>}
-    {hub?.configured && <SettingsGroup className="usage-connection-card" section="usage-connection">
-      <div className="settings-item usage-connection">
-        <Network size={20} aria-hidden="true" />
-        <div className="usage-connection-info"><span className="settings-label">{t("Hub")}</span><span className="settings-hint" role="status">{hub.url} · {hub.ok ? t("Connected") : hub.problem ?? t("Check the hub connection")}</span></div>
-        <div className="usage-connection-actions">
-          <button className="btn btn-ghost" type="button" onClick={() => setDialog("hub")}>{t("Edit")}</button>
-          <button className="btn btn-ghost" type="button" onClick={() => setConfirmRemoval(true)}>{t("Remove")}</button>
-        </div>
-      </div>
+    {hub?.configured && <SettingsGroup className="usage-connection-card" section="usage-connection" title={t("Hub")} icon={<Network />}>
+      <SettingsRow label={hub.url} description={<span role="status">{hub.ok ? t("Connected") : hub.problem ?? t("Check the hub connection")}</span>} wide>
+        <Button variant="field" onClick={() => setDialog("hub")}>{t("Edit")}</Button>
+        <Button variant="ghost" onClick={() => setConfirmRemoval(true)}>{t("Remove")}</Button>
+      </SettingsRow>
     </SettingsGroup>}
     {confirmRemoval && <ConfirmDialog title={t("Remove hub?")}
       body={t("Its accounts disappear from this list. The hub itself is not changed.")}

@@ -158,25 +158,25 @@
   list-style: none;
 }
 
-/* what ended is one line until asked for: the list is for what runs now */
+/* what ended is one line until asked for (a ghost Button the row wide): the list is for what runs now */
 .bg-ended-toggle {
-  display: flex;
-  align-items: center;
+  justify-content: flex-start;
   gap: var(--space-1);
   width: 100%;
-  min-height: var(--row-h);
-  padding: var(--space-1) var(--space-2);
-  background: transparent;
-  border: 0;
+  min-height: var(--control-h);
+  padding-inline: var(--space-2);
   color: var(--text-dim);
   font-size: var(--fs-xs);
-  text-align: left;
-  cursor: pointer;
+  font-weight: var(--fw-regular);
 }
 
 .bg-task-list + .bg-ended-toggle {
   margin-top: var(--space-1);
-  border-top: var(--hairline) solid var(--border);
+  background-image: var(--divider);
+  background-repeat: no-repeat;
+  background-size: 100% var(--divider-h);
+  background-position: top;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
 }
 
 .bg-ended-toggle svg {
@@ -185,19 +185,12 @@
   flex: none;
 }
 
-.bg-ended-toggle:hover,
 .bg-ended-toggle[aria-expanded="true"] {
   color: var(--text);
 }
 
 .bg-ended-failed {
-  color: var(--status-blocked);
-}
-
-.bg-ended-failed::before {
-  content: "·";
-  margin-right: var(--space-1);
-  color: var(--text-dim);
+  margin-left: var(--space-1);
 }
 
 .bg-task {
@@ -232,12 +225,12 @@
 
 @media (hover: hover) {
   .bg-task-open:hover {
-    background: var(--bg-hover);
+    background: var(--fill-2);
   }
 }
 
 .bg-task-open[aria-expanded="true"] {
-  background: var(--bg-hover);
+  background: var(--fill-3);
 }
 
 /* a finger's row: the target's height, the text still at the row's top */
@@ -268,7 +261,7 @@
 }
 
 .bg-task.is-running .bg-task-icon,
-.bg-step.is-in_progress .bg-task-icon { color: var(--status-working); }
+.bg-step.is-in_progress .bg-task-icon { color: var(--status-working); animation: pulse var(--dur-pulse) var(--ease-pulse) infinite; }
 .bg-step.is-completed .bg-task-icon { color: var(--status-done); }
 .bg-step.is-pending .bg-task-title { color: var(--text-dim); }
 
@@ -279,7 +272,8 @@
   overflow-wrap: anywhere;
 }
 
-/* the plan heading says how far it got; the tasks heading sets the tasks apart below it */
+/* the plan heading says how far it got, and a Progress bar under it draws it; the tasks heading
+   sets the tasks apart below it on an etched line */
 .bg-plan-progress {
   margin-left: var(--space-2);
   font-weight: normal;
@@ -287,9 +281,17 @@
   text-transform: none;
 }
 
+.bg-plan-bar {
+  width: auto;
+  margin: 0 var(--space-2) var(--space-2);
+}
+
 .bg-tasks-heading {
   margin-top: var(--space-1);
-  border-top: var(--hairline) solid var(--border);
+  background-image: var(--divider);
+  background-repeat: no-repeat;
+  background-size: 100% var(--divider-h);
+  background-position: top;
 }
 .bg-task.is-completed .bg-task-icon { color: var(--status-done); }
 .bg-task.is-failed .bg-task-icon,
@@ -308,9 +310,18 @@
 }
 
 .bg-task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
   color: var(--text-dim);
   font-size: var(--fs-xs);
   overflow-wrap: anywhere;
+}
+
+/* the state word, a Badge, on the meta line */
+.bg-task-state {
+  margin-top: 2px;
 }
 
 /* a workflow: its steps wave by wave, a wave's steps side by side as chips that wrap */
@@ -343,28 +354,17 @@
   gap: var(--space-1);
 }
 
+/* a step of a wave is a Badge in its state's tone (ui/badge); a long label wraps inside it */
 .bg-node {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  max-width: 100%;
-  padding: 0 var(--space-2);
+  height: auto;
   min-height: var(--chip-h);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-pill);
-  color: var(--text-dim);
-  font-size: var(--fs-xs);
+  max-width: 100%;
+  white-space: normal;
   overflow-wrap: anywhere;
 }
 
 .bg-node svg { width: 12px; height: 12px; flex: none; }
-.bg-node.is-running { border-color: var(--status-working); color: var(--text); }
-.bg-node.is-running svg { color: var(--status-working); }
-.bg-node.is-completed svg { color: var(--status-done); }
-.bg-node.is-failed,
-.bg-node.is-blocked { border-color: var(--status-blocked); color: var(--text); }
-.bg-node.is-blocked svg { color: var(--status-blocked); }
-.bg-node.is-failed svg { color: var(--status-blocked); }
+.bg-node.is-running svg { animation: pulse var(--dur-pulse) var(--ease-pulse) infinite; }
 
 .bg-run-error {
   margin: var(--space-1) 0 0;

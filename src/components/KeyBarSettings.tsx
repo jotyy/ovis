@@ -7,8 +7,8 @@ import { DEFAULT_KEY_BAR_ITEMS, KEY_BAR_ITEMS_MAX, KEY_BAR_KEYS, keyBarInputSequ
 import { NO_STICKY_MODIFIERS, type StickyModifiers } from "../lib/keys.ts";
 import { useSettings } from "../lib/settings.ts";
 import { useT } from "../lib/i18n.ts";
-import { SettingsGroup, SettingsSelect } from "./SettingsControls.tsx";
-import { Button, CardRow, Field, Input, Kbd, ToggleGroup, ToggleGroupItem } from "./ui/index.ts";
+import { SettingsCardRow, SettingsGroup, SettingsSelect } from "./SettingsControls.tsx";
+import { Button, Field, Input, Kbd, ToggleGroup, ToggleGroupItem } from "./ui/index.ts";
 
 const MODIFIERS: readonly (keyof StickyModifiers)[] = ["ctrl", "alt", "shift"];
 const MODIFIER_CAPS: Record<keyof StickyModifiers, string> = { ctrl: "Ctrl", alt: "Alt", shift: "Shift" };
@@ -74,13 +74,13 @@ export function KeyBarSettings() {
             const name = keyBarItemLabel(item);
             return (
               <li key={keyBarItemId(item)}>
-                <CardRow className="key-bar-settings-row" title={<Kbd className="h-6 px-2 text-xs text-strong" title={name}>{name}</Kbd>} description={item.type === "modifier" ? t("Held modifier") : item.modifiers ? t("Saved combination") : undefined}>
+                <SettingsCardRow className="key-bar-settings-row" title={<Kbd className="h-6 px-2 text-xs text-strong" title={name}>{name}</Kbd>} description={item.type === "modifier" ? t("Held modifier") : item.modifiers ? t("Saved combination") : undefined}>
                   <span className="key-bar-settings-actions">
                     <Button variant="ghost" size="icon" className="text-dim" disabled={index === 0} aria-label={t("Move {name} up", { name })} title={t("Move {name} up", { name })} onClick={() => move(index, -1)}><ChevronUp /></Button>
                     <Button variant="ghost" size="icon" className="text-dim" disabled={index === items.length - 1} aria-label={t("Move {name} down", { name })} title={t("Move {name} down", { name })} onClick={() => move(index, 1)}><ChevronDown /></Button>
                     <Button variant="ghost" size="icon" className="text-dim" aria-label={t("Remove {name}", { name })} title={t("Remove {name}", { name })} onClick={() => remove(index)}><X /></Button>
                   </span>
-                </CardRow>
+                </SettingsCardRow>
               </li>
             );
           })}

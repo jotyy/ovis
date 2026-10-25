@@ -12,15 +12,21 @@ import "./SettingsControls.css";
  * The `settings-*` class names stay as hooks for the regression scripts and the pages other
  * components still write by hand (PushTestControls, PortalPanel).
  */
+/**
+ * CardRow with a title that is an element, not only a string: ui/card.tsx types the title as the
+ * div's own (a string). A row here wraps its words in the hook classes the regression scripts read.
+ */
+export const SettingsCardRow = CardRow as unknown as (props: Omit<ComponentProps<typeof CardRow>, "title"> & { title: ReactNode }) => ReactNode;
+
 /** `section`: the group's name in a link to it (`?settings=<page>&section=<name>`, lib/deepLink.ts) */
-export function SettingsGroup({ title, description, icon, action, note, className, section, children, ...rest }: Omit<ComponentProps<"section">, "title"> & { title?: string; description?: ReactNode; icon?: ReactNode; action?: ReactNode; note?: ReactNode; section?: string }) {
+export function SettingsGroup({ title, description, icon, action, note, className, section, children, ...rest }: Omit<ComponentProps<"section">, "title" | "children"> & { title?: string; description?: ReactNode; icon?: ReactNode; action?: ReactNode; note?: ReactNode; section?: string; children?: ReactNode }) {
   return (
     <Card className={cn("settings-section settings-card", className)} data-section={section} tabIndex={section ? -1 : undefined} {...rest}>
       {title !== undefined && <CardHeader icon={icon} title={title} description={description} action={action} />}
-      <CardContent className="gap-3 p-4">
+      {(children !== undefined || note !== undefined) && <CardContent className="gap-3 p-4">
         {note !== undefined && <p className="settings-description settings-note">{note}</p>}
         {children}
-      </CardContent>
+      </CardContent>}
     </Card>
   );
 }
@@ -31,9 +37,9 @@ export function SettingsGroup({ title, description, icon, action, note, classNam
  */
 export function SettingsRow({ label, description, htmlFor, wide = false, className, children }: { label: string; description?: ReactNode; htmlFor?: string; wide?: boolean; className?: string; children: ReactNode }) {
   return (
-    <CardRow className={cn("settings-row", wide && "is-wide", className)} htmlFor={htmlFor} title={<span className="settings-label">{label}</span>} description={description !== undefined ? <span className="settings-description">{description}</span> : undefined}>
+    <SettingsCardRow className={cn("settings-row", wide && "is-wide", className)} htmlFor={htmlFor} title={<span className="settings-label">{label}</span>} description={description !== undefined ? <span className="settings-description">{description}</span> : undefined}>
       {children}
-    </CardRow>
+    </SettingsCardRow>
   );
 }
 

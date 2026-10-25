@@ -9,6 +9,8 @@ import { deviceLabel } from "../lib/phone.ts";
 import type { HealthAuth, PairedDevice, PairingCode } from "../../shared/protocol.ts";
 import { QrCode } from "./QrCode.tsx";
 import { currentLocale, t as tt, useT } from "../lib/i18n.ts";
+import { Alert, AlertDescription, Badge, Button, Input } from "./ui/index.ts";
+import { SettingsCardRow } from "./SettingsControls.tsx";
 
 const POLL_MS = 3000;
 
@@ -131,10 +133,12 @@ export function DevicesPanel({ pairUrl, auth, onPaired }: DevicesPanelProps) {
 
   return (
     <div className="devices-panel">
-      {auth?.via !== undefined && <p className={auth.via === "open" ? "settings-hint devices-open" : "settings-description"}>{t(VIA[auth.via])}</p>}
+      {auth?.via !== undefined && (auth.via === "open"
+        ? <Alert tone="danger" className="devices-open"><AlertDescription className="text-danger-text">{t(VIA[auth.via])}</AlertDescription></Alert>
+        : <p className="settings-description">{t(VIA[auth.via])}</p>)}
       {auth?.via === "open" && <>
         <p className="settings-hint">{t("Pairing a device turns on the app's own sign-in, on top of any proxy sign-in: other browsers then need pairing or the access token. If your proxy already signs people in, set OVIS_TOKEN and have the proxy send it instead.")}</p>
-        <div className="phone-actions"><button type="button" className="btn btn-primary" onClick={() => void pairSelf()} disabled={pairingSelf}>{t("Pair this device now")}</button></div>
+        <div className="phone-actions"><Button variant="accent" onClick={() => void pairSelf()} disabled={pairingSelf}>{t("Pair this device now")}</Button></div>
       </>}
       <details className="settings-details">
         <summary>{t("A paired device gets in on its own until you revoke it here.")}<span className="settings-details-toggle">{t("Details")}</span></summary>
@@ -145,27 +149,23 @@ export function DevicesPanel({ pairUrl, auth, onPaired }: DevicesPanelProps) {
       ) : (
         <ul className="devices-list">
           {devices.map((d) => (
-            <li key={d.id} className="devices-row">
+            <li key={d.id}>
               {renaming?.id === d.id ? (
-                <form className="devices-rename" onSubmit={(e) => { e.preventDefault(); void rename(); }}>
-                  <input className="input" value={renaming.label} maxLength={48} autoFocus aria-label={t("Device name")} onChange={(e) => setRenaming({ id: d.id, label: e.target.value })} />
-                  <button type="submit" className="icon-button" aria-label={t("Save name")}><Check /></button>
-                  <button type="button" className="icon-button" aria-label={t("Cancel")} onClick={() => setRenaming(null)}><X /></button>
+                <form className="devices-rename devices-row" onSubmit={(e) => { e.preventDefault(); void rename(); }}>
+                  <Input value={renaming.label} maxLength={48} autoFocus aria-label={t("Device name")} onChange={(e) => setRenaming({ id: d.id, label: e.target.value })} />
+                  <Button type="submit" variant="ghost" size="icon" aria-label={t("Save name")}><Check /></Button>
+                  <Button variant="ghost" size="icon" className="text-dim" aria-label={t("Cancel")} onClick={() => setRenaming(null)}><X /></Button>
                 </form>
               ) : (
-                <>
-                  <div className="devices-name">
-                    <span className="settings-label">{d.label}{d.current && <span className="devices-current">{t("this device")}</span>}</span>
-                    <span className="settings-description">{t("Last seen {when}", { when: lastSeen(d.last_seen_at) })}</span>
-                  </div>
+                <SettingsCardRow className="devices-row" title={<span className="devices-name"><span className="settings-label">{d.label}</span>{d.current && <Badge tone="accent" className="devices-current">{t("this device")}</Badge>}</span>} description={<span className="settings-description">{t("Last seen {when}", { when: lastSeen(d.last_seen_at) })}</span>}>
                   <div className="devices-actions">
-                    <button type="button" className="icon-button" aria-label={t("Rename {name}", { name: d.label })} onClick={() => setRenaming({ id: d.id, label: d.label })}><Pencil /></button>
+                    <Button variant="ghost" size="icon" className="text-dim" aria-label={t("Rename {name}", { name: d.label })} onClick={() => setRenaming({ id: d.id, label: d.label })}><Pencil /></Button>
                     {/* one element across both steps, so focus stays on it when it asks to confirm */}
-                    <button type="button" className={confirming === d.id ? "btn btn-danger" : "icon-button"} aria-label={confirming === d.id ? undefined : t("Revoke {name}", { name: d.label })} onClick={() => void revoke(d.id)}>
-                      <Trash2 aria-hidden="true" />{confirming === d.id && t("Revoke?")}
-                    </button>
+                    <Button variant={confirming === d.id ? "danger" : "ghost"} size={confirming === d.id ? "field" : "icon"} className={confirming === d.id ? undefined : "text-dim"} aria-label={confirming === d.id ? undefined : t("Revoke {name}", { name: d.label })} onClick={() => void revoke(d.id)}>
+                      <Trash2 />{confirming === d.id && t("Revoke?")}
+                    </Button>
                   </div>
-                </>
+                </SettingsCardRow>
               )}
             </li>
           ))}
@@ -173,7 +173,7 @@ export function DevicesPanel({ pairUrl, auth, onPaired }: DevicesPanelProps) {
       )}
       {justPaired !== null && <p className="settings-hint" role="status">{t("Paired: {name}.", { name: justPaired })}</p>}
       {code === null ? (
-        <div className="phone-actions"><button type="button" className="btn btn-primary" onClick={() => void pair()} disabled={unavailable}>{t("Pair a device")}</button></div>
+        <div className="phone-actions"><Button variant="accent" onClick={() => void pair()} disabled={unavailable}>{t("Pair a device")}</Button></div>
       ) : (
         <div className="devices-pairing" role="status">
           {qrValue !== null && <QrCode value={qrValue} label={t("QR code that pairs a phone with code {code}", { code: code.code })} />}
@@ -187,17 +187,17 @@ export function DevicesPanel({ pairUrl, auth, onPaired }: DevicesPanelProps) {
               <p className="devices-link">
                 <span className="settings-description">{t("Or send this link to it:")}</span>
                 <a ref={linkRef} href={qrValue}>{qrValue}</a>
-                <button type="button" className="btn btn-ghost" onClick={() => void copyText(qrValue, linkRef.current).then((ok) => { if (ok) { setLinkCopied(true); window.setTimeout(() => setLinkCopied(false), 1600); } })}>{t(linkCopied ? "Copied" : "Copy")}</button>
+                <Button variant="ghost" size="xs" onClick={() => void copyText(qrValue, linkRef.current).then((ok) => { if (ok) { setLinkCopied(true); window.setTimeout(() => setLinkCopied(false), 1600); } })}>{t(linkCopied ? "Copied" : "Copy")}</Button>
               </p>
             )}
             <div className="phone-actions">
-              <button type="button" className="btn" onClick={() => void pair()}><RefreshCw aria-hidden="true" />{t("New code")}</button>
-              <button type="button" className="btn btn-ghost" onClick={() => setCode(null)}>{t("Done")}</button>
+              <Button variant="field" size="field" onClick={() => void pair()}><RefreshCw />{t("New code")}</Button>
+              <Button variant="ghost" onClick={() => setCode(null)}>{t("Done")}</Button>
             </div>
           </div>
         </div>
       )}
-      {error !== null && <p className="settings-hint" role="alert">{error}</p>}
+      {error !== null && <p className="settings-hint account-error" role="alert">{error}</p>}
     </div>
   );
 }

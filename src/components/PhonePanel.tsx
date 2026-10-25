@@ -7,6 +7,7 @@ import { copyText } from "../lib/clipboard.ts";
 import type { PhonePlan } from "../lib/phone.ts";
 import { QrCode } from "./QrCode.tsx";
 import { useT } from "../lib/i18n.ts";
+import { Button } from "./ui/index.ts";
 
 const README_PHONE = "https://github.com/devswha/ovis#on-your-phone";
 const README_SAFETY = "https://github.com/devswha/ovis#access-and-safety";
@@ -26,7 +27,7 @@ export function PhonePanel({ plan, loading, onRefresh }: PhonePanelProps) {
 
 function Plan({ plan, loading, onRefresh }: PhonePanelProps) {
   const t = useT();
-  const checkAgain = <button type="button" className="btn" onClick={onRefresh} disabled={loading}><RefreshCw aria-hidden="true" />{t("Check again")}</button>;
+  const checkAgain = <Button variant="field" size="field" onClick={onRefresh} disabled={loading}><RefreshCw />{t("Check again")}</Button>;
   switch (plan.kind) {
     case "here":
     case "served":
@@ -96,7 +97,7 @@ function Command({ command }: { command: string }) {
   return (
     <div className="phone-command">
       <code ref={codeRef}>{command}</code>
-      <button type="button" className="btn" onClick={() => void copy()}>{t(copied ? "Copied" : "Copy")}</button>
+      <Button variant="field" onClick={() => void copy()}>{t(copied ? "Copied" : "Copy")}</Button>
     </div>
   );
 }

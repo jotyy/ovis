@@ -252,7 +252,7 @@ export function DirectoryBrowser({ start, onPick, onOpenFile, onFolder }: Direct
             {listing === null && <li className={cn(note, "dir-browser-note")} role="status">{t("Loading…")}</li>}
             {directories?.map((name) => (
               <li key={name}>
-                <button type="button" className={cn(row, "dir-browser-item [&>svg]:text-accent")} disabled={loading} onClick={() => void open(childPath(path, name), hidden, false)}>
+                <button type="button" data-slot="button" className={cn(row, "dir-browser-item [&>svg]:text-accent")} disabled={loading} onClick={() => void open(childPath(path, name), hidden, false)}>
                   <FileGlyph name={name} kind="directory" />
                   <span className="min-w-0 flex-1 truncate">{name}</span>
                   <ChevronRight aria-hidden="true" className="ml-auto size-4! text-dim opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 coarse:opacity-100" />
@@ -261,7 +261,7 @@ export function DirectoryBrowser({ start, onPick, onOpenFile, onFolder }: Direct
             ))}
             {onOpenFile !== undefined && listing?.files?.map((file) => (
               <li key={`file:${file.name}`}>
-                <button type="button" className={cn(row, "dir-browser-item is-file [&>svg]:text-dim")} disabled={loading} onClick={() => onOpenFile(childPath(path, file.name))}>
+                <button type="button" data-slot="button" className={cn(row, "dir-browser-item is-file [&>svg]:text-dim")} disabled={loading} onClick={() => onOpenFile(childPath(path, file.name))}>
                   <FileGlyph name={file.name} />
                   <span className="min-w-0 flex-1 truncate">{file.name}</span>
                   <span className="dir-browser-size ml-auto shrink-0 text-2xs text-dim tabular-nums">{formatBytes(file.size)}</span>

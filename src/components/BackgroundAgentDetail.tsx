@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { CircleDot, RefreshCw, X } from "../lib/icons.ts";
+import { CircleDot, RefreshCw } from "../lib/icons.ts";
+import { Alert, Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle, IconButton, TooltipProvider } from "./ui/index.ts";
 
 import "./BackgroundAgentDetail.css";
 
@@ -9,7 +9,8 @@ import { useT } from "../lib/i18n.ts";
 import { useMachineApi } from "../lib/machineContext.tsx";
 import { usePhoneSheetBack } from "../lib/sheetHistory.ts";
 import { useSheetSwipe } from "../lib/sheets.ts";
-import { nativeModalOver, useFocusTrap } from "../lib/useFocusTrap.ts";
+import { useMediaQuery } from "../lib/useMediaQuery.ts";
+import { nativeModalOver } from "../lib/useFocusTrap.ts";
 import type { OmoTask, PaneBackgroundAgentDetail } from "../../shared/protocol.ts";
 
 /** why the detail was not read: each has a note of its own, and none shows an empty view as if it were the agent's */
@@ -32,8 +33,8 @@ const failureOf = (error: unknown): Failure => {
  * dispatched with, then its prose and the tools it called. A task of another kind has no transcript
  * to open and the sheet says so, as it does for a PC whose bridge is from before the route; nothing
  * is shown as the agent's that the PC did not read. Read when opened and on Refresh, never polled.
- * A dialog over the task list: Escape, the scrim and a phone's Back close it, and the focus goes
- * back to the row that opened it.
+ * A Dialog (ui/dialog; a sheet on a phone) over the task list: Escape, the scrim and a phone's Back
+ * close it, and the focus goes back to the row that opened it.
  */
 export function BackgroundAgentDetail({ paneId, task, onClose }: { paneId: string; task: OmoTask; onClose: () => void }) {
   const t = useT();
@@ -72,19 +73,10 @@ export function BackgroundAgentDetail({ paneId, task, onClose }: { paneId: strin
     return () => { generation.current += 1; };
   }, [supported, load]);
 
-  const surface = useFocusTrap<HTMLElement>(true);
+  const surface = useRef<HTMLDivElement>(null);
   useSheetSwipe(surface, onClose);
   usePhoneSheetBack(onClose);
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent): void => {
-      if (event.key !== "Escape" || nativeModalOver(surface.current)) return;
-      event.stopPropagation();
-      event.preventDefault();
-      onClose();
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [onClose]);
+  const phone = useMediaQuery("(max-width: 640px)");
 
   // what happened, then what to do about it: each on a line of its own
   const notes: Record<Failure, [string, string]> = {
@@ -96,51 +88,56 @@ export function BackgroundAgentDetail({ paneId, task, onClose }: { paneId: strin
     unavailable: [t("The agent's files can't be read right now"), t("Try Refresh in a moment.")],
     error: [t("Couldn't read the agent's details"), t("Try Refresh. If it keeps failing, restart Ovis on the PC.")],
   };
-  const note = (lines: string[], className = "bg-agent-note", role?: "status") => <p className={className} role={role}>{lines.map((line) => <span key={line} className="bg-agent-note-line">{line}</span>)}</p>;
+  const lines = (items: string[]) => items.map((line) => <span key={line} className="bg-agent-note-line">{line}</span>);
+  const note = (items: string[], className = "bg-agent-note", role?: "status") => <p className={className} role={role}>{lines(items)}</p>;
   const meta = [detail?.agent ?? task.category, task.model].filter((part) => part !== null).join(" · ");
   const empty = detail !== null && detail.prompt === null && detail.events.length === 0;
-  return createPortal(
-    <div className="modal-scrim" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <section ref={surface} className="modal bg-agent-detail" role="dialog" aria-modal="true" aria-labelledby={`${id}-title`} aria-busy={loading} tabIndex={-1}>
-        <header className="modal-header bg-agent-detail-header">
-          <CircleDot className="bg-agent-detail-icon" aria-hidden="true" />
-          <div className="bg-agent-detail-heading">
-            <h2 className="modal-title bg-agent-detail-title" id={`${id}-title`}>{detail?.title ?? task.title}</h2>
-            {meta.length > 0 && <p className="bg-agent-detail-meta">{meta}</p>}
-          </div>
-          {supported && <button type="button" className="icon-button" aria-label={t("Refresh")} title={t("Refresh")} disabled={loading} onClick={load}><RefreshCw aria-hidden="true" /></button>}
-          <button type="button" className="icon-button" aria-label={t("Close details")} title={t("Close details")} onClick={onClose}><X aria-hidden="true" /></button>
-        </header>
-        <div className="modal-body bg-agent-detail-body" role="region" aria-labelledby={`${id}-title`} tabIndex={0}>
-          {loading && detail === null && note([t("Loading…")])}
-          {failure !== null && note(notes[failure], "bg-agent-note is-failure", "status")}
-          {failure !== null && detail !== null && note([t("Couldn't refresh: this is what it last read")])}
-          {empty && note([t("Nothing recorded yet"), t("The agent may still be starting. Try Refresh in a moment.")])}
-          {detail?.truncated === true && note([t("The agent wrote more than this view reads."), t("The middle part is left out.")])}
-          {detail?.incomplete === true && note([t("Some records couldn't be read and are left out")])}
-          {detail?.prompt !== null && detail?.prompt !== undefined && <section className="bg-agent-section">
-            <h3 className="bg-agent-heading">{t("Prompt")}</h3>
-            <p className="bg-agent-text">{detail.prompt}</p>
-          </section>}
-          {detail !== null && detail.events.length > 0 && <section className="bg-agent-section">
-            <h3 className="bg-agent-heading">{t("Work so far")}</h3>
-            <ol className="bg-agent-events">
-              {detail.events.map((event, index) => {
-                if (event.kind === "text") return <li key={index} className="bg-agent-event is-text"><p className="bg-agent-text">{event.text}</p></li>;
-                // the server writes a tool event as its name, a space, then the arguments as JSON
-                const space = event.text.indexOf(" ");
-                const name = space === -1 ? event.text : event.text.slice(0, space);
-                const args = space === -1 ? "" : event.text.slice(space + 1);
-                return <li key={index} className="bg-agent-event is-tool">
-                  <span className="bg-agent-tool-name">{name}</span>
-                  {args.length > 0 && args !== "{}" && <code className="bg-agent-tool-args">{args}</code>}
-                </li>;
-              })}
-            </ol>
-          </section>}
-        </div>
-      </section>
-    </div>,
-    document.body,
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <TooltipProvider>
+        <DialogContent ref={surface} variant={phone ? "sheet" : "modal"} className="bg-agent-detail" aria-busy={loading} aria-labelledby={`${id}-title`} closeLabel={t("Close details")}
+          // a native dialog over this one (a file viewer's) takes its own Escape
+          onEscapeKeyDown={(event) => { if (nativeModalOver(surface.current)) event.preventDefault(); }}>
+          <DialogHeader className="bg-agent-detail-header">
+            <CircleDot className="bg-agent-detail-icon" aria-hidden="true" />
+            <div className="bg-agent-detail-heading">
+              <DialogTitle className="bg-agent-detail-title" id={`${id}-title`}>{detail?.title ?? task.title}</DialogTitle>
+              {meta.length > 0 && <p className="bg-agent-detail-meta">{meta}</p>}
+            </div>
+            {supported && <IconButton className="bg-agent-detail-refresh" label={t("Refresh")} disabled={loading} onClick={load}><RefreshCw aria-hidden="true" /></IconButton>}
+          </DialogHeader>
+          {/* the body is the one scroll region: a tab stop of its own, so the keyboard reaches a long transcript */}
+          <DialogBody className="bg-agent-detail-body" role="region" aria-labelledby={`${id}-title`} tabIndex={0}>
+            {loading && detail === null && note([t("Loading…")])}
+            {/* a failure reads as a sentence, never as an empty transcript: the words carry it, and the alert's tone says it first */}
+            {failure !== null && <Alert tone="danger" className="bg-agent-note is-failure" role="status">{lines(notes[failure])}</Alert>}
+            {failure !== null && detail !== null && note([t("Couldn't refresh: this is what it last read")])}
+            {empty && note([t("Nothing recorded yet"), t("The agent may still be starting. Try Refresh in a moment.")])}
+            {detail?.truncated === true && note([t("The agent wrote more than this view reads."), t("The middle part is left out.")])}
+            {detail?.incomplete === true && note([t("Some records couldn't be read and are left out")])}
+            {detail?.prompt !== null && detail?.prompt !== undefined && <section className="bg-agent-section">
+              <h3 className="bg-agent-heading">{t("Prompt")}</h3>
+              <p className="bg-agent-text">{detail.prompt}</p>
+            </section>}
+            {detail !== null && detail.events.length > 0 && <section className="bg-agent-section">
+              <h3 className="bg-agent-heading">{t("Work so far")}</h3>
+              <ol className="bg-agent-events">
+                {detail.events.map((event, index) => {
+                  if (event.kind === "text") return <li key={index} className="bg-agent-event is-text"><p className="bg-agent-text">{event.text}</p></li>;
+                  // the server writes a tool event as its name, a space, then the arguments as JSON
+                  const space = event.text.indexOf(" ");
+                  const name = space === -1 ? event.text : event.text.slice(0, space);
+                  const args = space === -1 ? "" : event.text.slice(space + 1);
+                  return <li key={index} className="bg-agent-event is-tool">
+                    <span className="bg-agent-tool-name">{name}</span>
+                    {args.length > 0 && args !== "{}" && <code className="bg-agent-tool-args">{args}</code>}
+                  </li>;
+                })}
+              </ol>
+            </section>}
+          </DialogBody>
+        </DialogContent>
+      </TooltipProvider>
+    </Dialog>
   );
 }

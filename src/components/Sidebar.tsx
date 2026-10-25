@@ -12,6 +12,10 @@ import { indicatorGlyph, knownStatus, rollupStatus, STATUS_WORD, type KnownStatu
 import { AgentMark } from "./AgentMark.tsx";
 import { WorkspaceFavicon } from "./WorkspaceFavicon.tsx";
 import { ConfirmDialog } from "./ConfirmDialog.tsx";
+import { Badge } from "./ui/badge.tsx";
+import { Button } from "./ui/button.tsx";
+import { Input } from "./ui/input.tsx";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip.tsx";
 import { RowMenu, type RowMenuItem } from "./RowMenu.tsx";
 import { WorktreeDialog, type WorktreeDialogMode } from "./WorktreeDialog.tsx";
 import { focusWorkspaceListToggle } from "../lib/focus.ts";

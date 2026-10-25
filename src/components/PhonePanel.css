@@ -29,11 +29,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
-  background: var(--bg-input);
-  border: var(--hairline) solid var(--border);
-  border-left: var(--rail-w) solid var(--accent);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  background: var(--well);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sunken), inset var(--rail-w) 0 0 var(--accent);
 }
 
 .phone-command code {

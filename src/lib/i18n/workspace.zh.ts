@@ -27,6 +27,8 @@ export const WORKSPACE_ZH: Record<string, string> = {
   "The new tab's Claude store couldn't be confirmed, so the tab was closed.": "无法确认新标签页的 Claude 存储，因此已关闭该标签页。",
   "Resuming took too long, so it was stopped. A tab it started will be closed. Try again.": "继续耗时过长，已停止。已启动的标签页将被关闭。请重试。",
   "This session is still being resumed. Try again in a moment.": "此会话仍在继续中。请稍后重试。",
+  "Filter sessions": "筛选会话",
+  "No session matches the filter.": "没有符合筛选条件的会话。",
   "Resume unavailable": "无法继续",
   "This PC can't start this session in the store it was listed from": "这台电脑无法在列出该会话的存储中启动它",
   "Checkout missing": "检出缺失",

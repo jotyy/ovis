@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type FocusEvent, type KeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { RefreshCw } from "../lib/icons.ts";
 
 import "./UsageMeters.css";
@@ -8,6 +8,10 @@ import { useT, type Translate } from "../lib/i18n.ts";
 import { useSettings, type UsageCount, type UsageGlance } from "../lib/settings.ts";
 import { formatPercent, formatResetIn, glanceWindow, HIGH_PERCENT, meterPercent, meterText, orderProviders, PROVIDER_MARK, PROVIDER_NAME, usageName, useUsage, windowLabel } from "../lib/usage.ts";
 import { AgentMark } from "./AgentMark.tsx";
+import { Badge } from "./ui/badge.tsx";
+import { Button } from "./ui/button.tsx";
+import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "./ui/popover.tsx";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip.tsx";
 
 /** chips the strip holds when its width cannot be measured (before layout, or a test without one) */
 const FALLBACK_CHIPS = 4;
@@ -52,11 +56,11 @@ function Provider({ usage, now, count }: { usage: ProviderUsage; now: number; co
   const name = PROVIDER_NAME[usage.id];
   const problem = problemText(t, usage);
   return (
-    <section className="usage-provider" aria-label={usageName(usage)}>
+    <section className="usage-provider divider-t" aria-label={usageName(usage)}>
       <header className="usage-provider-head">
         <AgentMark agent={PROVIDER_MARK[usage.id]} size={16} />
         <span className="usage-provider-name">{name}</span>
-        {usage.plan && <span className="usage-plan">{usage.plan}</span>}
+        {usage.plan && <Badge tone="neutral" className="usage-plan">{usage.plan}</Badge>}
         {usage.account && <span className="usage-account" title={usage.account}>{usage.account}</span>}
       </header>
       {problem && <p className={`usage-note${isError(usage) ? " is-problem" : ""}`}>{problem}</p>}
@@ -104,24 +108,10 @@ export function UsageMeters() {
     const tick = setInterval(() => setNow(Date.now()), 30_000);
     return () => clearInterval(tick);
   }, [settings.showUsage, open]);
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: PointerEvent): void => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [open]);
-
-  // Escape and focus belong to the meters only while focus is in them: other dialogs keep theirs
+  // The popover (Radix) closes itself on Escape, a click outside or the focus leaving, and hands the
+  // focus back to the strip. The Escape stops here, through the portal: other dialogs keep theirs.
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
-    if (event.key !== "Escape" || !open) return;
-    event.stopPropagation();
-    setOpen(false);
-    stripRef.current?.focus();
-  };
-  const onBlur = (event: FocusEvent<HTMLDivElement>): void => {
-    if (event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+    if (event.key === "Escape" && open) event.stopPropagation();
   };
 
   // as many chips as the row has room for, judged by the widest chip drawn so far: it only grows,
@@ -163,32 +153,42 @@ export function UsageMeters() {
     return `${usageName(usage)} ${window ? meterText(window, count) : "—"}${high ? ` (${windowLabel(high)} ${meterText(high, count)})` : ""}`;
   }).join(", ");
 
+  // the popover hangs over the whole meters row (the anchor), opened by the strip (the trigger)
   return (
-    <div className="usage" ref={rootRef} onKeyDown={onKeyDown} onBlur={onBlur}>
-      <button
-        ref={stripRef}
-        type="button"
-        className="usage-strip"
-        aria-expanded={open}
-        aria-label={`${t("Subscription usage")}: ${summary}`}
-        title={summary}
-        onClick={() => setOpen(!open)}
-      >
-        {chips.map((usage) => <Chip key={usage.key} usage={usage} count={count} glance={settings.usageGlance} />)}
-        {folded > 0 && <span className="usage-more">+{folded}</span>}
-      </button>
-      {open && (
-        <div className="usage-popover" role="dialog" aria-label={t("Subscription usage")}>
-          <header className="usage-popover-head">
-            <span>{t("Subscription usage")}</span>
-            {/* busy, not disabled: a disabled button drops focus, and Escape with it */}
-            <button type="button" className="icon-button" aria-label={t("Refresh")} title={t("Refresh")} aria-busy={loading} onClick={() => { if (!loading) refresh(); }}>
-              <RefreshCw aria-hidden="true" className={loading ? "is-spinning" : undefined} />
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverAnchor asChild>
+        <div className="usage" ref={rootRef} onKeyDown={onKeyDown}>
+          <PopoverTrigger asChild>
+            <button
+              ref={stripRef}
+              type="button"
+              className="usage-strip"
+              aria-expanded={open}
+              aria-label={`${t("Subscription usage")}: ${summary}`}
+              title={summary}
+            >
+              {chips.map((usage) => <Chip key={usage.key} usage={usage} count={count} glance={settings.usageGlance} />)}
+              {folded > 0 && <span className="usage-more">+{folded}</span>}
             </button>
-          </header>
-          {shown.map((usage) => <Provider key={usage.key} usage={usage} now={now} count={count} />)}
+          </PopoverTrigger>
+          <PopoverContent side="top" align="end" collisionPadding={8} className="usage-popover" aria-label={t("Subscription usage")}
+            onCloseAutoFocus={(event) => { event.preventDefault(); stripRef.current?.focus(); }}>
+            <header className="usage-popover-head">
+              <span>{t("Subscription usage")}</span>
+              {/* busy, not disabled: a disabled button drops focus, and Escape with it */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon-sm" className="usage-refresh" aria-label={t("Refresh")} title={t("Refresh")} aria-busy={loading} onClick={() => { if (!loading) refresh(); }}>
+                    <RefreshCw aria-hidden="true" className={loading ? "is-spinning" : undefined} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("Refresh")}</TooltipContent>
+              </Tooltip>
+            </header>
+            {shown.map((usage) => <Provider key={usage.key} usage={usage} now={now} count={count} />)}
+          </PopoverContent>
         </div>
-      )}
-    </div>
+      </PopoverAnchor>
+    </Popover>
   );
 }

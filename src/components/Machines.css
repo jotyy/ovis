@@ -255,63 +255,14 @@
   opacity: 1;
 }
 
-.machine-dialog {
-  width: min(560px, calc(100vw - 24px));
-  max-height: calc(100dvh - 24px);
-  padding: 0;
-  border: var(--hairline) solid var(--border-strong);
-  color: var(--text);
-}
-
-/* The only native <dialog> in the app, so it has no .modal-scrim ancestor and the phone
-   bottom-sheet rules in styles.css never reach it: it stays a centred card on a phone. A dialog
-   opened with showModal() lives in the top layer and is centred by the UA's `margin: auto`,
-   clamped by its `max-width`/`max-height` and stretched by `inset: 0`, so the sheet form needs
-   all three reset, not just a border radius. */
-@media (max-width: 640px) {
-  .machine-dialog {
-    width: 100%;
-    max-width: none;
-    max-height: 92%;
-    margin: auto auto 0;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-}
-
-/* the phone's keyboard is up (lib/viewport.ts): as the sheet does, this one ends where the
-   keyboard begins instead of sitting behind it — the same reason styles.css drops the sheet's
-   bottom padding here */
-@media (max-width: 640px) {
-  [data-keyboard] .machine-dialog {
-    inset-block-start: 0;
-    inset-block-end: auto;
-    height: var(--app-height, 100%);
-    margin-block: auto 0;
-    padding-bottom: 0;
-  }
-}
-
-.machine-dialog::backdrop { background: var(--scrim); }
-
-.machine-dialog .modal-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.machine-dialog form,
+/* Add PC and a PC's setup (MachineDialog.tsx) are a shadcn Dialog; its forms stack their fields */
+.machine-form,
 .machine-advanced {
   display: grid;
   gap: var(--space-3);
 }
 
-.machine-advanced { padding-top: var(--space-3); }
-
-.machine-dialog summary {
-  padding: var(--space-2) 0;
-  cursor: pointer;
-}
+.machine-advanced { padding-top: var(--space-2); }
 
 .machine-challenge pre {
   font-size: var(--fs-sm);
@@ -362,8 +313,9 @@
 
 .machine-progress {
   padding: var(--space-3);
-  background: var(--bg-hover);
-  border-radius: var(--radius-md);
+  background: var(--fill-1);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 0 1px var(--ink-1), inset 0 0 0 1px var(--edge-light);
   overflow-wrap: anywhere;
 }
 
@@ -373,9 +325,9 @@
   margin: var(--space-2) 0 0;
   padding: var(--space-2);
   overflow: auto;
-  background: var(--bg-input);
-  border: var(--hairline) solid var(--border);
+  background: var(--well);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sunken);
   color: var(--text);
   font-family: var(--font-mono);
   font-size: var(--fs-xs);
@@ -396,8 +348,8 @@
 
 .machine-error {
   margin: 0;
-  color: var(--status-blocked);
-  font-size: var(--fs-xs);
+  color: var(--danger-text);
+  font-size: var(--fs-sm);
   overflow-wrap: anywhere;
 }
 

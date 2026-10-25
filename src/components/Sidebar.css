@@ -4,8 +4,10 @@
      buttons above the list. Aliases of existing tokens only. */
   --side-gutter: var(--space-3);
   --side-box: var(--control-h);
-  --side-row: var(--control-h);
-  --side-row-2: calc(var(--control-h) + var(--space-3));
+  /* a row is a field's height (the editor's nav rows), its corner between a control's and a card's */
+  --side-row: var(--input-h);
+  --side-row-2: calc(var(--input-h) + var(--space-2));
+  --side-radius: calc(var(--radius-md) + var(--hairline) * 2);
   --side-action: var(--space-6);
   /* hover is the fill the colour of light every surface takes under the pointer (styles.css) */
   --side-hover: var(--fill-2);
@@ -30,7 +32,7 @@
   padding: 0 var(--side-gutter);
 }
 
-/* a section head (Agents): a small-caps caption in the dim text, as the pinned card's is, never a rule */
+/* a section head (Agents): a label in the dim text, 12/550 as every label of the surface, never a rule */
 .sidebar-section-label {
   display: flex;
   align-items: center;
@@ -42,13 +44,11 @@
   background: transparent;
   color: var(--text-dim);
   font: inherit;
-  font-size: var(--fs-2xs);
-  font-weight: var(--fw-semibold);
-  letter-spacing: var(--tracking-caps);
-  border-radius: var(--radius-md);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  border-radius: var(--side-radius);
   line-height: var(--lh-tight);
   text-align: left;
-  text-transform: uppercase;
 }
 
 button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-offset) * -1); }
@@ -138,43 +138,16 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
 }
 
 
+/* the clear (a ghost icon Button) is centred in the field's trailing cell */
 .sidebar-filter-clear {
   position: absolute;
-  top: var(--space-2);
-  right: var(--side-gutter);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--side-row);
-  height: var(--side-row);
-  padding: 0;
-  background: transparent;
-  border: var(--hairline) solid transparent;
-  border-radius: var(--radius-md);
-  background-clip: padding-box;
+  top: calc(var(--space-2) + (var(--side-row) - var(--space-6)) / 2);
+  right: calc(var(--side-gutter) + (var(--side-row) - var(--space-6)) / 2);
   color: var(--text-dim);
-  cursor: pointer;
 }
 
-.sidebar-filter-clear svg {
-  width: var(--icon-size);
-  height: var(--icon-size);
-}
-
-/* a pointer's hover and press, as the app's icon buttons draw them (styles.css .icon-button) */
 @media (hover: hover) {
-  .sidebar-filter-clear:hover { background: var(--bg-hover); color: var(--text); }
-}
-
-.sidebar-filter-clear:active {
-  background: var(--bg-elevated);
-  border-color: var(--accent);
-  color: var(--text-strong);
-}
-
-.sidebar-filter-clear:focus-visible {
-  outline: var(--ring);
-  outline-offset: calc(var(--ring-offset) * -1);
+  .sidebar-filter-clear:hover { color: var(--text-strong); }
 }
 
 /* a row the filter keeps for the selection, or as the head of a match, not as a match: its words dim,
@@ -250,40 +223,51 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   list-style: none;
 }
 
-/* Pinned rows, agents and workspaces alike, stand first as a group of rows under a small-caps
-   caption in the title column, as a section head is; no edge, no fill, so the rows read as any
-   other. The list carries the name for screen readers, so the caption is hidden from them. The
-   rest follow a breath below. */
+/* Pinned rows, agents and workspaces alike, stand first as a group of rows under a caption in
+   the title column, set as a section head is; no edge, no fill, so the rows read as any other.
+   The list carries the name for screen readers, so the caption is hidden from them. The rest
+   follow a breath below. */
 .sidebar-pinned + ul { margin-top: var(--space-3); }
 
 .sidebar-pinned-label {
   margin: 0;
   padding: var(--space-1) 0 var(--space-1) var(--side-box);
   color: var(--text-dim);
-  font-size: var(--fs-2xs);
-  font-weight: var(--fw-semibold);
-  letter-spacing: var(--tracking-caps);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
   line-height: var(--lh-tight);
-  text-transform: uppercase;
   pointer-events: none;
 }
 
 .workspace {
   display: flex;
   flex-direction: column;
-  border-radius: var(--radius-md);
+  border-radius: var(--side-radius);
   transition: opacity var(--dur-fast) var(--ease-out);
-}
-
-.pane-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
 .pane-item {
   position: relative;
-  border-radius: var(--radius-md);
+  border-radius: var(--side-radius);
+}
+
+/* The chosen row is told twice, as the editor's nav tells it: the raised face (below), and a
+   short bar of light at the sidebar's own edge, centred on the row, glowing a little into the
+   panel. Drawn by the row's list item, whose header already lends its pseudo-elements to the
+   worktree tree lines; it sits in the list's gutter, which the scroll container does not clip. */
+.workspace-group.is-selected::before,
+.agent-item.is-selected::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(-1 * var(--side-gutter));
+  width: calc(var(--hairline) * 2);
+  height: var(--space-5);
+  transform: translateY(-50%);
+  border-radius: 0 var(--space-1) var(--space-1) 0;
+  background: var(--text-strong);
+  box-shadow: calc(var(--hairline) * 2) 0 var(--space-2) var(--hairline) color-mix(in srgb, var(--text-strong) 25%, transparent);
+  pointer-events: none;
 }
 
 /* the trailing padding keeps the status cell, which the selector draws at the row's right edge */
@@ -295,7 +279,7 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   min-height: var(--side-row);
   margin-block: calc(var(--side-row-gap) / 2);
   padding-right: var(--side-box);
-  border-radius: var(--radius-md);
+  border-radius: var(--side-radius);
   transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
 
@@ -308,7 +292,7 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   padding: 0;
   background: transparent;
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--side-radius);
   color: var(--text);
   text-align: left;
   cursor: pointer;
@@ -357,7 +341,7 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   width: var(--side-box);
   align-self: stretch;
   height: auto;
-  border-radius: var(--radius-md);
+  border-radius: var(--side-radius);
   color: var(--text);
 }
 
@@ -409,6 +393,7 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   background: var(--side-selected);
   background-image: var(--side-selected-face);
   box-shadow: var(--side-selected-edge);
+  color: var(--text-strong);
 }
 
 /* keyboard focus draws the ring on the whole row and no fill */
@@ -519,8 +504,7 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
 }
 
 /* the field's text stays where the title was, and its edge clear of the mark */
-.workspace-rename-input,
-.pane-rename-input {
+.workspace-rename-input {
   flex: 1 1 auto;
   min-width: 0;
   height: calc(var(--control-h) - var(--space-2));
@@ -690,7 +674,7 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   animation: sidebar-breathe var(--dur-breathe) steps(6) infinite;
 }
 
-.sidebar-status.badge-restore-error { color: var(--status-blocked); }
+.sidebar-status[data-status="restore-error"] { color: var(--status-blocked); }
 
 @keyframes sidebar-breathe {
   0%,
@@ -728,7 +712,7 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   overflow-wrap: anywhere;
 }
 
-/* the footer's actions are rows on the same grid */
+/* the footer's actions are rows on the same grid: ghost Buttons (ui/button.tsx) set on it */
 .sidebar-footer {
   position: relative;
   display: flex;
@@ -742,13 +726,13 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   margin-top: auto;
 }
 
+/* Install app: a row of the list, its glyph in the leading cell and its words in the rows' type */
 .sidebar-footer-action {
   justify-content: flex-start;
   gap: 0;
-  width: 100%;
+  height: var(--side-row);
   padding: 0 var(--space-2) 0 0;
-  border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--side-radius);
   font-size: var(--fs-md);
   font-weight: var(--fw-regular);
 }
@@ -761,10 +745,6 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   color: var(--text-dim);
 }
 
-@media (hover: hover) {
-  .sidebar-footer-action:hover:not(:disabled) { background: var(--side-hover); }
-}
-
 /* the gear first, the plan meters filling the rest */
 .sidebar-footer-row {
   display: flex;
@@ -773,14 +753,16 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   min-width: 0;
 }
 
-/* Settings is its gear alone, so the plan meters beside it get the rest of the row */
+/* Settings is its gear alone, a square the leading cell's width, so the plan meters beside it get
+   the rest of the row */
 .sidebar-footer-row > .sidebar-footer-settings {
   flex: 0 0 auto;
+  justify-content: center;
   width: var(--side-box);
   padding: 0;
 }
 
-.sidebar-footer-settings svg { margin-inline: auto; }
+.sidebar-footer-settings svg { margin-inline: 0; }
 
 .sidebar-install-help {
   margin: 0;
@@ -820,17 +802,11 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   }
 }
 
-/* a finger presses a row as an iPhone list row is pressed: it fills, it does not dim (styles.css) */
+/* a finger presses a row as an iPhone list row is pressed: it fills, it does not dim (styles.css);
+   the footer's Buttons fill on their own */
 @media (hover: none) and (pointer: coarse) {
-  .workspace-header:has(> .pane-select:active),
-  .sidebar-footer-action:active {
-    background: var(--side-hover);
-  }
-
-  .pane-select:active,
-  .sidebar-footer-action:active {
-    opacity: 1;
-  }
+  .workspace-header:has(> .pane-select:active) { background: var(--side-hover); }
+  .pane-select:active { opacity: 1; }
 }
 
 /* a pane's plan: its glyph in the working color until every step is done */
