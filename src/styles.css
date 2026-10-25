@@ -102,7 +102,11 @@
   --syntax-meta: #b49dd6;
 
   /* type (comfortable density; compact overrides below) */
-  --font-ui: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  /* Inter Variable is the interface face (fonts/inter/inter.css); Pretendard, cut to Inter's Latin
+     metrics, follows it for Hangul, then the system faces for the CJK scripts Inter has no glyphs for */
+  --font-ui: "Inter Variable", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  /* the display cut, for the few large figures (a pairing code, a plan meter's number): Inter Display at 500 */
+  --font-display: "Inter Display", var(--font-ui);
   /* "JetBrains Mono Web" is the bundled face (fonts/fonts.css): after the icon font, which draws
      the private use area alone, and never in the terminal's own stack (lib/fontFamily.ts) */
   --font-mono: "Symbols Nerd Font Mono", "JetBrains Mono Web", ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "D2Coding", monospace;
@@ -122,11 +126,13 @@
   --fs-pairing: calc(32px * var(--ui-scale));
   --fs-input: 16px; /* the one size iOS Safari does not zoom on focus */
   --lh-tight: 1.2;
-  --lh-base: 1.5;
+  --lh-base: 1.45;
   --lh-code: 1.6;
   --lh-prose: 1.65;
-  --fw-regular: 400;
-  --fw-medium: 500;
+  /* Inter at 500 for everything read: a dark surface thins a face, and 500 reads as 400 does on
+     paper. Labels, titles and the chosen item step to 550; 600 and 700 are for emphasis alone */
+  --fw-regular: 500;
+  --fw-medium: 550;
   --fw-semibold: 600;
   --fw-bold: 700;
   --tracking-tight: -0.01em;
@@ -147,18 +153,20 @@
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
-  --radius-2xl: 24px;
+  --radius-2xl: 20px;
   --radius-pill: 999px;
 
   /* sizes */
   --header-h: 52px;
   /* the header from 769px, in either density: one line beside the sidebar's own top row */
-  --header-h-wide: 46px;
-  --sidebar-w: 320px;
-  --control-h: 34px;
+  --header-h-wide: 52px;
+  --sidebar-w: 288px;
+  --control-h: 32px;
+  /* a text field is a step taller than a button, so its text has air above and below */
+  --input-h: 36px;
   /* what the segmented track takes from --control-h above and below an option: its padding and
      hairline, both sides. An option is --control-h less this, and its touch expander grows from that */
-  --segmented-inset: 6px;
+  --segmented-inset: 2px;
   --touch-target: 44px;
   /* the smallest hit area a mouse gets: a glyph button under --control-h keeps its look and reaches
      it through an invisible ::before expander (ChatView.css, Composer.css), never by growing */
@@ -194,15 +202,20 @@
   --ring-offset: 2px;
 
   /* motion: only real state changes move (drawer, dialogs, working/reconnecting pulse) */
-  --dur-fast: 120ms;
-  --dur-base: 180ms;
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+  /* a layout change (the sidebar's width, a panel sliding in) */
+  --dur-slow: 300ms;
   --dur-pulse: 1600ms;
   /* one turn of a stepped spinner: it draws its steps and nothing else, so the step count is
      the frame rate and this only sets how fast it looks */
   --dur-spin: 1600ms;
   /* one breath of the sidebar's working dot: held full, dimmed, held, back (Sidebar.css) */
   --dur-breathe: 2000ms;
-  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  /* GSAP's power3 curves: out for what appears, in-out for what changes state under the pointer */
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-smooth: cubic-bezier(0.7, 0, 0, 1);
   --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
   /* the pulse jumps between its two looks: a smooth one has the browser draw a new frame at
      every display refresh for as long as an agent works (60+ a second), which stutters a
@@ -231,6 +244,48 @@
   --droplet-mark-bg: rgba(255, 255, 255, 0.1);
   --droplet-ring: rgba(255, 255, 255, 0.1);
   --droplet-shadow: rgba(0, 0, 0, 0.35);
+
+  /* ---- surface language (DESIGN.md §7), the same over every palette ----
+     Depth is layers over whatever surface a palette gives, never a drawn line: a fill the colour
+     of light on the surface, a ring of shadow just outside it, and one pixel of light along its
+     top edge inside it. White and black at an alpha, so every dark palette reads alike; the
+     light block below turns the fills to ink and the shadows down. */
+  --fill-1: rgba(255, 255, 255, 0.02); /* a field at rest */
+  --fill-2: rgba(255, 255, 255, 0.04); /* hover; a raised control's face */
+  --fill-3: rgba(255, 255, 255, 0.06); /* pressed; the selected item */
+  --fill-4: rgba(255, 255, 255, 0.1); /* a mark's disc, a track */
+  --ink-1: rgba(0, 0, 0, 0.12); /* the ring around a control */
+  --ink-2: rgba(0, 0, 0, 0.24); /* the ring around a popover; a well */
+  --ink-3: rgba(0, 0, 0, 0.32); /* a divider's dark line; a dialog's ring */
+  --edge-light: rgba(255, 255, 255, 0.04); /* the light along a top edge */
+  --edge-light-strong: rgba(255, 255, 255, 0.12); /* the same on the chosen tab */
+  /* a well's floor: the segmented track and other recesses sit a step below their surface */
+  --well: color-mix(in srgb, var(--bg) 78%, black);
+  --edge-highlight: inset 0 1px 0 var(--edge-light), inset 0 0 0 1px var(--edge-light);
+  --shadow-surface: 0 2px 4px -1px rgba(0, 0, 0, 0.08), 0 1px 1px -1px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--ink-1), var(--edge-highlight);
+  --shadow-raised: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.16), var(--edge-highlight);
+  --shadow-sunken: 0 0 0 1px var(--ink-2), 0 1px 1px rgba(0, 0, 0, 0.05), inset 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-tab: 0 2px 4px -1px rgba(0, 0, 0, 0.5), inset 0 1px 0 var(--edge-light-strong), inset 0 -1px 0.5px rgba(0, 0, 0, 0.02), inset 0 0 1px rgba(0, 0, 0, 0.05);
+  --shadow-chip: 0 1px 2px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.01), inset 0 0 0 1px var(--edge-light);
+  --shadow-panel: 0 2px 4px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--ink-1), var(--edge-highlight);
+  --shadow-popover: 0 24px 48px rgba(0, 0, 0, 0.24), 0 10px 18px rgba(0, 0, 0, 0.16), 0 5px 8px rgba(0, 0, 0, 0.16), 0 2px 4px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--ink-2), var(--edge-highlight);
+  --shadow-dialog: 0 32px 64px rgba(0, 0, 0, 0.44), 0 12px 24px rgba(0, 0, 0, 0.24), 0 0 0 1px var(--ink-3), var(--edge-highlight);
+  --shadow-tooltip: 0 8px 16px rgba(0, 0, 0, 0.24), 0 0 0 1px var(--ink-3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-primary: 0 2px 6px color-mix(in srgb, var(--primary) 22%, transparent), 0 4px 4px color-mix(in srgb, var(--primary) 25%, transparent), 0 0 0 1px var(--ink-1), var(--edge-highlight);
+  /* a focused field: the accent inside its edge and a soft halo of it outside (the ring stays for controls without a box) */
+  --shadow-focus: 0 0 0 1px var(--bg-panel), 0 0 0 4px var(--accent-tint), inset 0 0 0 1px var(--accent);
+  /* text set into a raised surface: a hairline of shadow above it */
+  --text-shadow-engraved: 0 -1px 0.25px rgba(0, 0, 0, 0.32);
+  /* a divider is etched, not drawn: a dark line and the light that falls past it, two pixels tall,
+     a background on the element it ends (background-size 100% var(--divider-h)) */
+  --divider: linear-gradient(to bottom, var(--ink-3) 0, var(--ink-3) 1px, var(--edge-light) 1px);
+  --divider-h: 2px;
+  /* a sheen down a chip; a raised face lit from above (the active tab, the chosen nav row) */
+  --surface-sheen: linear-gradient(178deg, rgba(255, 255, 255, 0.02) 4%, rgba(255, 255, 255, 0.014) 28%, rgba(255, 255, 255, 0.008) 49%, rgba(255, 255, 255, 0) 75%);
+  --raised-face: linear-gradient(to top, var(--bg-elevated) 0%, var(--bg-elevated) 50%, color-mix(in srgb, var(--bg-elevated) 86%, white) 100%);
+  --primary-sheen: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.1) 100%);
+  --scrim-blur: blur(3px);
+  --popover-blur: blur(12px);
 }
 
 [data-theme="light"] {
@@ -297,6 +352,31 @@
   --syntax-type: #155a72;
   --syntax-variable: #7a5418;
   --syntax-meta: #5d4791;
+  --fill-1: rgba(0, 0, 0, 0.02);
+  --fill-2: rgba(0, 0, 0, 0.04);
+  --fill-3: rgba(0, 0, 0, 0.06);
+  --fill-4: rgba(0, 0, 0, 0.08);
+  --ink-1: rgba(0, 0, 0, 0.08);
+  --ink-2: rgba(0, 0, 0, 0.12);
+  --ink-3: rgba(0, 0, 0, 0.16);
+  --edge-light: rgba(255, 255, 255, 0.6);
+  --edge-light-strong: rgba(255, 255, 255, 0.9);
+  --well: color-mix(in srgb, var(--bg) 94%, black);
+  --shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--ink-1), var(--edge-highlight);
+  --shadow-raised: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--ink-1), var(--edge-highlight);
+  --shadow-sunken: 0 0 0 1px var(--ink-1), inset 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-tab: 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 0 1px var(--ink-1), inset 0 1px 0 var(--edge-light-strong);
+  --shadow-chip: 0 1px 1px rgba(0, 0, 0, 0.04), 0 0 0 1px var(--ink-1), inset 0 1px 0 var(--edge-light);
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--ink-1);
+  --shadow-popover: 0 16px 32px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--ink-2);
+  --shadow-dialog: 0 24px 48px rgba(0, 0, 0, 0.18), 0 8px 16px rgba(0, 0, 0, 0.1), 0 0 0 1px var(--ink-2);
+  --shadow-tooltip: 0 8px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--ink-2);
+  --shadow-primary: 0 2px 6px color-mix(in srgb, var(--primary) 22%, transparent), 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--ink-1);
+  --text-shadow-engraved: none;
+  --divider: linear-gradient(to bottom, var(--ink-2) 0, var(--ink-2) 1px, var(--edge-light) 1px);
+  --surface-sheen: linear-gradient(178deg, rgba(255, 255, 255, 0.7) 4%, rgba(255, 255, 255, 0) 75%);
+  --raised-face: linear-gradient(to bottom, color-mix(in srgb, var(--bg-elevated) 40%, white) 0%, var(--bg-elevated) 100%);
+  --primary-sheen: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.12) 100%);
 }
 
 /* Charcoal in light: plain paper with ink for the accent and the cursor */
@@ -506,6 +586,122 @@
   --shadow-drawer: 0 0 40px rgba(0, 0, 0, 0.6);
   --shadow-pop: 0 16px 48px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border);
   --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* Studio, the default: the look of Kargul Studio's workflow editor
+   (github.com/kargulstudio/workflow-editor, MIT; no code is taken, the colors are). Near-black
+   neutrals with no tint, the chrome a step darker than the content it frames, violet for the
+   accent and the primary action, and the four agent states in the editor's tag colours (cyan,
+   red, green) with amber for a notice. Edges are the surface language above, so the hairline
+   tokens sit close to their surfaces and show only where a rule is drawn. */
+[data-theme="dark"][data-palette="studio"] {
+  --bg: #111114;
+  --bg-panel: #0c0c0f;
+  --bg-elevated: #17171c;
+  --bg-hover: #1f1f25;
+  --bg-input: #15151a;
+  --border: #1c1c21;
+  --border-strong: #27272e;
+  --text: #d6d6db;
+  --text-dim: #8a8a93;
+  --text-strong: #fcfdff;
+  --accent: #9b7dff;
+  --accent-tint: rgba(155, 125, 255, 0.14);
+  --primary: #5016ff;
+  --primary-hover: #5b25ff;
+  --primary-text: #ffffff;
+  --primary-tint: rgba(80, 22, 255, 0.18);
+  --status-idle: #8a8a93;
+  --status-working: #59ebf0;
+  --status-blocked: #f05959;
+  --status-done: #59f089;
+  --status-working-tint: rgba(89, 235, 240, 0.14);
+  --status-blocked-tint: rgba(240, 89, 89, 0.14);
+  --status-done-tint: rgba(89, 240, 137, 0.14);
+  --danger-tint: rgba(227, 62, 49, 0.12);
+  --notice: #ffb575;
+  --danger-text: #ffb3ad;
+  --scrim: rgba(0, 0, 0, 0.55);
+  --term-bg: #111114;
+  --term-fg: #d6d6db;
+  --term-cursor: #9b7dff;
+  --term-selection: #2d2a4d;
+  --line-number: var(--text-dim);
+  --syntax-function: #ab8fff;
+  --syntax-keyword: #f07c8c;
+  --syntax-string: #86e3a2;
+  --syntax-number: #ffb575;
+  --syntax-type: #59ebf0;
+  --syntax-variable: #e6e6eb;
+  --syntax-meta: #c58cff;
+  --bubble-border: transparent;
+  --shadow-drawer: 0 0 40px rgba(0, 0, 0, 0.6);
+  --shadow-pop: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.32);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Studio in light: the editor's own light tokens (shadcn's neutral scale), white content on a
+   grey chrome, the same violet; the states darkened until each reads AA on white */
+[data-theme="light"][data-palette="studio"] {
+  --bg: #ffffff;
+  --bg-panel: #f5f5f6;
+  --bg-elevated: #fafafa;
+  --bg-hover: #ebebed;
+  --bg-input: #ffffff;
+  --border: #e4e4e7;
+  --border-strong: #d1d1d6;
+  --text: #27272a;
+  --text-dim: #6b6b74;
+  --text-strong: #0a0a0b;
+  --accent: #5016ff;
+  --accent-tint: rgba(80, 22, 255, 0.1);
+  --primary: #5016ff;
+  --primary-hover: #4812e6;
+  --primary-text: #ffffff;
+  --primary-tint: rgba(80, 22, 255, 0.12);
+  --status-idle: #6b6b74;
+  --status-working: #0e7490;
+  --status-blocked: #d13438;
+  --status-done: #1a7f3c;
+  --status-working-tint: rgba(14, 116, 144, 0.12);
+  --status-blocked-tint: rgba(209, 52, 56, 0.12);
+  --status-done-tint: rgba(26, 127, 60, 0.12);
+  --danger-tint: rgba(209, 52, 56, 0.1);
+  --notice: #a85a00;
+  --danger-text: #9b1c1c;
+  --scrim: rgba(10, 10, 11, 0.4);
+  --term-bg: #ffffff;
+  --term-fg: #27272a;
+  --term-cursor: #5016ff;
+  --term-selection: #e6ddff;
+  --term-black: #27272a;
+  --term-red: #b3261e;
+  --term-green: #22743a;
+  --term-yellow: #8a5300;
+  --term-blue: #0b6e8a;
+  --term-magenta: #6f42c1;
+  --term-cyan: #0f6f74;
+  --term-white: #6b6b74;
+  --term-bright-black: #4e4b47;
+  --term-bright-red: #c92d24;
+  --term-bright-green: #277d3f;
+  --term-bright-yellow: #9f6100;
+  --term-bright-blue: #1a7391;
+  --term-bright-magenta: #7f52d1;
+  --term-bright-cyan: #13767e;
+  --term-bright-white: #0a0a0b;
+  --line-number: var(--text-dim);
+  --syntax-function: #5b21b6;
+  --syntax-keyword: #c0392b;
+  --syntax-string: #1f7a3f;
+  --syntax-number: #a85a00;
+  --syntax-type: #0e7490;
+  --syntax-variable: #27272a;
+  --syntax-meta: #7c3aed;
+  --bubble-border: var(--border);
+  --shadow-drawer: 0 0 40px rgba(10, 10, 11, 0.18);
+  --shadow-pop: 0 16px 48px rgba(10, 10, 11, 0.12), 0 0 0 1px var(--border);
+  --shadow-card: 0 4px 16px rgba(10, 10, 11, 0.06);
 }
 
 /* Catppuccin (catppuccin.com/palette): Mocha in dark, Latte in light, mapped by the
@@ -1451,10 +1647,11 @@
   --fs-xl: calc(17px * var(--ui-scale));
   --fs-display: calc(21px * var(--ui-scale));
   --fs-pairing: calc(26px * var(--ui-scale));
-  --lh-base: 1.45;
+  --lh-base: 1.4;
   --header-h: 46px;
-  --sidebar-w: 300px;
-  --control-h: 32px;
+  --sidebar-w: 272px;
+  --control-h: 30px;
+  --input-h: 34px;
   --row-h: 44px;
   --chip-h: 18px;
   --avatar-size: 26px;
@@ -1496,7 +1693,22 @@ body {
   font-size: var(--fs-md);
   font-weight: var(--fw-regular);
   line-height: var(--lh-base);
+  letter-spacing: var(--tracking-tight);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Scrollbars are thin and quiet, a strip of light that darkens under the pointer: the editor's
+   own, on every scroll container of the app */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--fill-4) transparent;
+}
+
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+  ::-webkit-scrollbar-thumb { border: 2px solid transparent; border-radius: var(--radius-pill); background-color: var(--fill-4); background-clip: padding-box; }
 }
 
 /* ---------- line breaking ---------- */
@@ -1794,10 +2006,11 @@ button {
   flex: 0 0 auto;
   margin: 0;
   font-size: var(--fs-lg);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-medium);
   letter-spacing: var(--tracking-tight);
   line-height: var(--lh-tight);
   color: var(--text-strong);
+  text-shadow: var(--text-shadow-engraved);
   white-space: nowrap;
 }
 
@@ -1839,9 +2052,10 @@ button {
      the crumb beside it or gone */
   min-height: var(--context-line);
   font-size: var(--fs-md);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-medium);
   color: var(--text-strong);
   letter-spacing: var(--tracking-tight);
+  text-shadow: var(--text-shadow-engraved);
 }
 
 /* the header note's sentence (.header-note-text, App.tsx) is cut like the title it stands in for; its
@@ -1922,9 +2136,12 @@ button {
   height: var(--chip-h);
   white-space: nowrap;
   padding: 0 var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  background: var(--fill-2);
+  background-image: var(--surface-sheen);
+  box-shadow: var(--shadow-chip);
   color: var(--text-dim);
+  font-weight: var(--fw-medium);
 }
 
 /* live is the state nobody needs told: the chip stays in the document as a status a screen
@@ -2013,6 +2230,49 @@ button {
   white-space: pre-wrap;
 }
 
+/* From 769px the pane is a card: the chrome (header, sidebar) is the darker panel surface and
+   the pane sits inset in it with rounded corners and a ring, the way the editor frames its
+   canvas. The card's gutter is the sidebar's own margin too, so the two never touch. */
+@media (min-width: 769px) {
+  .app-body {
+    gap: var(--space-2);
+    padding: 0 var(--space-2) var(--space-2) 0;
+    background: var(--bg-panel);
+  }
+
+  .app.sidebar-collapsed .app-body {
+    padding-left: var(--space-2);
+  }
+
+  .sidebar {
+    border-right: 0;
+  }
+
+  .pane-column {
+    position: relative;
+    border-radius: var(--radius-lg);
+    background: var(--bg);
+    box-shadow: 0 0 0 1px var(--ink-3), 0 0 2px var(--ink-2);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* the light along the card's top edge, over everything in it and under the pointer's reach */
+  .pane-column::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-popover);
+    border-radius: inherit;
+    box-shadow: inset 0 1px 0 var(--edge-light), inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    pointer-events: none;
+  }
+
+  .app-header {
+    border-bottom-color: transparent;
+  }
+}
+
 /* From 769px the header is two zones. Over the sidebar, the sidebar's own top row (its toggle
    and the palette) on the sidebar's surface, the seam between sidebar and pane running to the
    top of the window. Over the pane, the pane's surface: under the chat lens no bar and no rule,
@@ -2021,12 +2281,12 @@ button {
    --bg-panel bar and its rule: the installed app's theme-color matches it. */
 @media (min-width: 769px) {
   .app-header.is-zoned {
-    background: var(--term-bg);
+    background: var(--bg-panel);
   }
 
   .app-header.is-zoned.is-chat {
     border-bottom-color: transparent;
-    background: var(--bg);
+    background: var(--bg-panel);
   }
 
   .app:not(.sidebar-collapsed) .app-header.is-zoned {
@@ -2043,7 +2303,6 @@ button {
     justify-content: space-between;
     margin: calc(-1 * env(safe-area-inset-top, 0px)) var(--space-2) calc(-1 * var(--hairline)) 0;
     padding: env(safe-area-inset-top, 0px) var(--space-3) 0 calc(var(--space-3) + env(safe-area-inset-left, 0px));
-    border-right: var(--hairline) solid var(--border);
     background: var(--bg-panel);
   }
 }
@@ -2073,6 +2332,15 @@ button {
 
 /* ---------- primitives ---------- */
 
+/* Every glyph is a Tabler icon (lib/icons.ts): one stroke for the whole set, a touch lighter than
+   the package's own, so an 18px glyph sits beside 14px Inter at the same weight. A filled face
+   has no stroke and keeps its shape. */
+.tabler-icon {
+  flex: 0 0 auto;
+  stroke-width: 1.75;
+}
+
+/* a glyph button: no box at rest, a fill of light under the pointer, pressed a step more */
 .icon-button {
   display: inline-flex;
   align-items: center;
@@ -2082,23 +2350,25 @@ button {
   height: var(--control-h);
   padding: 0;
   background: transparent;
-  border: var(--hairline) solid transparent;
+  border: 0;
   border-radius: var(--radius-md);
-  color: var(--text);
+  color: var(--text-dim);
   cursor: pointer;
   transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-in-out),
+    color var(--dur-fast) var(--ease-in-out),
+    box-shadow var(--dur-fast) var(--ease-in-out);
 }
 
+/* outlined: a field-like face, the way the editor's toolbar buttons sit */
 .icon-button.is-outlined {
-  border-color: var(--border);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-surface);
+  color: var(--text);
 }
 
-/* a disabled control must not read as the strongest control on screen: 0.7 keeps the dark
-   accent glyph at 4.93:1 on --bg-panel (disabled controls are exempt from the AA minimum) */
 .icon-button:disabled {
-  opacity: 0.7;
+  opacity: 0.5;
   cursor: default;
 }
 
@@ -2110,14 +2380,14 @@ button {
 /* hover only where a pointer can hover: after a tap a touch screen keeps :hover on the button */
 @media (hover: hover) {
   .icon-button:hover:not(:disabled) {
-    background: var(--bg-hover);
+    background: var(--fill-2);
+    color: var(--text-strong);
   }
 }
 
 .icon-button:active,
 .icon-button[aria-expanded="true"] {
-  background: var(--bg-elevated);
-  border-color: var(--accent);
+  background: var(--fill-3);
   color: var(--text-strong);
 }
 
@@ -2126,7 +2396,9 @@ button {
   display: none;
 }
 
-/* text buttons: .btn (neutral), .btn-primary, .btn-danger, .btn-ghost */
+/* text buttons: .btn (a field, the editor's toolbar button), .btn-primary (the accent, lit from
+   above), .btn-danger, .btn-ghost. A button is a surface: a ring of shadow outside, a pixel of
+   light inside its top edge, its words set into it. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -2135,76 +2407,111 @@ button {
   height: var(--control-h);
   padding: 0 var(--space-3);
   background: var(--bg-elevated);
-  border: var(--hairline) solid var(--border);
+  border: 0;
   border-radius: var(--radius-md);
-  color: var(--text-strong);
+  box-shadow: var(--shadow-surface);
+  color: var(--text);
   font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
+  text-shadow: var(--text-shadow-engraved);
   white-space: nowrap;
   text-decoration: none; /* a link styled as a button (Reconnect, Star on GitHub) */
   cursor: pointer;
   transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    opacity var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-in-out),
+    color var(--dur-fast) var(--ease-in-out),
+    box-shadow var(--dur-fast) var(--ease-in-out),
+    opacity var(--dur-fast) var(--ease-in-out);
 }
 
 .btn svg {
   width: 16px;
   height: 16px;
+  color: var(--text-dim);
 }
 
 @media (hover: hover) {
   .btn:hover:not(:disabled) {
     background: var(--bg-hover);
-    border-color: var(--border-strong);
+    color: var(--text-strong);
+  }
+
+  .btn:hover:not(:disabled) svg {
+    color: var(--text);
   }
 }
 
+.btn:active:not(:disabled) {
+  background: color-mix(in srgb, var(--bg-elevated) 80%, var(--bg));
+}
+
 .btn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: default;
 }
 
 .btn-primary {
   background: var(--primary);
-  border-color: var(--primary);
+  background-image: var(--primary-sheen);
+  box-shadow: var(--shadow-primary);
   color: var(--primary-text);
+}
+
+.btn-primary svg {
+  color: inherit;
 }
 
 @media (hover: hover) {
   .btn-primary:hover:not(:disabled) {
-    background: var(--primary-hover);
-    border-color: var(--primary-hover);
+    background-color: var(--primary-hover);
+    color: var(--primary-text);
   }
+
+  .btn-primary:hover:not(:disabled) svg {
+    color: inherit;
+  }
+}
+
+.btn-primary:active:not(:disabled) {
+  background-color: color-mix(in srgb, var(--primary) 88%, black);
 }
 
 .btn-danger {
   background: var(--danger-tint);
-  border-color: var(--status-blocked);
+  box-shadow: 0 0 0 1px var(--status-blocked);
   color: var(--danger-text);
+  text-shadow: none;
 }
 
-/* hovered, a danger button keeps its tint and border: the neutral hover fill above would read as
-   the risk going away. Its border draws twice as thick instead, so the pointer still shows */
+.btn-danger svg {
+  color: inherit;
+}
+
+/* hovered, a danger button keeps its tint and ring: the neutral hover fill above would read as
+   the risk going away. Its ring draws twice as thick instead, so the pointer still shows */
 @media (hover: hover) {
   .btn-danger:hover:not(:disabled) {
     background: var(--danger-tint);
-    border-color: var(--status-blocked);
-    box-shadow: inset 0 0 0 var(--hairline) var(--status-blocked);
+    color: var(--danger-text);
+    box-shadow: 0 0 0 1px var(--status-blocked), inset 0 0 0 1px var(--status-blocked);
   }
 }
 
 .btn-ghost {
   background: transparent;
-  border-color: transparent;
+  box-shadow: none;
   color: var(--text);
+  text-shadow: none;
 }
 
 @media (hover: hover) {
   .btn-ghost:hover:not(:disabled) {
-    border-color: transparent;
+    background: var(--fill-2);
   }
+}
+
+.btn-ghost:active:not(:disabled) {
+  background: var(--fill-3);
 }
 
 /* fingers: the header controls grow to the touch target; the header still fits them */
@@ -2234,23 +2541,30 @@ button {
   }
 }
 
+/* a tag: a small raised chip with a sheen down it, its words at the label weight */
 .pill {
   display: inline-flex;
   align-items: center;
+  gap: var(--space-1);
   height: var(--chip-h);
   padding: 0 var(--space-2);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-pill);
-  font-family: var(--font-mono);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--fill-2);
+  background-image: var(--surface-sheen);
+  box-shadow: var(--shadow-chip);
+  font-family: var(--font-ui);
   font-size: var(--fs-2xs);
-  color: var(--text-dim);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  text-shadow: var(--text-shadow-engraved);
   white-space: nowrap;
 }
 
 .pill-offline {
   color: var(--status-blocked);
-  border-color: var(--status-blocked);
-  background: var(--danger-tint);
+  background: var(--status-blocked-tint);
 }
 
 /* a pill that carries a sentence (the header's link and copy notes): the interface face, for the
@@ -2265,35 +2579,38 @@ button {
   padding: 0 var(--space-1);
   margin-left: var(--space-1);
   color: var(--accent);
-  border-color: var(--accent);
   background: var(--accent-tint);
   text-transform: uppercase;
 }
 
-/* status badge: tinted background + text, the state readable as a word */
+/* status badge: tinted ground, the state's colour for its word, a glow of the colour under the word */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
   height: var(--chip-h);
   padding: 0 var(--space-2);
-  border: var(--hairline) solid transparent;
-  border-radius: var(--radius-sm);
+  border: 0;
+  border-radius: var(--radius-md);
+  background-image: var(--surface-sheen);
+  box-shadow: var(--shadow-chip);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-semibold);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
+  text-shadow: var(--text-shadow-engraved), 0 4px 6px color-mix(in srgb, currentColor 40%, transparent);
   white-space: nowrap;
 }
 
 .badge-idle {
   color: var(--text-dim);
-  background: var(--bg-elevated);
+  background-color: var(--fill-2);
+  text-shadow: var(--text-shadow-engraved);
 }
 
 .badge-working {
   color: var(--status-working);
-  background: var(--status-working-tint);
+  background-color: var(--status-working-tint);
 }
 
 /* RUN is the one state that moves: a dot breathes before the word, the word holds still */
@@ -2308,36 +2625,45 @@ button {
 
 .badge-blocked {
   color: var(--status-blocked);
-  background: var(--status-blocked-tint);
+  background-color: var(--status-blocked-tint);
 }
 
 .badge-done {
   color: var(--status-done);
-  background: var(--status-done-tint);
+  background-color: var(--status-done-tint);
 }
 
 /* BG: the turn ended on work still running in the background. The working colours, holding still */
 .badge-waiting {
   color: var(--status-working);
-  background: var(--status-working-tint);
+  background-color: var(--status-working-tint);
 }
 
 /* unknown keeps the dim text color (contrast) and is told apart by the dashed edge */
 .badge-unknown {
   color: var(--text-dim);
-  border-color: var(--border);
-  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+  outline: var(--hairline) dashed var(--border);
+  outline-offset: -1px;
+  text-shadow: none;
 }
 
-/* segmented control: one selected option, the rest quiet */
+/* a badge with no word yet draws nothing: its ring would show as an empty box */
+.badge:empty {
+  display: none;
+}
+
+/* segmented control: a sunken well, the chosen option a raised face in it, the rest quiet words */
 .segmented {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 2px;
-  background: var(--bg-elevated);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-md);
+  padding: 1px;
+  background: var(--well);
+  border: 0;
+  border-radius: calc(var(--radius-md) + 1px);
+  box-shadow: var(--shadow-sunken);
 }
 
 .segmented > button {
@@ -2350,14 +2676,21 @@ button {
   padding: 0 var(--space-3);
   background: transparent;
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: calc(var(--radius-md) - 1px);
   color: var(--text-dim);
   font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
   cursor: pointer;
   transition:
-    background-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-in-out),
+    color var(--dur-slow) var(--ease-in-out),
+    box-shadow var(--dur-fast) var(--ease-in-out);
+}
+
+@media (hover: hover) {
+  .segmented > button:hover:not([aria-pressed="true"]) {
+    color: var(--text);
+  }
 }
 
 .segmented > button svg {
@@ -2366,8 +2699,12 @@ button {
 }
 
 .segmented > button[aria-pressed="true"] {
-  background: var(--bg-hover);
+  background: var(--bg-elevated);
+  background-image: var(--raised-face);
+  box-shadow: var(--shadow-tab);
   color: var(--text-strong);
+  font-weight: var(--fw-semibold);
+  text-shadow: 0 1px 8px var(--edge-light-strong);
 }
 
 /* the chosen lens carries the selection color on its glyph, like the rail does in the list */
@@ -2375,16 +2712,16 @@ button {
   color: var(--accent);
 }
 
-/* keyboard key hint */
+/* keyboard key hint: a small key, its bottom edge a shade deeper */
 .kbd {
   display: inline-flex;
   align-items: center;
   height: 18px;
   padding: 0 5px;
-  border: var(--hairline) solid var(--border-strong);
-  border-bottom-width: 2px;
+  border: 0;
   border-radius: var(--radius-sm);
-  background: var(--bg-elevated);
+  background: var(--fill-2);
+  box-shadow: 0 0 0 1px var(--ink-2), inset 0 -1px 0 var(--ink-2), inset 0 1px 0 var(--edge-light);
   color: var(--text-dim);
   font-family: var(--font-mono);
   font-size: var(--fs-2xs);
@@ -2403,31 +2740,44 @@ button {
   background: var(--scrim);
 }
 
+/* the blur under a dialog, where there is room for it: a phone's sheet keeps its scrim plain */
+@media (min-width: 641px) {
+  .modal-scrim {
+    -webkit-backdrop-filter: var(--scrim-blur);
+    backdrop-filter: var(--scrim-blur);
+  }
+}
+
 .modal {
   display: flex;
   flex-direction: column;
   width: min(100%, 560px);
   max-height: min(100%, 720px);
-  background: var(--bg-panel);
+  background: var(--bg-elevated);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--shadow-dialog);
   overflow: hidden;
 }
 
+/* the dialog's zones part on an etched line, drawn as the header's floor and the footer's ceiling */
 .modal-header {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-4) var(--space-5);
-  border-bottom: var(--hairline) solid var(--border);
+  background-image: var(--divider);
+  background-repeat: no-repeat;
+  background-size: 100% var(--divider-h);
+  background-position: bottom;
 }
 
 .modal-title {
   flex: 1 1 auto;
   margin: 0;
   font-size: var(--fs-lg);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-medium);
   color: var(--text-strong);
+  text-shadow: var(--text-shadow-engraved);
 }
 
 .modal-body {
@@ -2442,7 +2792,10 @@ button {
   justify-content: flex-end;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
-  border-top: var(--hairline) solid var(--border);
+  background-image: var(--divider);
+  background-repeat: no-repeat;
+  background-size: 100% var(--divider-h);
+  background-position: top;
 }
 
 @media (max-width: 640px) {
@@ -2454,7 +2807,7 @@ button {
   .modal {
     width: 100%;
     max-height: 92%;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
@@ -2495,6 +2848,25 @@ button {
   }
 }
 
+/* a dialog on a wide screen arrives as a popover does: a short fade and a breath of scale */
+@media (min-width: 641px) {
+  .modal-scrim {
+    animation: fade-in var(--dur-base) var(--ease-out);
+  }
+
+  .modal-scrim > * {
+    animation: pop-in var(--dur-base) var(--ease-out);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.97); }
+}
+
 @keyframes scrim-in {
   from { background-color: transparent; }
 }
@@ -2527,7 +2899,7 @@ button {
   }
 }
 
-/* form fields inside dialogs */
+/* form fields inside dialogs: a label over its field, both at the field's own left */
 .field {
   display: flex;
   flex-direction: column;
@@ -2539,8 +2911,6 @@ button {
   font-size: var(--fs-xs);
   font-weight: var(--fw-medium);
   color: var(--text-dim);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
 }
 
 .field-hint {
@@ -2548,16 +2918,27 @@ button {
   color: var(--text-dim);
 }
 
+/* a field is a shallow well with a ring: at rest a breath lighter than its panel, focused the
+   accent runs inside its edge with a halo outside it */
 .input,
 .select {
-  height: var(--control-h);
+  height: var(--input-h);
   padding: 0 var(--space-3);
   background: var(--bg-input);
-  border: var(--hairline) solid var(--border);
+  border: 0;
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-surface);
   color: var(--text-strong);
   font: inherit;
   font-size: var(--fs-input);
+  font-weight: var(--fw-regular);
+  transition:
+    box-shadow var(--dur-fast) var(--ease-in-out),
+    background-color var(--dur-fast) var(--ease-in-out);
+}
+
+.input {
+  font-variant-numeric: tabular-nums;
 }
 
 /* a field's placeholder: the browser's own grey reads 3.8:1 on a dark field, so every placeholder
@@ -2574,13 +2955,25 @@ button {
 .sidebar-filter-input::-webkit-calendar-picker-indicator { display: none !important; }
 .sidebar-filter-input::-webkit-list-button { display: none !important; }
 
-/* a bordered field shows focus on its own border; the offset ring is for controls without one */
+@media (hover: hover) {
+  .input:hover:not(:focus):not(:disabled),
+  .select:hover:not(:focus):not(:disabled) {
+    background: color-mix(in srgb, var(--bg-input) 70%, var(--bg-hover));
+  }
+}
+
+/* a boxed field shows focus on its own edge; the offset ring is for controls without one */
 .input:focus,
 .select:focus,
 .input:focus-visible,
 .select:focus-visible {
-  border-color: var(--accent);
+  box-shadow: var(--shadow-focus);
   outline: none;
+}
+
+.input:disabled,
+.select:disabled {
+  opacity: 0.5;
 }
 
 @media (min-width: 641px) {
@@ -2590,16 +2983,20 @@ button {
   }
 }
 
-/* popover menu (palette rows, slash/@ completions) */
+/* popover menu (palette rows, slash/@ completions): glass a step above its panel, under a deep
+   shadow, its items on a hover fill of light */
 .menu {
   display: flex;
   flex-direction: column;
-  padding: var(--space-1);
-  background: var(--bg-panel);
-  border: var(--hairline) solid var(--border);
+  padding: calc(var(--space-1) + 2px);
+  background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+  -webkit-backdrop-filter: var(--popover-blur);
+  backdrop-filter: var(--popover-blur);
+  border: 0;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--shadow-popover);
   overflow: hidden;
+  animation: pop-in var(--dur-fast) var(--ease-out);
 }
 
 .menu-item {
@@ -2613,8 +3010,10 @@ button {
   border-radius: var(--radius-md);
   color: var(--text);
   font-size: var(--fs-sm);
+  font-weight: var(--fw-regular);
   text-align: left;
   cursor: pointer;
+  transition: background-color 100ms var(--ease-in-out), color 100ms var(--ease-in-out);
 }
 
 .menu-item svg {
@@ -2625,13 +3024,13 @@ button {
 }
 
 .menu-item[aria-selected="true"] {
-  background: var(--bg-hover);
+  background: var(--fill-3);
   color: var(--text-strong);
 }
 
 @media (hover: hover) {
   .menu-item:hover {
-    background: var(--bg-hover);
+    background: var(--fill-3);
     color: var(--text-strong);
   }
 }
@@ -2653,7 +3052,7 @@ button {
 .menu-heading {
   padding: var(--space-2) var(--space-2) var(--space-1);
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-medium);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: var(--text-dim);
@@ -2664,8 +3063,9 @@ button {
 .error-state {
   margin: var(--space-2);
   padding: var(--space-3);
-  border: var(--hairline) solid var(--status-blocked);
-  border-radius: var(--radius-md);
+  border: 0;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 0 1px var(--status-blocked);
   background: var(--danger-tint);
 }
 
@@ -2680,8 +3080,9 @@ button {
   height: var(--control-h);
   padding: 0 var(--space-3);
   background: transparent;
-  border: var(--hairline) solid var(--status-blocked);
-  border-radius: var(--radius-sm);
+  border: 0;
+  box-shadow: 0 0 0 1px var(--status-blocked);
+  border-radius: var(--radius-md);
   color: var(--danger-text);
   font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
@@ -2875,12 +3276,11 @@ button {
   .icon-button:active,
   .icon-button[aria-expanded="true"] {
     background: transparent;
-    border-color: transparent;
   }
 
   .icon-button.is-outlined:active,
   .icon-button.is-outlined[aria-expanded="true"] {
-    border-color: var(--border);
+    background: var(--bg-elevated);
   }
 
   /* no weight of its own: a row that fills when pressed (an iPhone list row) says so in its own

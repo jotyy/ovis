@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { flushSync } from "react-dom";
-import { FolderOpen, X } from "lucide-react";
+import { FolderOpen, X } from "../lib/icons.ts";
 
 import "./NewSessionDialog.css";
 

@@ -3,7 +3,7 @@
  * of useVoiceInput. Dictated text is only inserted at the caret; nothing here ever sends.
  */
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
-import { Check, Mic, Square, X } from "lucide-react";
+import { Check, Mic, Square, X } from "../lib/icons.ts";
 
 import "./VoiceInput.css";
 

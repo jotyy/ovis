@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ArrowDown, ArrowUp, Check, Columns2, Copy, CopySlash, FileText, FoldVertical, Rows3, Search, TriangleAlert, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, Columns2, Copy, CopySlash, FileText, FoldVertical, Rows3, Search, TriangleAlert, X } from "../lib/icons.ts";
 
 import "./FindBar.css";
 import "./RepoDiffViewer.css";

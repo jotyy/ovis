@@ -22,7 +22,7 @@
  */
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { X } from "../lib/icons.ts";
 import "./SessionHistory.css";
 import { AgentPicker } from "./AgentPicker.tsx";
 import type { AgentKind, HerdrPane, SessionHistoryAgent, SessionHistoryResponse, SessionHistoryRow, TabCreated, WorkspaceInfo } from "../../shared/protocol.ts";

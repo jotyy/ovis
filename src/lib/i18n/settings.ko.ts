@@ -28,6 +28,7 @@ export const SETTINGS_KO: Record<string, string> = {
   "Shown in light mode": "라이트 모드에서 표시됩니다",
   "Charcoal": "차콜",
   "Codex": "Codex",
+  "Studio": "Studio",
   "Amber": "앰버",
   "Catppuccin": "Catppuccin",
   "Catppuccin Latte": "Catppuccin Latte",

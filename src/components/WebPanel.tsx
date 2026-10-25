@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { ExternalLink, Globe, RotateCw, X } from "lucide-react";
+import { ExternalLink, Globe, RotateCw, X } from "../lib/icons.ts";
 import { useT } from "../lib/i18n.ts";
 import "./FileViewer.css";
 

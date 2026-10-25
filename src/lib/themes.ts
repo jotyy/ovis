@@ -19,9 +19,9 @@ export function isThemeId(value: unknown): value is ThemeId {
 }
 
 /** The theme either side starts from, and falls back to for an unknown id. */
-export const DEFAULT_THEME: ThemeId = "codex";
-/** The default before codex (#1267 added it, then it became the default): a side still on it was never chosen either. */
-const FORMER_DEFAULT: ThemeId = "amber";
+export const DEFAULT_THEME: ThemeId = "studio";
+/** The defaults before studio (amber, then codex): a side still on one of them was never chosen either. */
+const FORMER_DEFAULTS: readonly ThemeId[] = ["amber", "codex"];
 
 const DEFAULT_ROWS: Record<Mode, ThemeEntry> = {
   dark: SUPPORTED_ENTRIES.find((entry) => entry.id === DEFAULT_THEME && entry.mode === "dark")!,
@@ -70,7 +70,7 @@ const SIDE_KEY = { dark: "darkTheme", light: "lightTheme" } as const;
 export function pickTheme(current: { readonly darkTheme: string; readonly lightTheme: string }, side: Mode, id: ThemeId): Partial<Record<"darkTheme" | "lightTheme", ThemeId>> {
   const other: Mode = side === "dark" ? "light" : "dark";
   const sibling = siblingFor(id, other);
-  const untouched = current[SIDE_KEY[other]] === DEFAULT_THEME || current[SIDE_KEY[other]] === FORMER_DEFAULT || current[SIDE_KEY[other]] === siblingFor(current[SIDE_KEY[side]], other);
+  const untouched = current[SIDE_KEY[other]] === DEFAULT_THEME || (FORMER_DEFAULTS as readonly string[]).includes(current[SIDE_KEY[other]]) || current[SIDE_KEY[other]] === siblingFor(current[SIDE_KEY[side]], other);
   return sibling !== undefined && untouched ? { [SIDE_KEY[side]]: id, [SIDE_KEY[other]]: sibling } : { [SIDE_KEY[side]]: id };
 }
 

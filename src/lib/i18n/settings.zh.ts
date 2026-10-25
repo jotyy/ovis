@@ -28,6 +28,7 @@ export const SETTINGS_ZH: Record<string, string> = {
   "Shown in light mode": "在浅色模式下显示",
   "Charcoal": "炭灰",
   "Codex": "Codex",
+  "Studio": "Studio",
   "Amber": "琥珀",
   "Catppuccin": "Catppuccin",
   "Catppuccin Latte": "Catppuccin Latte",

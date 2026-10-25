@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Network, SquareTerminal, X } from "lucide-react";
+import { ArrowLeft, Network, SquareTerminal, X } from "../lib/icons.ts";
 import type { CLIProxyStatus } from "../../shared/protocol.ts";
 import type { UsageLoginProvider } from "../../shared/usage-login.ts";
 import { fetchUsageLoginProviders } from "../lib/api.ts";

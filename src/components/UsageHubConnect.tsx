@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "../lib/icons.ts";
 import type { CLIProxyStatus } from "../../shared/protocol.ts";
 import { cliProxyRequest, fetchUsage } from "../lib/api.ts";
 import { useT } from "../lib/i18n.ts";

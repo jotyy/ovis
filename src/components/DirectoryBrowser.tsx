@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUp, FolderPlus, House } from "lucide-react";
+import { ArrowUp, FolderPlus, House } from "../lib/icons.ts";
 
 import "./DirectoryBrowser.css";
 import { FileGlyph } from "./FileGlyph.tsx";

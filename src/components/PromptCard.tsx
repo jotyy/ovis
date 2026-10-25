@@ -1,5 +1,5 @@
 import { useContext, useEffect, useId, useRef, useState } from "react";
-import { ArrowLeft, Check, ChevronDown, ChevronUp, FileText, Send } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, ChevronUp, FileText, Send } from "../lib/icons.ts";
 
 import "./PromptCard.css";
 

@@ -4,7 +4,7 @@
  * their whole paths (RowMenu): the dialog never grows a second row of chips.
  */
 import { useLayoutEffect, useRef, useState } from "react";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen } from "../lib/icons.ts";
 
 import { useT } from "../lib/i18n.ts";
 import { useMediaQuery } from "../lib/useMediaQuery.ts";

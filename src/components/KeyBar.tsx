@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect, useRef, type MouseEvent, type PointerEvent, type ReactNode } from "react";
-import { ClipboardPaste, Keyboard } from "lucide-react";
+import { ClipboardPaste, Keyboard } from "../lib/icons.ts";
 
 import "./KeyBar.css";
 

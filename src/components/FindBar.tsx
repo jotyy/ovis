@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, Search, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Search, X } from "../lib/icons.ts";
 import type { PaneFindResponse } from "../../shared/protocol.ts";
 import { ApiError } from "../lib/api.ts";
 import type { ViewportIntentGate } from "../lib/viewportIntent.ts";

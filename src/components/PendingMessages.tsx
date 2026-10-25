@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ArrowUp, Copy, X } from "lucide-react";
+import { ArrowUp, Copy, X } from "../lib/icons.ts";
 import type { PendingMessageView } from "../lib/pendingMessages.ts";
 import { copyText } from "../lib/clipboard.ts";
 import { submitNote } from "../lib/compose.ts";

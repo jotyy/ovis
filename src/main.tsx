@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 // the faces the tokens name, then styles.css before any component: it holds the primitives
 // (.btn, .input, .menu…) that component stylesheets override, and Vite emits CSS in import order
 import "./fonts/fonts.css";
+import "./tailwind.css";
 import "./styles.css";
 import { App } from "./App.tsx";
 import { AppCrash, CrashProbe } from "./components/AppCrash.tsx";

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FolderSearch, X } from "lucide-react";
+import { FolderSearch, X } from "../lib/icons.ts";
 
 import "./FilesDialog.css";
 import { DirectoryBrowser } from "./DirectoryBrowser.tsx";

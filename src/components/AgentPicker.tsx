@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
-import { ChevronDown, Terminal } from "lucide-react";
+import { ChevronDown, Terminal } from "../lib/icons.ts";
 
 import type { AgentKind } from "../../shared/protocol.ts";
 import { AgentMark } from "./AgentMark.tsx";

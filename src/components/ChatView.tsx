@@ -2,8 +2,8 @@ import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffec
 import { createPortal } from "react-dom";
 import {
   ArrowDown, BookOpen, Check, ChevronDown, ChevronRight, Circle, CircleAlert, CircleCheck, CircleDot, CircleQuestionMark, CircleSlash, CircleX, Copy, Layers, SquareTerminal, Target, Undo2,
-  type LucideProps,
-} from "lucide-react";
+  type IconProps,
+} from "../lib/icons.ts";
 
 import "./ChatView.css";
 // the timeline's styles stay in the entry: its chunk loads apart (chatTimelineLoader.ts), but
@@ -276,7 +276,7 @@ function ChecklistView({ rows }: { rows: ChecklistRow[] }) {
   ))}</ul>;
 }
 
-const TODO_ICONS: Record<TodoStatus, ComponentType<LucideProps>> = {
+const TODO_ICONS: Record<TodoStatus, ComponentType<IconProps>> = {
   completed: CircleCheck, in_progress: CircleDot, pending: Circle, blocked: CircleAlert, dropped: CircleSlash,
 };
 const TODO_LABELS: Record<TodoStatus, string> = {
@@ -738,7 +738,7 @@ function TerminalCommandRow({ outcome, actions }: { outcome: CommandOutcome; act
   </article>;
 }
 
-const OUTCOME_ICONS: Record<OutcomeState, ComponentType<LucideProps>> = {
+const OUTCOME_ICONS: Record<OutcomeState, ComponentType<IconProps>> = {
   accepted: Circle, "interaction-required": CircleAlert, "result-observed": CircleCheck, "terminal-required": SquareTerminal, unknown: CircleQuestionMark,
 };
 
@@ -818,7 +818,7 @@ interface TurnProps {
   onRewindInTerminal?: (() => void) | null;
 }
 
-const TASK_RESULT_ICONS: Record<OmoTaskResult["status"], ComponentType<LucideProps>> = { completed: CircleCheck, failed: CircleX, cancelled: CircleSlash };
+const TASK_RESULT_ICONS: Record<OmoTaskResult["status"], ComponentType<IconProps>> = { completed: CircleCheck, failed: CircleX, cancelled: CircleSlash };
 
 /** One OmO background task that ended: what it was and how it went, and what it found on request. */
 function TaskResultRow({ task }: { task: OmoTaskResult }) {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, Pencil, RefreshCw, Trash2, X } from "lucide-react";
+import { Check, Pencil, RefreshCw, Trash2, X } from "../lib/icons.ts";
 
 import "./DevicesPanel.css";
 

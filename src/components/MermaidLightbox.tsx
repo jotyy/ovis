@@ -5,7 +5,7 @@
  */
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { Minus, Plus, Scan, X } from "lucide-react";
+import { Minus, Plus, Scan, X } from "../lib/icons.ts";
 
 import "./MermaidLightbox.css";
 

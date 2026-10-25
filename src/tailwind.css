@@ -1,0 +1,178 @@
+/*
+ * Tailwind for the shadcn components (components/ui/*): the theme and utility layers only. No
+ * preflight: the app's own reset in styles.css stands, and a layered utility never beats the
+ * unlayered component stylesheets, so the two systems meet only on elements that use one of them.
+ *
+ * Every utility colour, radius, shadow, font and ease here is an alias of a token in styles.css,
+ * so `bg-panel` or `shadow-surface` follows the theme and the density as `var(--bg-panel)` does;
+ * a literal colour never appears in a class (src/conventions.test.ts keeps literals out of the
+ * stylesheets, and components/ui keeps them out of the class names).
+ */
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+
+@custom-variant hover (@media (hover: hover) { &:hover });
+@custom-variant coarse (@media (pointer: coarse) { & });
+
+@theme inline {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-bg: var(--bg);
+  --color-panel: var(--bg-panel);
+  --color-elevated: var(--bg-elevated);
+  --color-hover: var(--bg-hover);
+  --color-input: var(--bg-input);
+  --color-well: var(--well);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-dim: var(--text-dim);
+  --color-strong: var(--text-strong);
+  --color-accent: var(--accent);
+  --color-accent-tint: var(--accent-tint);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-text: var(--primary-text);
+  --color-primary-tint: var(--primary-tint);
+  --color-idle: var(--status-idle);
+  --color-working: var(--status-working);
+  --color-blocked: var(--status-blocked);
+  --color-done: var(--status-done);
+  --color-working-tint: var(--status-working-tint);
+  --color-blocked-tint: var(--status-blocked-tint);
+  --color-done-tint: var(--status-done-tint);
+  --color-danger-tint: var(--danger-tint);
+  --color-danger-text: var(--danger-text);
+  --color-notice: var(--notice);
+  --color-scrim: var(--scrim);
+  --color-fill-1: var(--fill-1);
+  --color-fill-2: var(--fill-2);
+  --color-fill-3: var(--fill-3);
+  --color-fill-4: var(--fill-4);
+  --color-ink-1: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-edge: var(--edge-light);
+
+  --font-*: initial;
+  --font-sans: var(--font-ui);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+
+  --text-*: initial;
+  --text-2xs: var(--fs-2xs);
+  --text-xs: var(--fs-xs);
+  --text-sm: var(--fs-sm);
+  --text-md: var(--fs-md);
+  --text-chat: var(--fs-chat);
+  --text-lg: var(--fs-lg);
+  --text-xl: var(--fs-xl);
+  --text-display: var(--fs-display);
+  --text-input: var(--fs-input);
+
+  --font-weight-*: initial;
+  --font-weight-regular: var(--fw-regular);
+  --font-weight-medium: var(--fw-medium);
+  --font-weight-semibold: var(--fw-semibold);
+  --font-weight-bold: var(--fw-bold);
+
+  --radius-*: initial;
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-full: var(--radius-pill);
+
+  --shadow-*: initial;
+  --shadow-surface: var(--shadow-surface);
+  --shadow-raised: var(--shadow-raised);
+  --shadow-sunken: var(--shadow-sunken);
+  --shadow-tab: var(--shadow-tab);
+  --shadow-chip: var(--shadow-chip);
+  --shadow-panel: var(--shadow-panel);
+  --shadow-popover: var(--shadow-popover);
+  --shadow-dialog: var(--shadow-dialog);
+  --shadow-tooltip: var(--shadow-tooltip);
+  --shadow-primary: var(--shadow-primary);
+  --shadow-focus: var(--shadow-focus);
+  --shadow-edge: var(--edge-highlight);
+  --shadow-card: var(--shadow-card);
+  --shadow-pop: var(--shadow-pop);
+
+  --ease-*: initial;
+  --ease-out: var(--ease-out);
+  --ease-in-out: var(--ease-in-out);
+  --ease-smooth: var(--ease-smooth);
+  --ease-spring: var(--ease-spring);
+
+  --spacing: 4px;
+
+  /* the control sizes, as utilities: h-control, h-input, size-control */
+  --spacing-control: var(--control-h);
+  --spacing-input: var(--input-h);
+  --spacing-chip: var(--chip-h);
+  --spacing-touch: var(--touch-target);
+  --spacing-icon: var(--icon-size);
+
+  --animate-fade-in: fade-in var(--dur-base) var(--ease-out) both;
+  --animate-pop-in: pop-in var(--dur-fast) var(--ease-out) both;
+  --animate-pop-out: pop-out 100ms var(--ease-out) both;
+  --animate-sheet-in: sheet-in var(--dur-sheet) var(--ease-spring) both;
+  --animate-sheet-out: sheet-out var(--dur-sheet-out) var(--ease-out) both;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes pop-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes pop-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.97); }
+  }
+}
+
+/* text set into a raised surface; an etched divider as a background (tokens in styles.css) */
+@utility text-engraved {
+  text-shadow: var(--text-shadow-engraved);
+}
+
+@utility divider-b {
+  background-image: var(--divider);
+  background-repeat: no-repeat;
+  background-size: 100% var(--divider-h);
+  background-position: bottom;
+}
+
+@utility divider-t {
+  background-image: var(--divider);
+  background-repeat: no-repeat;
+  background-size: 100% var(--divider-h);
+  background-position: top;
+}
+
+@utility bg-raised {
+  background-image: var(--raised-face);
+}
+
+@utility bg-sheen {
+  background-image: var(--surface-sheen);
+}
+
+@utility bg-primary-sheen {
+  background-image: var(--primary-sheen);
+}
+
+@utility backdrop-popover {
+  -webkit-backdrop-filter: var(--popover-blur);
+  backdrop-filter: var(--popover-blur);
+}
+
+@utility backdrop-scrim {
+  -webkit-backdrop-filter: var(--scrim-blur);
+  backdrop-filter: var(--scrim-blur);
+}

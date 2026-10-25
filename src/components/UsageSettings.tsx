@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronUp, Eye, EyeOff, Network, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, Eye, EyeOff, Network, Plus } from "../lib/icons.ts";
 import type { CLIProxyStatus, ProviderUsage, UsageProviderId } from "../../shared/protocol.ts";
 import { useSettings } from "../lib/settings.ts";
 import { useT } from "../lib/i18n.ts";

@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X } from "../lib/icons.ts";
 import type { ReactNode } from "react";
 
 import "./ComposerNotices.css";

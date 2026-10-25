@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, type RefObject } from "react";
-import { ArrowLeft, Bell, Check, ChevronRight, Gauge, Info, Keyboard, MessageSquare, Mic, Monitor, Palette, Plug, Plus, Search, Smartphone, SquareTerminal, Star, X, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Bell, Check, ChevronRight, GaugeFilled, Info, KeyboardFilled, MessageSquareFilled, MicFilled, Monitor, MonitorFilled, PaletteFilled, Plus, PuzzleFilled, Search, SmartphoneFilled, SquareTerminal, Star, type IconComponent, X } from "../lib/icons.ts";
 
 import "./SettingsDialog.css";
 
@@ -209,17 +209,17 @@ function FontFamilyInput({ value, label, onCommit, fixedWidthFor = null }: { val
 type SettingsPage = SettingsPageId;
 
 /** The pages in the order the list shows them: what is looked at first, then what is set once. */
-export const PAGES: readonly { id: SettingsPage; icon: LucideIcon }[] = [
-  { id: "appearance", icon: Palette },
-  { id: "chat", icon: MessageSquare },
+export const PAGES: readonly { id: SettingsPage; icon: IconComponent }[] = [
+  { id: "appearance", icon: PaletteFilled },
+  { id: "chat", icon: MessageSquareFilled },
   { id: "terminal", icon: SquareTerminal },
   { id: "alerts", icon: Bell },
-  { id: "voice", icon: Mic },
-  { id: "usage", icon: Gauge },
-  { id: "shortcuts", icon: Keyboard },
-  { id: "devices", icon: Smartphone },
-  { id: "remote", icon: Monitor },
-  { id: "integrations", icon: Plug },
+  { id: "voice", icon: MicFilled },
+  { id: "usage", icon: GaugeFilled },
+  { id: "shortcuts", icon: KeyboardFilled },
+  { id: "devices", icon: SmartphoneFilled },
+  { id: "remote", icon: MonitorFilled },
+  { id: "integrations", icon: PuzzleFilled },
   { id: "about", icon: Info },
 ];
 
@@ -248,6 +248,7 @@ function shownBy(entry: SettingsLevel | null): { page: SettingsPage | null; keyB
 
 /** What each theme is called: the color words are translated, the brand names stay as their projects write them. */
 const THEME_NAMES: Record<ThemeId, string> = {
+  studio: "Studio",
   amber: "Amber",
   charcoal: "Charcoal",
   codex: "Codex",

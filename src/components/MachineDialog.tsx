@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Monitor, X } from "lucide-react";
+import { Monitor, X } from "../lib/icons.ts";
 import type { Machine, SetupAction, SetupJob } from "../../shared/machines.ts";
 import { answerMachineSetup, fetchMachineSetup, startMachineSetup } from "../lib/api.ts";
 import { hostKeyFingerprints } from "../lib/hostKey.ts";

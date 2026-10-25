@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Network } from "lucide-react";
+import { Network } from "../lib/icons.ts";
 import type { CLIProxyLogin, CLIProxyLoginStatus, CLIProxyProvider } from "../../shared/protocol.ts";
 import { cliProxyRequest } from "../lib/api.ts";
 import { useT } from "../lib/i18n.ts";

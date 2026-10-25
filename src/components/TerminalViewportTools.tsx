@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown } from "../lib/icons.ts";
 import type { Terminal } from "@xterm/xterm";
 import type { PaneFindResponse, PaneScrollInfo } from "../../shared/protocol.ts";
 import { useMachineApi } from "../lib/machineContext.tsx";

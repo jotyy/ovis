@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { CircleDot, RefreshCw, X } from "lucide-react";
+import { CircleDot, RefreshCw, X } from "../lib/icons.ts";
 
 import "./BackgroundAgentDetail.css";
 

@@ -4,6 +4,7 @@ import { serviceWorkerBuild } from "./scripts/service-worker-build.ts";
 import { themeBootstrapBuild } from "./scripts/theme-bootstrap-build.ts";
 import { defineConfig, normalizePath, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
@@ -32,7 +33,7 @@ const buildRevision: Plugin = {
 
 export default defineConfig({
   // the theme boot script is emitted before compressedAssets and serviceWorkerBuild read the bundle
-  plugins: [react(), thirdPartyNotices, buildRevision, themeBootstrapBuild(), compressedAssets(), serviceWorkerBuild()],
+  plugins: [react(), tailwindcss(), thirdPartyNotices, buildRevision, themeBootstrapBuild(), compressedAssets(), serviceWorkerBuild()],
   define: {
     __APP_REVISION__: JSON.stringify(revision),
     __APP_VERSION__: JSON.stringify((JSON.parse(readFileSync("package.json", "utf8")) as { version: string }).version),
@@ -40,12 +41,13 @@ export default defineConfig({
     __HERDR_TEST_HOOKS__: JSON.stringify(process.env["HERDR_TEST_HOOKS"] === "1"),
   },
   server: {
-    port: 5173,
+    // VITE_PORT and OVIS_PORT let a second checkout develop beside an installed Ovis on :7317
+    port: Number(process.env["VITE_PORT"] ?? 5173),
     proxy: {
       // not the string shorthand: Vite gives that changeOrigin, and the server's same-origin check
       // compares the browser's Origin (:5173) with the Host it was sent, which must stay :5173
-      "/api": { target: "http://localhost:7317", changeOrigin: false },
-      "/ws": { target: "ws://localhost:7317", ws: true },
+      "/api": { target: `http://localhost:${process.env["OVIS_PORT"] ?? 7317}`, changeOrigin: false },
+      "/ws": { target: `ws://localhost:${process.env["OVIS_PORT"] ?? 7317}`, ws: true },
     },
   },
   // Keep Vite 6's syntax targets when changing the bundler, including installed mobile clients.

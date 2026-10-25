@@ -28,6 +28,7 @@ export const SETTINGS_JA: Record<string, string> = {
   "Shown in light mode": "ライトモードで表示されます",
   "Charcoal": "チャコール",
   "Codex": "Codex",
+  "Studio": "Studio",
   "Amber": "アンバー",
   "Catppuccin": "Catppuccin",
   "Catppuccin Latte": "Catppuccin Latte",

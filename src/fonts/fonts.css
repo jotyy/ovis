@@ -2,11 +2,13 @@
  * The app's own typefaces (THIRD_PARTY_NOTICES.md), served from the user's PC: nothing here is
  * fetched from another host.
  *
- * Pretendard Variable is upstream's dynamic subset, 92 chunks told apart by unicode-range in the
+ * Inter Variable (inter/inter.css) is the interface face; Pretendard follows it in the stack for
+ * Hangul, which Inter does not draw. Pretendard Variable is upstream's dynamic subset, 92 chunks told apart by unicode-range in the
  * stylesheet imported below (copied whole from the package): the browser fetches only the chunks
  * whose characters a page draws: the demo's English chat takes three (90 KB) and the same
  * chat in Korean eight more (200 KB). Vite fingerprints each into /assets/, where the service worker keeps what was fetched.
  */
+@import "./inter/inter.css";
 @import "./pretendard/pretendardvariable-dynamic-subset.css";
 
 /* The code face of the chat and the chrome (--font-mono in styles.css). Its family name is the

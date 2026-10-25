@@ -8,7 +8,7 @@
  */
 import { useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
-import { GitBranch, X } from "lucide-react";
+import { GitBranch, X } from "../lib/icons.ts";
 
 import "./WorktreeDialog.css";
 

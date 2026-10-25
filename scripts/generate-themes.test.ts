@@ -106,7 +106,7 @@ describe("generate-themes", () => {
     for (const lookalike of ['"x_theme_color": "#abcdef",', '"note": "\\"theme_color\\": \\"#abcdef\\"",', '"extra": { "theme_color": "#abcdef" },', '"list": [{ "background_color": "#abcdef" }],']) {
       const rendered = renderManifest(css, manifest.replace('"theme_color": ', `${lookalike}\n  "theme_color": `));
       expect(rendered, lookalike).toContain(lookalike);
-      expect(JSON.parse(rendered).theme_color).toBe("#1f1f1f");
+      expect(JSON.parse(rendered).theme_color).toBe("#0c0c0f");
     }
     expect(() => renderManifest(css, manifest.replace('"theme_color"', '"x_theme_color"'))).toThrow('"theme_color" found 0 times');
 
@@ -144,8 +144,8 @@ describe("generate-themes", () => {
 
   it("writes every copy from src/styles.css and never writes the CSS", async () => {
     const root = copyRoot();
-    // amber's panel feeds the module and DESIGN.md; the default theme's dark panel (codex) the page and manifest
-    const source = read(root, SOURCE).replace("--bg-panel: #181613;", "--bg-panel: #1a1714;").replace("--bg-panel: #1f1f1f;", "--bg-panel: #202020;");
+    // amber's panel feeds the module and DESIGN.md; the default theme's dark panel (studio) the page and manifest
+    const source = read(root, SOURCE).replace("--bg-panel: #181613;", "--bg-panel: #1a1714;").replace("--bg-panel: #0c0c0f;", "--bg-panel: #0d0d10;");
     expect(source).not.toBe(css);
     writeFileSync(join(root, SOURCE), source);
 

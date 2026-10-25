@@ -10,7 +10,7 @@
  */
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Check, type LucideIcon } from "lucide-react";
+import { Check, type IconComponent } from "../lib/icons.ts";
 
 import "./RowMenu.css";
 
@@ -26,7 +26,7 @@ export interface RowMenuItem {
   hint?: string;
   /** the item's tooltip, when it has more to say than its label */
   title?: string;
-  icon: LucideIcon;
+  icon: IconComponent;
   /** drawn in the icon's place when given: an agent's mark, which is not a lucide icon */
   glyph?: ReactNode;
   /** a hairline above this item */

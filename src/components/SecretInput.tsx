@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { LockKeyhole, Send } from "lucide-react";
+import { LockKeyhole, Send } from "../lib/icons.ts";
 import { validSecret } from "../../shared/secret-prompt.ts";
 import { useT } from "../lib/i18n.ts";
 import type { SubmitResult } from "../lib/ws.ts";

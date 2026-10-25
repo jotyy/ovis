@@ -12,7 +12,7 @@ import {
   type ReactNode,
 } from "react";
 import { flushSync } from "react-dom";
-import { ArrowUp, FileText, Folder, FolderGit2, GitBranch, LoaderCircle, MessageSquarePlus, Minimize2, Package, Plus, Puzzle, Square, TriangleAlert, UserRound, X, type LucideIcon } from "lucide-react";
+import { ArrowUp, FileText, Folder, FolderGit2, GitBranch, LoaderCircle, MessageSquarePlus, Minimize2, Package, Plus, Puzzle, Square, TriangleAlert, UserRound, X, type IconComponent } from "../lib/icons.ts";
 
 import "./Composer.css";
 
@@ -140,7 +140,7 @@ export const SOURCE_LABEL: Record<SlashCommand["source"], string> = {
   plugin: "Plugins",
 };
 /** Where a skill comes from, as a row's icon: yours in the accent (Composer.css), the rest dimmed like any icon. */
-const ORIGIN_ICON: Record<NonNullable<SlashCommand["origin"]>, LucideIcon> = { user: UserRound, project: FolderGit2, bundled: Package, plugin: Puzzle };
+const ORIGIN_ICON: Record<NonNullable<SlashCommand["origin"]>, IconComponent> = { user: UserRound, project: FolderGit2, bundled: Package, plugin: Puzzle };
 
 let attachmentSequence = 0;
 

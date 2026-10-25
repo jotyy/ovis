@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw } from "../lib/icons.ts";
 
 import "./PhonePanel.css";
 

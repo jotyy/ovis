@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type FocusEvent, type KeyboardEvent } from "react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw } from "../lib/icons.ts";
 
 import "./UsageMeters.css";
 

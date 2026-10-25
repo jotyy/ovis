@@ -706,7 +706,7 @@ describe("language", () => {
 
 describe("palette", () => {
   it("defaults to codex, and reads a record from before palettes as amber, the look it had", () => {
-    expect(DEFAULT_SETTINGS.palette).toBe("codex");
+    expect(DEFAULT_SETTINGS.palette).toBe("studio");
     // settings stored before palettes existed carry no palette key
     expect(sanitizeSettings({ theme: "light" }).palette).toBe("amber");
     expect(sanitizeSettings({ palette: "charcoal" }).palette).toBe("charcoal");

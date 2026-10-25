@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ComponentType } from "react";
-import { ChevronDown, ChevronRight, Circle, CircleAlert, CircleCheck, CircleDot, CircleSlash, CircleX, Layers, ListChecks, Workflow, type LucideProps } from "lucide-react";
+import { ChevronDown, ChevronRight, Circle, CircleAlert, CircleCheck, CircleDot, CircleSlash, CircleX, Layers, ListChecks, Workflow, type IconProps } from "../lib/icons.ts";
 
 import "./BackgroundTasks.css";
 
@@ -14,11 +14,11 @@ import type { OmoRun, OmoRunNode, OmoTask, PlanStep, PlanSummary } from "../../s
 
 const POLL_MS = 3000;
 
-const ICONS: Record<OmoTask["status"], ComponentType<LucideProps>> = {
+const ICONS: Record<OmoTask["status"], ComponentType<IconProps>> = {
   running: CircleDot, completed: CircleCheck, failed: CircleX, cancelled: CircleSlash, lost: CircleAlert,
 };
-const STEP_ICONS: Record<PlanStep["status"], ComponentType<LucideProps>> = { pending: Circle, in_progress: CircleDot, completed: CircleCheck };
-const NODE_ICONS: Record<OmoRunNode["state"], ComponentType<LucideProps>> = {
+const STEP_ICONS: Record<PlanStep["status"], ComponentType<IconProps>> = { pending: Circle, in_progress: CircleDot, completed: CircleCheck };
+const NODE_ICONS: Record<OmoRunNode["state"], ComponentType<IconProps>> = {
   pending: Circle, scheduled: Circle, running: CircleDot, blocked: CircleAlert, completed: CircleCheck, failed: CircleX, skipped: CircleSlash, cancelled: CircleSlash,
 };
 
