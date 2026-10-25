@@ -2553,8 +2553,9 @@ button {
   }
 }
 
-/* a tag: a small raised chip with a sheen down it, its words at the label weight */
-.pill {
+/* a tag: a small raised chip with a sheen down it, its words at the label weight. Only the
+   hand-rolled pills: a Badge (ui/badge.tsx) that carries a pill class for a script keeps its own */
+.pill:not([data-slot]) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -2574,7 +2575,7 @@ button {
   white-space: nowrap;
 }
 
-.pill-offline {
+.pill-offline:not([data-slot]) {
   color: var(--status-blocked);
   background: var(--status-blocked-tint);
 }
@@ -2586,7 +2587,7 @@ button {
 }
 
 /* a lens that is on its way: inside a segmented button, so it stays small */
-.pill-soon {
+.pill-soon:not([data-slot]) {
   height: auto;
   padding: 0 var(--space-1);
   margin-left: var(--space-1);

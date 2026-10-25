@@ -158,8 +158,8 @@ describe("generate-themes", () => {
     expect(read(root, SOURCE)).toBe(source);
     expect(read(root, OUTPUTS.module)).toContain('bgPanel: "#1a1714"');
     expect(read(root, OUTPUTS.design)).toContain("| Surface/panel | `--bg-panel` | `#1a1714` |");
-    expect(read(root, OUTPUTS.index)).toContain('<meta name="theme-color" content="#202020" />');
-    expect(JSON.parse(read(root, OUTPUTS.manifest)).theme_color).toBe("#202020");
+    expect(read(root, OUTPUTS.index)).toContain('<meta name="theme-color" content="#0d0d10" />');
+    expect(JSON.parse(read(root, OUTPUTS.manifest)).theme_color).toBe("#0d0d10");
 
     const fresh = await run(["--check", "--root", root]);
     expect([fresh.exitCode, fresh.output.trim()]).toEqual([0, "generated themes are up to date"]);
