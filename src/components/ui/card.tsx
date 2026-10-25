@@ -16,7 +16,7 @@ export function CardHeader({ className, icon, title, description, action, ...pro
       <div className="flex min-w-0 items-center gap-3.5">
         {icon && <IconBadge>{icon}</IconBadge>}
         <div className="flex min-w-0 flex-col">
-          <span className="text-lg font-medium text-strong text-engraved">{title}</span>
+          <span data-slot="card-title" className="text-lg font-medium text-strong text-engraved">{title}</span>
           {description && <span className="truncate text-sm font-regular text-dim">{description}</span>}
         </div>
       </div>

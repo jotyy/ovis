@@ -643,7 +643,7 @@ export function CommandPalette({ open, initialQuery = "", onClose, machines, onS
           {/* a bare input on the field surface, the search glyph before it; the surface shows the focus */}
           <div className="flex h-input min-w-0 flex-1 items-center gap-2 rounded-md bg-input px-3 shadow-surface transition-[box-shadow] duration-150 ease-in-out focus-within:shadow-focus coarse:h-touch">
             <Search aria-hidden="true" className="size-4 shrink-0 text-dim" />
-            <input ref={inputRef} data-slot="input" className="h-full min-w-0 flex-1 bg-transparent text-input text-strong outline-none! placeholder:text-dim sm:text-sm" type="search" value={query} placeholder={t("Search panes and actions…")} aria-label={t("Search panes and actions")} aria-controls="palette-results" aria-activedescendant={itemCount ? `palette-item-${activeIndex}` : undefined} onKeyDown={onInputKeyDown} onChange={(event) => { setQuery(event.target.value); setSelection(NO_SELECTION); }} />
+            <input ref={inputRef} data-slot="input" className="h-full min-w-0 flex-1 bg-transparent text-field text-strong outline-none placeholder:text-dim sm:text-sm" type="search" value={query} placeholder={t("Search panes and actions…")} aria-label={t("Search panes and actions")} aria-controls="palette-results" aria-activedescendant={itemCount ? `palette-item-${activeIndex}` : undefined} onKeyDown={onInputKeyDown} onChange={(event) => { setQuery(event.target.value); setSelection(NO_SELECTION); }} />
           </div>
           <Button variant="ghost" size="icon" className="text-dim coarse:size-touch" aria-label={t("Close command palette")} onClick={onClose}><X aria-hidden="true" /></Button>
         </div>

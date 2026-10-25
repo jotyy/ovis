@@ -1,4 +1,5 @@
 import { useT } from "../lib/i18n.ts";
+import { Button } from "./ui/button.tsx";
 
 import "./LanExposureNotice.css";
 
@@ -16,7 +17,7 @@ export function LanExposureNotice({ host, onOpen }: { host: string; onOpen: () =
   return (
     <div className="update-notice is-exposed" role="status" data-testid="lan-exposure-notice">
       <span>{t("Anyone who can reach {host} on your network can type into every pane: no access token is set and no device is paired yet.", { host })}</span>
-      <button type="button" className="btn" onClick={onOpen}>{t("Phone & devices")}</button>
+      <Button variant="field" onClick={onOpen}>{t("Phone & devices")}</Button>
     </div>
   );
 }

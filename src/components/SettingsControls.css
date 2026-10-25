@@ -132,7 +132,7 @@
 
 /* fingers: a select and the stepper are finger-sized targets, like the file viewer's controls */
 @media (pointer: coarse) {
-  .settings-select-trigger,
+  .settings-select,
   .settings-stepper {
     height: max(44px, var(--touch-target));
   }

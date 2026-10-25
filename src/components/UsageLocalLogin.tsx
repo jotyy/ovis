@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { UsageLoginProvider } from "../../shared/usage-login.ts";
 import { fetchUsageLoginAccounts, startUsageLogin } from "../lib/api.ts";
 import { useT } from "../lib/i18n.ts";
+import { Button, Input } from "./ui/index.ts";
 
 export function UsageLocalLogin({ provider, onStarted }: { readonly provider: UsageLoginProvider; readonly onStarted: (paneId: string) => void }) {
   const t = useT();
@@ -21,7 +22,7 @@ export function UsageLocalLogin({ provider, onStarted }: { readonly provider: Us
   if (accounts === null) return <p className={`settings-hint${error ? " account-error" : ""}`} role={error ? "alert" : "status"}>{error ?? t("Loading…")}</p>;
   if (accounts.length > 0 && !confirmed) return <div className="account-auth-form">
     <p className="settings-hint">{t("Signed in as {account}. Continuing may replace it.", { account: accounts.map((account) => account ?? t("an existing account")).join(", ") })}</p>
-    <button ref={action} type="button" className="btn" onClick={() => setConfirmed(true)}>{t("Continue")}</button>
+    <Button ref={action} variant="field" onClick={() => setConfirmed(true)}>{t("Continue")}</Button>
   </div>;
   return <form className="account-auth-form" onSubmit={(event) => {
     event.preventDefault();
@@ -41,7 +42,7 @@ export function UsageLocalLogin({ provider, onStarted }: { readonly provider: Us
   }}>
     {provider.separate_home && <>
     <label className="settings-label" htmlFor="usage-account-name">{t("Account name")}</label>
-    <input className="input" id="usage-account-name" name="name" pattern="[a-z0-9-]{1,32}" maxLength={32} required autoComplete="off" placeholder="work" disabled={busy} />
+    <Input id="usage-account-name" name="name" pattern="[a-z0-9-]{1,32}" maxLength={32} required autoComplete="off" placeholder="work" disabled={busy} />
     <p className="settings-hint">{t("Lowercase letters, numbers and hyphens")}</p>
     </>}
     <p className="settings-hint">{provider.id === "claude"
@@ -50,6 +51,6 @@ export function UsageLocalLogin({ provider, onStarted }: { readonly provider: Us
         : provider.id === "opencode" ? t("Choose OpenCode Go or Zen for plan limits.")
           : t("Follow the steps in the new tab.")}</p>
     {error && <p className="settings-hint account-error" role="alert">{error}</p>}
-    <button ref={action} className="btn" type="submit" disabled={busy}>{busy ? t("Starting…") : t("Start sign-in")}</button>
+    <Button ref={action} variant="field" type="submit" disabled={busy}>{busy ? t("Starting…") : t("Start sign-in")}</Button>
   </form>;
 }

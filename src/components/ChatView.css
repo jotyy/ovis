@@ -79,21 +79,6 @@
   }
 }
 
-/* Tailwind runs without preflight here, so a shadcn Button keeps the browser's outset border and
-   1px block padding until something resets them: done for the chat's own surfaces (the
-   transcript, the prompt card, the held list, the task list and its detail, the sessions dialog) */
-.chat-frame [data-slot="button"],
-.chat-view [data-slot="button"],
-.prompt-card [data-slot="button"],
-.pending-messages [data-slot="button"],
-.bg-tasks [data-slot="button"],
-.bg-agent-detail [data-slot="button"],
-.session-dialog [data-slot="button"],
-.markdown [data-slot="button"] {
-  border: 0;
-  padding-block: 0;
-}
-
 .chat-transcript {
   width: min(100%, var(--chat-w));
   min-height: 100%;
@@ -203,12 +188,6 @@
 
 .markdown-code-error {
   padding: var(--space-2) var(--space-3) 0;
-}
-
-/* the meta's glyph buttons (ui/icon-button: ghost, 24px) read in the meta's dim colour at rest */
-.chat-copy,
-.chat-meta-btn {
-  color: var(--text-dim);
 }
 
 .chat-turn-agent {
@@ -551,10 +530,6 @@
   color: var(--text-dim);
   font-family: var(--font-mono);
   font-size: var(--fs-2xs);
-}
-
-.markdown-code-copy {
-  color: var(--text-dim);
 }
 
 /* The block's chrome is not code: its language label, "Show all" toggle, copy error and "Too

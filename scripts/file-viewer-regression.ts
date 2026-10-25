@@ -720,7 +720,7 @@ try {
   await videoLink.waitFor();
 
   await openFiles(page);
-  await filesDialog.getByRole("button", { name: "Changes", exact: true }).click();
+  await filesDialog.getByRole("tab", { name: "Changes", exact: true }).click();
   const beforeMediaDiff = await page.evaluate(() => history.state);
   await filesDialog.locator(".repo-change").filter({ hasText: "preview.webm" }).click();
   const mediaDiff = page.locator(".repo-diff-viewer");
@@ -744,7 +744,7 @@ try {
   // move in the same moment) collapse the stack once, not twice: a second pair of steps would
   // land on the pane moves above and open the file a second time
   await openFiles(page);
-  await filesDialog.getByRole("button", { name: "Changes", exact: true }).click();
+  await filesDialog.getByRole("tab", { name: "Changes", exact: true }).click();
   await filesDialog.locator(".repo-change").filter({ hasText: "preview.webm" }).click();
   await mediaDiff.waitFor();
   await mediaDiff.getByRole("button", { name: "Open file", exact: true }).click();
@@ -757,7 +757,7 @@ try {
   await panel.waitFor({ state: "detached" });
   assert.deepEqual(await page.evaluate(() => ({ state: history.state, pane: new URLSearchParams(location.search).get("pane") })), { state: beforeMediaDiff, pane }, "two clicks collapse once: one Close returns to the diff's opener, on the same pane");
   await openFiles(page);
-  await filesDialog.getByRole("button", { name: "Changes", exact: true }).click();
+  await filesDialog.getByRole("tab", { name: "Changes", exact: true }).click();
   await filesDialog.locator(".repo-change").filter({ hasText: "preview.webm" }).click();
   await mediaDiff.waitFor();
   await mediaDiff.getByRole("button", { name: "Close diff", exact: true }).click();
@@ -780,7 +780,7 @@ try {
   for (const width of [1280, 980, 979]) {
     await page.setViewportSize({ width, height: 800 });
     await openFiles(page);
-    await filesDialog.getByRole("button", { name: "Changes", exact: true }).click();
+    await filesDialog.getByRole("tab", { name: "Changes", exact: true }).click();
     const beforeDiff = await page.evaluate(() => ({ state: history.state, url: location.href }));
     await filesDialog.locator(".repo-change").filter({ hasText: "notes.txt" }).click();
     const diff = page.locator(".repo-diff-viewer");

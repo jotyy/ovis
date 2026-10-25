@@ -230,7 +230,7 @@ try {
           assert.deepEqual(await dialog(page).locator(".bg-agent-tool-name").allTextContents(), ["Read", "Read", "Grep"]);
           assert.equal(await dialog(page).locator(".bg-agent-tool-args").first().textContent(), '{"file_path":"test/retry.test.ts"}');
           assert.equal(await dialog(page).locator("img, iframe, a[href]").count(), 0, "nothing of the transcript loads or links anywhere");
-          await dialog(page).locator('.icon-button[aria-label="Refresh"]:not(:disabled)').waitFor();
+          await dialog(page).locator('.agent-detail-refresh:not(:disabled)').waitFor();
           await floors(page, view);
           await shot(page, view, "open");
           // the focus trap: opened while its first read is out, the sheet takes the focus at Close (Refresh rests);
@@ -268,21 +268,21 @@ try {
           assert.ok(geometry.docW <= geometry.viewportW && !geometry.bodyWider, `nothing scrolls sideways: ${JSON.stringify(geometry)}`);
           // a touch target on a phone: the row, Refresh and Close are at least 44pt tall
           if (mobile) {
-            const heights = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".bg-agent-detail-header .icon-button, .bg-task-open")].map((node) => node.getBoundingClientRect().height));
+            const heights = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".agent-detail-refresh, .bg-agent-detail > [data-slot=button], .bg-task-open")].map((node) => node.getBoundingClientRect().height));
             assert.ok(heights.every((height) => height >= 44), `44pt targets: ${JSON.stringify(heights)}`);
           }
           // Refresh reads again: the agent wrote one more record meanwhile, and the button rests while the read is out
           await page.evaluate(() => { window.bgHold = true; });
           const refresh = dialog(page).getByRole("button", { name: "Refresh", exact: true });
           await refresh.click();
-          await dialog(page).locator('.icon-button[aria-label="Refresh"]:disabled').waitFor();
+          await dialog(page).locator('.agent-detail-refresh:disabled').waitFor();
           assert.equal(await events.count(), 5, "the content stays while the read is out");
           await shot(page, view, "refreshing");
           await page.evaluate(() => window.bgRelease?.());
           await events.nth(6).waitFor();
           assert.equal(await events.count(), 7, "the second read holds the new record, and the held read's marker");
           assert.match(await events.nth(5).textContent() ?? "", /^The jitter comes from Math\.random/, "the new record is the agent's next words");
-          await dialog(page).locator('.icon-button[aria-label="Refresh"]:not(:disabled)').waitFor();
+          await dialog(page).locator('.agent-detail-refresh:not(:disabled)').waitFor();
           assert.equal(await dialog(page).locator(".bg-agent-note").count(), 0, "a whole read has no note");
           // Escape closes the sheet, the list stays, the row has the focus again
           await page.keyboard.press("Escape");
@@ -422,7 +422,7 @@ try {
             if (refreshed) {
               // the first read lands, then Refresh fails or answers for another session
               await dialog(page).locator(".bg-agent-section").first().waitFor();
-              await dialog(page).locator(".bg-agent-detail-header .icon-button").first().click();
+              await dialog(page).locator(".agent-detail-refresh").click();
             }
             if (text !== null) await note(page, say(view, text)).waitFor();
             // what to do next, on a line of its own under what happened
@@ -438,7 +438,7 @@ try {
               assert.equal(await dialog(page).locator(".bg-agent-detail-title").textContent(), "Review the retry test for timing assumptions", `${state}: the title is the task's own`);
             }
             if (state === "error") assert.equal(await dialog(page).locator(".bg-agent-section").count(), 0, "error: no transcript stands in for what was not read");
-            if (state === "loading") assert.equal(await dialog(page).locator('.icon-button[aria-label="Refresh"]:disabled, .icon-button[aria-label="새로 고침"]:disabled').count(), 1, "Refresh rests while the first read is out");
+            if (state === "loading") assert.equal(await dialog(page).locator('.agent-detail-refresh:disabled').count(), 1, "Refresh rests while the first read is out");
             if (state === "truncated") await note(page, view.language === "ko" ? "일부 기록은 읽지 못해 빠졌습니다" : "Some records couldn't be read and are left out").waitFor();
             if (state === "older-rows") assert.equal(await detailReads(page), before, "rows without detail_kind ask the PC for nothing");
             if (state === "empty" || state === "missing" || state === "changed" || state === "offline" || state === "unavailable" || state === "older" || state === "older-rows") {
@@ -448,7 +448,7 @@ try {
             frames[state] = await page.evaluate(() => {
               const box = (node: Element | null | undefined): string => { const rect = node!.getBoundingClientRect(); return [rect.x, rect.y, rect.width, rect.height].map((value) => Math.round(value)).join(","); };
               const sheet = document.querySelector(".bg-agent-detail");
-              return `sheet ${box(sheet)} close ${box([...sheet!.querySelectorAll(".bg-agent-detail-header .icon-button")].at(-1))}`;
+              return `sheet ${box(sheet)} close ${box(sheet!.querySelector(":scope > [data-slot=button]"))}`;
             });
             if (state === "many") {
               const body = dialog(page).locator(".bg-agent-detail-body");

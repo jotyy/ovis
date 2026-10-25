@@ -74,7 +74,7 @@ export function RestoreErrorBadge({ reason }: { reason: string }) {
   const t = useT();
   const label = t("NOT RESTORED");
   return (
-    <span className="sidebar-status" data-status="restore-error" role="status" aria-label={label} title={`${label} — ${reason}`}>
+    <span className="badge sidebar-status" data-status="restore-error" role="status" aria-label={label} title={`${label} — ${reason}`}>
       <TriangleAlert aria-hidden="true" />
       <span className="visually-hidden">{label}</span>
     </span>
@@ -93,7 +93,9 @@ const STATUS_TONE: Readonly<Record<KnownStatus, ComponentProps<typeof Badge>["to
 /**
  * An agent's state: as a word, a Badge in the state's tone (the palette's rows); compact, the
  * sidebar's status cell, which draws only the state's own mark and nothing where there is none
- * to draw. The label and the tooltip stay with the cell for every state.
+ * to draw. The label and the tooltip stay with the cell for every state. The cell keeps the
+ * legacy `badge` class: Sidebar.css undresses it by that name and the browser scripts find the
+ * cell by it (`.badge[data-status=…]`).
  */
 export function StatusBadge({ status, compact = false }: { status?: AgentStatus; compact?: boolean }) {
   const t = useT();
@@ -110,7 +112,7 @@ export function StatusBadge({ status, compact = false }: { status?: AgentStatus;
   const indicators = settings.statusIndicators;
   const dot = value === "working" || value === "done" || value === "waiting";
   return (
-    <span className="sidebar-status" data-status={value} role="status" aria-label={description} title={description}>
+    <span className="badge sidebar-status" data-status={value} role="status" aria-label={description} title={description}>
       {indicators !== "classic" && <span className="sidebar-status-glyph" aria-hidden="true" onAnimationStart={value === "working" ? alignBreath : undefined}>{indicatorGlyph(value, indicators)}</span>}
       {indicators === "classic" && value === "blocked" && <span className="sidebar-status-mark" aria-hidden="true">?</span>}
       {indicators === "classic" && dot && <span className="sidebar-status-dot" aria-hidden="true" onAnimationStart={value === "working" ? alignBreath : undefined} />}

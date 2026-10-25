@@ -7,8 +7,3 @@
 .files-dialog [data-slot="dialog-body"] {
   min-height: calc(var(--control-h) * 8);
 }
-
-/* a hidden tab takes no room: the one shown sets the body's height */
-.files-dialog [data-slot="tabs-content"][hidden] {
-  display: none;
-}

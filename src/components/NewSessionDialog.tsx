@@ -1,6 +1,6 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { flushSync } from "react-dom";
-import { ChevronDown, FolderOpen, X } from "../lib/icons.ts";
+import { FolderOpen, X } from "../lib/icons.ts";
 
 import "./NewSessionDialog.css";
 
@@ -11,7 +11,7 @@ import { cn } from "../lib/cn.ts";
 import { AgentPicker, rememberAgent, rememberedAgent } from "./AgentPicker.tsx";
 import { DirectoryBrowser, homeRelative } from "./DirectoryBrowser.tsx";
 import { RecentFolderChips } from "./RecentFolderChips.tsx";
-import { Alert, AlertDescription, Button, DialogBody, DialogFooter, DialogHeader, Field, fieldSurface, Input, Label, Textarea } from "./ui/index.ts";
+import { Alert, AlertDescription, Button, DialogBody, DialogFooter, DialogHeader, Field, Input, Label, NativeSelect, Textarea } from "./ui/index.ts";
 import { useMachineApi, useMachineId } from "../lib/machineContext.tsx";
 import { useT } from "../lib/i18n.ts";
 import { useSettings } from "../lib/settings.ts";
@@ -70,8 +70,6 @@ const SKILLS_MS = 300;
 /** recent folders offered: one row a phone swipes sideways; a wider screen fits what one row holds and lists the rest under "+N" */
 const RECENT_FOLDERS_SHOWN = 8;
 
-/** a native select on the field surface: the regression scripts choose its options as a select's (selectOption) */
-export const nativeSelect = cn(fieldSurface, "m-0 h-input w-full cursor-pointer appearance-none border-0 px-3 pr-9 font-sans text-input font-regular sm:text-sm coarse:h-touch");
 
 function directoryBasename(value: string): string {
   const trimmed = value.replace(/\\/g, "/").replace(/\/+$/, "");
@@ -412,13 +410,11 @@ export function NewSessionDialog({ open, defaultCwd, tab = null, onClose, onCrea
               {suggestions.length > 0 && <datalist id="new-session-models">{suggestions.map((alias) => <option key={alias} value={alias} />)}</datalist>}
             </Field>}
             {can.efforts.length > 0 && <Field label={t("Effort")} htmlFor="new-session-effort" className="min-w-0" hint={<span id="new-session-effort-hint">{t("Levels depend on the model.")}</span>}>
-              <div className="relative">
-                <select id="new-session-effort" className={nativeSelect} value={effort} disabled={fieldsDisabled} aria-describedby="new-session-effort-hint" onChange={(event) => setEffort(event.target.value)}>
-                  <option value="">{t("Agent default")}</option>
-                  {can.efforts.map((level) => <option key={level} value={level}>{level}</option>)}
-                </select>
-                <ChevronDown aria-hidden="true" className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-dim" />
-              </div>
+              {/* a native select: the regression scripts choose its options as a select's (selectOption) */}
+              <NativeSelect id="new-session-effort" className="w-full" value={effort} disabled={fieldsDisabled} aria-describedby="new-session-effort-hint" onChange={(event) => setEffort(event.target.value)}>
+                <option value="">{t("Agent default")}</option>
+                {can.efforts.map((level) => <option key={level} value={level}>{level}</option>)}
+              </NativeSelect>
             </Field>}
           </div>}
           {agentKind !== "" && <Field label={t("First message")} htmlFor="new-session-prompt" hint={<span id="new-session-prompt-hint">{promptHint}</span>}>

@@ -801,7 +801,7 @@ function ShortcutsPage() {
           ];
           return (
             <SettingsRow key={shortcut.id} label={t(shortcut.label)} wide={shortcut.id !== "voice"} description={rowText === undefined ? undefined : <span role="status">{rowText}</span>}>
-              {shortcut.id === "voice" ? <span className="settings-keys">{formatKeys(shortcut.keys).map((key) => <Kbd className="kbd h-6 px-2 text-xs" key={key}>{key}</Kbd>)}</span> : (
+              {shortcut.id === "voice" ? <span className="settings-keys">{formatKeys(shortcut.keys).map((key) => <Kbd className="h-6 px-2 text-xs" key={key}>{key}</Kbd>)}</span> : (
                 <span className="settings-shortcut-control">
                 <Button variant="field" className={cn("settings-shortcut-record", isRecording && "shadow-focus text-strong")} ref={(button) => { if (button) recordButtons.current.set(shortcut.id, button); else recordButtons.current.delete(shortcut.id); }} aria-pressed={isRecording} aria-label={t("Record shortcut for {name}", { name: t(shortcut.label) })} onClick={() => { setPending(null); setRecording(isRecording ? null : { id: shortcut.id, problem: null }); }}>{isRecording ? t("Press keys…") : t("Record")}</Button>
                 {confirming ? <>
@@ -810,7 +810,7 @@ function ShortcutsPage() {
                     update({ shortcutOverrides: { ...settings.shortcutOverrides, [confirming.id]: confirming.value } });
                   }}>{t("Save anyway")}</Button>
                   <Button variant="field" onClick={() => settlePending(confirming.id)}>{t("Cancel")}</Button>
-                </> : <SettingsSelect className="settings-shortcut-select h-control w-[14rem]" aria-label={t(shortcut.label)} value={Object.hasOwn(settings.shortcutOverrides, shortcut.id) ? settings.shortcutOverrides[shortcut.id] ?? (unbound ? "default" : "off") : "default"} options={bindingOptions} onChange={(value) => {
+                </> : <SettingsSelect className="settings-shortcut-select w-[14rem] [&_select]:h-control" aria-label={t(shortcut.label)} value={Object.hasOwn(settings.shortcutOverrides, shortcut.id) ? settings.shortcutOverrides[shortcut.id] ?? (unbound ? "default" : "off") : "default"} options={bindingOptions} onChange={(value) => {
                   const next = { ...settings.shortcutOverrides };
                   if (value === "default") delete next[shortcut.id];
                   else next[shortcut.id] = value === "off" ? null : value;
@@ -1243,7 +1243,7 @@ function OpenSettingsDialog({ section = null, linkPage = null, linkSection = nul
       >
         <header className="settings-header flex items-center gap-2 py-3 pr-14 pl-4 divider-b">
           {(keyBarOpen || (narrow && page !== null)) && <Button variant="ghost" size="icon" ref={backRef} className="text-dim" aria-label={t("Back to settings")} onClick={goBack}><ArrowLeft /></Button>}
-          <DialogTitle className="min-w-0 flex-1 truncate pl-1">{keyBarOpen ? t("Key bar") : page === null ? t("Settings") : label(page)}</DialogTitle>
+          <DialogTitle className="modal-title min-w-0 flex-1 truncate pl-1">{keyBarOpen ? t("Key bar") : page === null ? t("Settings") : label(page)}</DialogTitle>
         </header>
         {listShown && (
           <nav className="settings-nav" aria-label={t("Settings")}>

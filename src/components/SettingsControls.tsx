@@ -1,7 +1,7 @@
 import { Children, useEffect, useState, type ComponentProps, type ReactNode } from "react";
 import { Minus, Plus } from "../lib/icons.ts";
 import { cn } from "../lib/cn.ts";
-import { Button, Card, CardContent, CardHeader, CardRow, Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, Switch, ToggleGroup, ToggleGroupItem } from "./ui/index.ts";
+import { Button, Card, CardContent, CardHeader, CardRow, NativeSelect, Switch, ToggleGroup, ToggleGroupItem } from "./ui/index.ts";
 
 import "./SettingsControls.css";
 
@@ -50,16 +50,18 @@ export function Toggle({ checked, label, onChange, disabled, id }: { checked: bo
 
 export interface SelectOption { value: string; label: string; disabled?: boolean; /** a word for the pointer that rests on the option */ title?: string }
 
-/** A choice among many (themes, languages, modes): a field that opens the menu surface. Groups part the list under their labels. */
+/**
+ * A choice among many (themes, languages, modes, shortcuts): the browser's own select on the field
+ * surface (ui/native-select), not the Radix one. The regression scripts drive these as selects
+ * (selectOption, inputValue, option and optgroup), and a theme list is long enough to want the
+ * browser's own list on a phone. Groups part the list under their labels.
+ */
 export function SettingsSelect({ id, value, onChange, options, groups, className, disabled, "aria-label": ariaLabel }: { id?: string; value: string; onChange: (value: string) => void; options?: readonly SelectOption[]; groups?: readonly { label: string; options: readonly SelectOption[] }[]; className?: string; disabled?: boolean; "aria-label"?: string }) {
-  const items = (list: readonly SelectOption[]) => list.map((option) => <SelectItem key={option.value} value={option.value} disabled={option.disabled} title={option.title}>{option.label}</SelectItem>);
+  const items = (list: readonly SelectOption[]) => list.map((option) => <option key={option.value} value={option.value} disabled={option.disabled} title={option.title}>{option.label}</option>);
   return (
-    <Select value={value} onValueChange={onChange} disabled={disabled}>
-      <SelectTrigger id={id} aria-label={ariaLabel} className={cn("settings-select-trigger w-[13rem]", className)}><SelectValue /></SelectTrigger>
-      <SelectContent>
-        {groups ? groups.map((group) => <SelectGroup key={group.label}><SelectLabel>{group.label}</SelectLabel>{items(group.options)}</SelectGroup>) : items(options ?? [])}
-      </SelectContent>
-    </Select>
+    <NativeSelect id={id} aria-label={ariaLabel} className={cn("w-[13rem] max-w-full", className)} selectClassName="settings-select" value={value} disabled={disabled} onChange={(event) => onChange(event.target.value)}>
+      {groups ? groups.map((group) => <optgroup key={group.label} label={group.label}>{items(group.options)}</optgroup>) : items(options ?? [])}
+    </NativeSelect>
   );
 }
 
@@ -67,9 +69,11 @@ export interface SegmentedOption<T extends string> { value: T; label: string }
 
 /** One of a few short choices, all in sight. Five or more go in a select instead. */
 export function Segmented<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: readonly SegmentedOption<T>[]; onChange: (value: T) => void }) {
-  // a press on the chosen option would clear the group: a choice stays until another is made
+  // a multiple-choice group whose one value is the choice: its options are plain pressed buttons
+  // (aria-pressed), as the browser scripts read them (App.tsx's lens switch does the same), each in
+  // the Tab order; a press on the chosen option would clear the group, so only another one counts
   return (
-    <ToggleGroup type="single" value={value} aria-label={label} className="settings-segmented" onValueChange={(next) => { if (next) onChange(next as T); }}>
+    <ToggleGroup type="multiple" rovingFocus={false} value={[value]} aria-label={label} className="settings-segmented" onValueChange={(values) => { const next = values.find((chosen) => chosen !== value); if (next) onChange(next as T); }}>
       {options.map((option) => <ToggleGroupItem key={option.value} value={option.value}>{option.label}</ToggleGroupItem>)}
     </ToggleGroup>
   );

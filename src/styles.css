@@ -1755,8 +1755,7 @@ html:lang(ko) :is(.composer-text, .composer-measure, .terminal-input-text)::plac
 /* A title that wraps takes even lines, never a full line over a one-word stub: dialog titles, the
    empty chat's greeting and a Settings group's caption. */
 .modal-title,
-.composer-greeting-title,
-.settings-section h3 {
+.composer-greeting-title {
   text-wrap: balance;
 }
 
@@ -2163,22 +2162,11 @@ button {
   clip: rect(0 0 0 0);
 }
 
-.conn-dot {
-  flex: 0 0 auto;
-  width: var(--dot-size);
-  height: var(--dot-size);
-  border-radius: var(--radius-pill);
-  background: var(--status-done);
-}
 
 .conn-reconnecting {
   color: var(--status-working);
 }
 
-.conn-reconnecting .conn-dot {
-  background: var(--status-working);
-  animation: pulse var(--dur-pulse) var(--ease-pulse) infinite;
-}
 
 /* A narrow window: the chip keeps its pulsing dot and gives its word's room to the pane title.
    The word stays for a screen reader and in the chip's title. */
@@ -3322,8 +3310,7 @@ button {
     animation: none;
   }
 
-  .badge-working::before,
-  .conn-reconnecting .conn-dot {
+  .badge-working::before {
     animation: none;
   }
 }

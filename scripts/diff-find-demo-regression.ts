@@ -61,7 +61,7 @@ async function openDiff(page: Page, phone: boolean, path: string): Promise<void>
       await page.getByRole("dialog", { name: "More", exact: true }).getByRole("button", { name: "Browse files", exact: true }).tap();
     } else await page.locator(".header-files-button").click();
     await page.getByRole("dialog", { name: "Files", exact: true }).waitFor();
-    await page.getByRole("button", { name: "Changes", exact: true }).click();
+    await page.getByRole("tab", { name: "Changes", exact: true }).click();
   }
   await page.locator(".repo-changes:not([aria-busy='true']) .repo-change").first().waitFor();
   await page.locator(".repo-change").filter({ has: page.locator(".repo-change-path", { hasText: path }) }).first().click();

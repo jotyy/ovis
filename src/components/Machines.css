@@ -176,6 +176,7 @@
 
 .machine-offline { opacity: 0.5; }
 
+/* the manage panel (MachineSidebar.tsx): a Field, an Input and Buttons (ui/) on a card surface */
 .machine-controls {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -184,8 +185,8 @@
   margin: 0 var(--space-3) var(--space-2);
   padding: var(--space-3);
   background: var(--bg-elevated);
-  border: var(--hairline) solid var(--border);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
 }
 
 /* the rename form reflows: Rename sits at the end of the name field's row where the two fit, and
@@ -198,7 +199,7 @@
   gap: var(--space-2);
 }
 
-.machine-controls form > .field {
+.machine-controls form > [data-slot="field"] {
   flex: 1 1 10rem;
 }
 
@@ -211,14 +212,13 @@
   gap: var(--space-2);
 }
 
-.machine-controls .field {
+.machine-controls [data-slot="field"] {
   min-width: 0;
-  margin-bottom: 0;
 }
 
 /* a one-line label is the standard control's height (--control-h as a floor; the block padding is
    small enough to stay under it); only a label that wraps grows its button */
-.machine-controls .btn {
+.machine-controls [data-slot="button"] {
   max-width: 100%;
   min-width: 0;
   min-height: var(--control-h);
@@ -230,11 +230,11 @@
 
 /* fingers: a touch-sized Rename is taller than the field, so it keeps its own line under it */
 @media (pointer: coarse) {
-  .machine-controls .btn {
+  .machine-controls [data-slot="button"] {
     min-height: var(--touch-target);
   }
 
-  .machine-controls form > .field {
+  .machine-controls form > [data-slot="field"] {
     flex-basis: 100%;
   }
 }
@@ -242,7 +242,7 @@
 /* only the removal in flight (MachineSidebar.tsx marks it aria-busy) keeps its full strength, so its
    warning stays readable while the request runs: dimmed even to 0.9, its text fell under 4.5:1 in
    Tokyo Night. Disabled because another action of the panel is running, it dims like its neighbours */
-.machine-controls .btn-danger[aria-busy="true"] {
+.machine-controls [data-slot="button"][aria-busy="true"] {
   opacity: 1;
 }
 
@@ -361,17 +361,16 @@
   .machine-dot.is-reconnecting { animation: none; }
 }
 
-/* a PC that retrying cannot reconnect: the next step, spelled out, with its button */
+/* a PC that retrying cannot reconnect: the next step, spelled out, with its button. An Alert
+   (ui/alert) in the error's or the news' tone, stacked, in the roster's indent (so no w-full) */
 .machine-action {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-2);
+  width: auto;
   margin: 0 var(--space-3) var(--space-2) var(--machine-indent);
   padding: var(--space-2) var(--space-3);
-  border: var(--hairline) solid var(--status-blocked);
-  border-radius: var(--radius-md);
-  background: var(--bg-elevated);
   font-size: var(--fs-xs);
   line-height: var(--lh-tight);
 }
@@ -398,11 +397,6 @@
 
 .machine-action-reason {
   overflow-wrap: anywhere;
-}
-
-.machine-action.is-updating {
-  border-color: var(--border);
-  width: calc(100% - var(--space-3) - var(--machine-indent));
 }
 
 /* a bridge install: the step, a bar, the bytes and time left */
@@ -464,5 +458,4 @@
 /* an update in progress is news, not an error */
 .machine-action.is-updating .machine-action-text strong { color: var(--status-working); }
 
-.machine-action.is-setup { border-color: var(--border); }
 .machine-action.is-setup .machine-action-text strong { color: var(--text); }

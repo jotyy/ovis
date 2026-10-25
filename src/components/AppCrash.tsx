@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type Ref } from "react";
 import { copyText } from "../lib/clipboard.ts";
 import { crashProbe, type CrashRegion } from "../lib/crashProbe.ts";
 import { t, useT } from "../lib/i18n.ts";
+import { Button } from "./ui/button.tsx";
 import "./AppCrash.css";
 
 /** The error as text a bug report can carry: its message, its stack, where and on what it ran. */
@@ -28,8 +29,8 @@ export function AppCrash({ error }: { error: unknown }) {
         <h1 className="app-crash-title">{t("Something went wrong")}</h1>
         <p className="error-message">{t("The app hit an error and stopped drawing. Your terminals keep running in herdr.")}</p>
         <div className="app-crash-actions">
-          <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>{t("Reload app")}</button>
-          <button type="button" className="btn" onClick={() => void copyText(details, detailsRef.current).then(setCopied)}>{copied === true ? t("Copied") : t("Copy details")}</button>
+          <Button variant="accent" onClick={() => window.location.reload()}>{t("Reload app")}</Button>
+          <Button variant="field" onClick={() => void copyText(details, detailsRef.current).then(setCopied)}>{copied === true ? t("Copied") : t("Copy details")}</Button>
         </div>
         {/* opened when copying was refused: copyText has selected the text for a long press or Ctrl+C */}
         <details className="app-crash-details" open={copied === false || undefined}>
@@ -54,7 +55,7 @@ export function RegionCrash({ message, retry, retryLabel, buttonRef, onShown }: 
   return (
     <div className="error-state" role="alert">
       <p className="error-message">{message}</p>
-      <button type="button" ref={buttonRef} className="btn" onClick={retry}>{retryLabel ?? t("Try again")}</button>
+      <Button variant="field" ref={buttonRef} onClick={retry}>{retryLabel ?? t("Try again")}</Button>
     </div>
   );
 }

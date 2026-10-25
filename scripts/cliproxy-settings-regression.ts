@@ -161,7 +161,7 @@ return (u.pathname==='/api/usage'||u.pathname==='/api/cliproxy'||u.pathname.star
   await modal.getByRole("button", { name: /^Through the hub/ }).waitFor();
   await second.close();
   await modal.getByRole("button", { name: "Close", exact: true }).click();
-  await page.waitForFunction(() => document.activeElement === document.querySelector(".usage-accounts-header .btn"));
+  await page.waitForFunction(() => document.activeElement === document.querySelector(".usage-accounts-header [data-slot=button]"));
 
   // Given: a hub session is still waiting when its dialog is dismissed.
   await add.click();
@@ -214,7 +214,7 @@ return (u.pathname==='/api/usage'||u.pathname==='/api/cliproxy'||u.pathname.star
   await confirm.getByRole("button", { name: "Remove", exact: true }).click();
   assert.equal((await removed).status(), 200);
   await connection.waitFor({ state: "hidden" });
-  await page.waitForFunction(() => document.activeElement === document.querySelector(".usage-accounts-header .btn"));
+  await page.waitForFunction(() => document.activeElement === document.querySelector(".usage-accounts-header [data-slot=button]"));
   assert.equal(deletes, 1);
   await add.click();
   await modal.getByRole("button", { name: "Claude", exact: true }).click();

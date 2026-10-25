@@ -164,7 +164,7 @@ const select = async (page: Page, pane: string): Promise<void> => {
 const confirmRowOf = (page: Page): Promise<{ oneLine: boolean; height: number; over: number; text: { height: number; line: number; scrolls: boolean; whole: string } }> => page.evaluate(() => {
   const card = document.querySelector<HTMLElement>(".prompt-card")!;
   const row = card.querySelector<HTMLElement>(".prompt-card-confirm")!;
-  const [confirm, cancel] = [...row.querySelectorAll<HTMLElement>(".btn")].map((node) => node.getBoundingClientRect());
+  const [confirm, cancel] = [...row.querySelectorAll<HTMLElement>("[data-slot=button]")].map((node) => node.getBoundingClientRect());
   const text = row.querySelector<HTMLElement>(".prompt-card-confirm-text") ?? row.querySelector<HTMLElement>("span")!;
   return {
     oneLine: Math.abs(confirm!.top - cancel!.top) <= 1 && cancel!.left >= confirm!.right,
@@ -480,10 +480,10 @@ try {
           await page.locator(".composer-text").fill("2");
           await page.locator(".composer-text").press("Enter");
           await page.locator(".prompt-card-confirm").waitFor();
-          assert.deepEqual(await hitOf(page, ".prompt-card-confirm .btn-primary"), { hit: "self", visible: true }, `${label}: Confirm is in sight and pressable`);
+          assert.deepEqual(await hitOf(page, ".prompt-card-confirm .prompt-card-confirm-send"), { hit: "self", visible: true }, `${label}: Confirm is in sight and pressable`);
           // the pinned row is as short as it can be: Confirm and Cancel share one line
           assert.equal((await confirmRowOf(page)).oneLine, true, `${label}: Confirm and Cancel are on one line`);
-          assert.deepEqual(await hitOf(page, ".prompt-card-confirm .btn:not(.btn-primary)"), { hit: "self", visible: true }, `${label}: Cancel is in sight and pressable`);
+          assert.deepEqual(await hitOf(page, ".prompt-card-confirm .prompt-card-confirm-cancel"), { hit: "self", visible: true }, `${label}: Cancel is in sight and pressable`);
           await page.waitForFunction(() => document.querySelector(".prompt-card-option.is-typed")!.getAnimations().length === 0);
           await shot(`form-${label}`);
           // every option and the custom answer are reached by scrolling the card alone
@@ -493,9 +493,9 @@ try {
             assert.deepEqual(await reach(page, ".prompt-card-option[data-reach]"), { hit: "self", visible: true }, `${label}: option ${option + 1} is reachable`);
             await page.evaluate(() => document.querySelector("[data-reach]")!.removeAttribute("data-reach"));
           }
-          assert.deepEqual(await reach(page, ".prompt-card-custom .input"), { hit: "self", visible: true }, `${label}: the custom answer is reachable`);
-          assert.deepEqual(await reach(page, ".prompt-card-custom .btn"), { hit: "self", visible: true }, `${label}: its Send is reachable`);
-          assert.deepEqual(await hitOf(page, ".prompt-card-confirm .btn-primary"), { hit: "self", visible: true }, `${label}: Confirm stays in sight while the card is scrolled`);
+          assert.deepEqual(await reach(page, ".prompt-card-custom [data-slot=input]"), { hit: "self", visible: true }, `${label}: the custom answer is reachable`);
+          assert.deepEqual(await reach(page, ".prompt-card-custom [data-slot=button]"), { hit: "self", visible: true }, `${label}: its Send is reachable`);
+          assert.deepEqual(await hitOf(page, ".prompt-card-confirm .prompt-card-confirm-send"), { hit: "self", visible: true }, `${label}: Confirm stays in sight while the card is scrolled`);
           assert.equal((await layoutOf(page)).pageScrolls, false, `${label}: only the card scrolled`);
           // Confirm sends the typed pick, once, through the answer endpoint
           await page.locator(".prompt-card-confirm").getByRole("button", { name: "Confirm" }).click();
@@ -518,11 +518,11 @@ try {
           assert.equal(await page.locator(".prompt-card-tag").textContent(), "Recommended");
           assert.equal(layout.scrolls, true, "the form is taller than a phone with its keyboard up: the card scrolls");
           await shot("form-held-390x500");
-          assert.deepEqual(await reach(page, ".prompt-card-custom .input"), { hit: "self", visible: true });
+          assert.deepEqual(await reach(page, ".prompt-card-custom [data-slot=input]"), { hit: "self", visible: true });
           // the card's last row is pressed at its bottom edge
-          assert.deepEqual(await reach(page, ".prompt-card-custom .btn"), { hit: "self", visible: true });
-          assert.deepEqual(await hitOf(page, ".prompt-card-custom .btn", "bottom"), { hit: "self", visible: true });
-          await page.locator(".prompt-card-custom .input").fill("sqlite, one file");
+          assert.deepEqual(await reach(page, ".prompt-card-custom [data-slot=button]"), { hit: "self", visible: true });
+          assert.deepEqual(await hitOf(page, ".prompt-card-custom [data-slot=button]", "bottom"), { hit: "self", visible: true });
+          await page.locator(".prompt-card-custom [data-slot=input]").fill("sqlite, one file");
           await page.locator(".prompt-card-custom").getByRole("button", { name: "Send" }).tap();
           await page.locator(".prompt-card").getByText(FORM.question).waitFor({ state: "detached" });
           assert.deepEqual(await answersOf(page), [{ pane_id: panes.web, prompt_id: "demo-form", custom_text: "sqlite, one file" }]);
@@ -539,7 +539,7 @@ try {
         try {
           const type = await page.evaluate(() => {
             const of = (selector: string): { size: number; family: string } => { const style = getComputedStyle(document.querySelector(selector)!); return { size: parseFloat(style.fontSize), family: style.fontFamily }; };
-            return { prose: of(".chat-transcript"), title: of(".prompt-card-header h2"), option: of(".prompt-card-option-label"), body: of(".prompt-card-body"), keycap: of(".prompt-card-number"), scale: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--chat-scale")) };
+            return { prose: of(".chat-transcript"), title: of(".prompt-card-header [data-slot=card-title]"), option: of(".prompt-card-option-label"), body: of(".prompt-card-body"), keycap: of(".prompt-card-number"), scale: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--chat-scale")) };
           });
           assert.equal(type.prose.size, 22);
           assert.ok(type.scale > 1.5, `the chat is scaled (${type.scale})`);
@@ -593,7 +593,7 @@ try {
           assert.equal(await typing(), true, "a drag down a scrolled card keeps the keyboard");
           await page.locator(".prompt-card").evaluate((node) => { node.scrollTop = 0; });
           // the card's own field keeps its keyboard, and a press on a row is not a request to read
-          await drag(".prompt-card-custom .input");
+          await drag(".prompt-card-custom [data-slot=input]");
           assert.equal(await typing(), true, "a drag on the card's field keeps the keyboard");
           await click(".prompt-card-option-label");
           assert.equal(await typing(), true, "an option is a button: its tap is not a request to read");
@@ -642,7 +642,7 @@ try {
           assert.equal(row.text.scrolls, true, `${label}: and scrolls in itself`);
           assert.equal(row.oneLine, true, `${label}: Confirm and Cancel are on one line`);
           assert.ok(row.over >= 80, `${label}: the card keeps ${row.over}px of its ${card}px over the Confirm row (the row is ${row.height}px)`);
-          for (const button of [".prompt-card-confirm .btn-primary", ".prompt-card-confirm .btn:not(.btn-primary)"]) assert.deepEqual(await hitOf(page, button), { hit: "self", visible: true }, `${label}: ${button} is in sight and pressable`);
+          for (const button of [".prompt-card-confirm .prompt-card-confirm-send", ".prompt-card-confirm .prompt-card-confirm-cancel"]) assert.deepEqual(await hitOf(page, button), { hit: "self", visible: true }, `${label}: ${button} is in sight and pressable`);
           await shot(label.replaceAll(" ", "-"));
           // the short options on both sides of the long one are reached whole; the long one, taller
           // than the card, is pressed at its top
@@ -658,7 +658,7 @@ try {
             const rect = long.getBoundingClientRect();
             return document.elementFromPoint(rect.left + rect.width / 2, rect.top + 12)?.closest(".prompt-card-option") === long;
           }), true, `${label}: the long option is pressable`);
-          assert.deepEqual(await hitOf(page, ".prompt-card-confirm .btn-primary"), { hit: "self", visible: true }, `${label}: Confirm stays in sight while the card is scrolled`);
+          assert.deepEqual(await hitOf(page, ".prompt-card-confirm .prompt-card-confirm-send"), { hit: "self", visible: true }, `${label}: Confirm stays in sight while the card is scrolled`);
           assert.equal((await layoutOf(page)).pageScrolls, false, `${label}: only the card scrolled`);
           await page.locator(".prompt-card-confirm").getByRole("button", { name: "Confirm" }).click();
           await page.locator(".prompt-card").getByText(REVIEW.question).waitFor({ state: "detached" });
@@ -672,7 +672,7 @@ try {
         // A prompt that takes another's place opens at its top, with nothing of the one before it
         const { page, errors, close } = await open({ width: 390, height: 500, touch: true, prompt: FORM });
         try {
-          await page.locator(".prompt-card-custom .input").fill("sqlite");
+          await page.locator(".prompt-card-custom [data-slot=input]").fill("sqlite");
           const before = await page.evaluate(() => {
             const card = document.querySelector<HTMLElement>(".prompt-card")!;
             const body = card.querySelector<HTMLElement>(".prompt-card-body")!;
@@ -685,7 +685,7 @@ try {
           await page.locator(".prompt-card").getByText(PLAN.title).waitFor();
           const after = await page.evaluate(() => {
             const card = document.querySelector<HTMLElement>(".prompt-card")!;
-            return { card: card.scrollTop, body: card.querySelector<HTMLElement>(".prompt-card-body")!.scrollTop, custom: card.querySelector<HTMLInputElement>(".prompt-card-custom .input")!.value, cards: document.querySelectorAll(".prompt-card").length, inRegion: card.parentElement!.getAttribute("aria-live") };
+            return { card: card.scrollTop, body: card.querySelector<HTMLElement>(".prompt-card-body")!.scrollTop, custom: card.querySelector<HTMLInputElement>(".prompt-card-custom [data-slot=input]")!.value, cards: document.querySelectorAll(".prompt-card").length, inRegion: card.parentElement!.getAttribute("aria-live") };
           });
           assert.deepEqual(after, { card: 0, body: 0, custom: "", cards: 1, inRegion: "polite" }, "the next prompt opens at its top, empty, as an addition to the live region");
           assert.deepEqual(errors, []);
@@ -816,7 +816,7 @@ try {
           await box.fill("3");
           await box.press("Enter");
           await page.locator(".prompt-card-confirm").waitFor();
-          await page.locator(".prompt-card-custom .input").fill("only for exports over 10 MB");
+          await page.locator(".prompt-card-custom [data-slot=input]").fill("only for exports over 10 MB");
           await watchCards(page);
           await setPrompt(page, AGAIN);
           await page.waitForFunction(() => (window as unknown as { cardsRemoved: number }).cardsRemoved === 1, undefined, { timeout: 15_000 });
@@ -824,7 +824,7 @@ try {
           assert.equal(await page.locator(".prompt-card").count(), 1, "the second asking has a card of its own");
           assert.equal(await page.locator(".prompt-card-confirm").count(), 0, "which does not inherit the first asking's typed pick");
           assert.equal(await page.locator(".prompt-card-option.is-typed").count(), 0);
-          assert.equal(await page.locator(".prompt-card-custom .input").inputValue(), "", "nor what was being written in the first one's card");
+          assert.equal(await page.locator(".prompt-card-custom [data-slot=input]").inputValue(), "", "nor what was being written in the first one's card");
           assert.deepEqual(await answersOf(page), [], "and nothing was sent");
 
           // an answer pressed for the first asking that comes back once the second one is showing
@@ -950,8 +950,8 @@ try {
             assert.equal(await active(), "composer-text", `${key} on an option hands the focus to the message box on a coarse pointer`);
             await ask();
           }
-          await page.locator(".prompt-card-custom .input").fill("sqlite, one file");
-          await page.locator(".prompt-card-custom .input").press("Enter");
+          await page.locator(".prompt-card-custom [data-slot=input]").fill("sqlite, one file");
+          await page.locator(".prompt-card-custom [data-slot=input]").press("Enter");
           await gone();
           assert.equal(await active(), "composer-text", "Enter in the card's field hands the focus to the message box");
           await ask();

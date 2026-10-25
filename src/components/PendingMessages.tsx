@@ -64,7 +64,7 @@ export function PendingMessages({ messages, active = true, connected, agent, blo
       return <li key={message.id} className="pending-message" data-state={message.state}>
         <div className="pending-message-bubble" aria-busy={busy || undefined}>{message.text}</div>
         <div className="pending-message-meta">
-          <Badge tone={tone} className="pending-message-note pending-message-status" role="status">{status}</Badge>
+          <Badge tone={tone} className="pending-message-status" role="status">{status}</Badge>
           {!uncertain && <Button variant="field" size="xs" className="pending-message-action pending-message-send"
             aria-label={`${t("Send now")}: ${message.text}`} aria-busy={busy || undefined} title={t("Send now")}
             disabled={!connected || blocked || busy} onClick={(event) => {

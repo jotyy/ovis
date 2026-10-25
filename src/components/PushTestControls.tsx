@@ -5,6 +5,7 @@ import { inNativeApp } from "../lib/nativeApp.ts";
 import { notificationState } from "../lib/notifications.ts";
 import { pushSupported, testDevicePush } from "../lib/push.ts";
 import { useSettings } from "../lib/settings.ts";
+import { Button } from "./ui/button.tsx";
 
 type Result = Awaited<ReturnType<typeof testDevicePush>> | "gone" | "failed" | "sending" | null;
 
@@ -47,10 +48,10 @@ export function PushTestControls({ onEnable }: { onEnable: () => Promise<boolean
               : !settings.alertsOn ? t("Alerts off") : null}
           </span>
         </div>
-        <button type="button" className="btn" disabled={busy || !settings.alertsOn || !supported || denied} onClick={() => void send(false)}>{busy ? t("Sending…") : t("Send test")}</button>
+        <Button variant="field" disabled={busy || !settings.alertsOn || !supported || denied} onClick={() => void send(false)}>{busy ? t("Sending…") : t("Send test")}</Button>
       </div>
       {enable && supported && !denied && <div className="settings-actions">
-        <button type="button" className="btn" disabled={busy} onClick={() => void send(true)}>{t("Turn alerts on again")}</button>
+        <Button variant="field" disabled={busy} onClick={() => void send(true)}>{t("Turn alerts on again")}</Button>
       </div>}
     </div>
   );

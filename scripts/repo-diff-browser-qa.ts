@@ -1410,7 +1410,7 @@ try {
     // a computer's header opens Files from its own button (the More menu keeps it on a phone)
     await page.locator(".header-files-button").click();
     await page.getByRole("dialog", { name: "Files", exact: true }).waitFor();
-    await page.getByRole("button", { name: "Changes", exact: true }).click();
+    await page.getByRole("tab", { name: "Changes", exact: true }).click();
     const demoRows = await changeRows(page);
     assert.deepEqual(demoRows, ["M docs/checkout-flow.png Binary", "R src/idempotency.ts → src/lib/idempotency.ts +0−0", "? src/money.test.ts", "M src/money.ts +4−1"], `the demo's changes: ${JSON.stringify(demoRows)}`);
     await openChange(page, "src/money.ts");

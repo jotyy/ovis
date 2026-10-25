@@ -218,7 +218,7 @@ export function RowMenu({ anchor, point, restoreFocusTo, title, subtitle, detail
         className={cn("row-menu", anchor.closest('[aria-modal="true"]') && "is-over-modal", variant === "paths" && "row-menu-paths")}
         aria-label={title}
         side="bottom"
-        align={align}
+        align={point ? "start" : align}
         sideOffset={GAP}
         collisionPadding={EDGE}
         loop={!point}

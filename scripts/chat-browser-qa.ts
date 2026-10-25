@@ -135,7 +135,7 @@ try {
   assert.equal(await row.locator(".work-row-icon, .work-row-sep").count(), 0);
   // a failed call says so after its object, never between the verb and what it ran
   const failedRow = log.getByRole("button", { name: "Ran bun test failed", exact: true });
-  assert.equal(await failedRow.evaluate((node) => node.lastElementChild?.className), "work-row-failed");
+  assert.equal(await failedRow.evaluate((node) => node.lastElementChild?.classList.contains("work-row-failed")), true);
   assert.equal(await failedRow.getAttribute("title"), "exec_command · bun test");
   // the row opened while the turn ran stays open through fold and unfold: a click would close it
   if (await row.getAttribute("aria-expanded") !== "true") await row.click();

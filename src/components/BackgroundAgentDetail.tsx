@@ -104,7 +104,7 @@ export function BackgroundAgentDetail({ paneId, task, onClose }: { paneId: strin
               <DialogTitle className="bg-agent-detail-title" id={`${id}-title`}>{detail?.title ?? task.title}</DialogTitle>
               {meta.length > 0 && <p className="bg-agent-detail-meta">{meta}</p>}
             </div>
-            {supported && <IconButton className="icon-button agent-detail-refresh" label={t("Refresh")} disabled={loading} onClick={load}><RefreshCw aria-hidden="true" /></IconButton>}
+            {supported && <IconButton className="agent-detail-refresh" label={t("Refresh")} disabled={loading} onClick={load}><RefreshCw aria-hidden="true" /></IconButton>}
           </DialogHeader>
           {/* the body is the one scroll region: a tab stop of its own, so the keyboard reaches a long transcript */}
           <DialogBody className="bg-agent-detail-body" role="region" aria-labelledby={`${id}-title`} tabIndex={0}>

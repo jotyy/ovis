@@ -995,6 +995,12 @@ skip between neighbours) through `<IconButton>`, under one `<TooltipProvider>` p
   palette), never the browser's own grey (3.8:1 on a dark field).
 
 ### Select (`<Select>`, `ui/select.tsx`)
+
+Two rows keep a native `<select>` under the same field surface (`<NativeSelect>`, `ui/native-select.tsx`):
+the Settings selects and New workspace's Effort. The browser regression scripts drive them through
+Playwright's native select API (`selectOption`, `inputValue`, `option:checked`), which a Radix
+listbox has no equivalent for. A segmented Settings choice is a `<ToggleGroup type="multiple">`
+holding one value, so its options stay `<button aria-pressed>` for the same scripts.
 - A `fieldSurface` trigger (`h-input`, the chosen value truncating, a dim chevron that turns while
   open, `shadow-focus` while open) that opens the menu surface below (`position="popper"`, as wide
   as the trigger at least), its items `h-control` rows on `bg-fill-3` when highlighted, the chosen

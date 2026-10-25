@@ -28,13 +28,14 @@
   left: 0;
   width: var(--space-2);
   height: 1px;
-  background: var(--border-strong);
+  /* a dim word's ink, faded: an edge colour on the content's ground is near invisible in light */
+  background: color-mix(in srgb, var(--text-dim) 60%, transparent);
   transition: width var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
 
 .chat-minimap-tick:hover::before {
   width: var(--space-3);
-  background: var(--text-dim);
+  background: var(--text);
 }
 
 .chat-minimap-tick[aria-current="true"]::before {

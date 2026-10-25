@@ -32,7 +32,7 @@ function childPath(parent: string, name: string): string {
 }
 
 /** a row of the listing: a glyph, a name, and what trails it (a folder's chevron, a file's size) */
-const row = "group flex min-h-9 w-full cursor-pointer items-center gap-2 rounded-md px-2 text-left text-sm text-text outline-none transition-[background-color,color] duration-150 ease-in-out hover:bg-fill-2 hover:text-strong focus-visible:bg-fill-2 focus-visible:ring-2 focus-visible:ring-accent/60 disabled:pointer-events-none disabled:opacity-50 coarse:min-h-touch [&>svg]:size-icon [&>svg]:shrink-0";
+const row = "group flex min-h-9 w-full cursor-pointer items-center gap-2 rounded-md px-2 text-left text-sm text-text outline-none transition-[background-color,color] duration-150 ease-in-out hover:bg-fill-2 hover:text-strong focus-visible:bg-fill-2 focus-visible:ring-2 focus-visible:ring-accent/60 disabled:pointer-events-none disabled:opacity-50 coarse:min-h-touch [&>svg:first-child]:size-icon [&>svg]:shrink-0";
 
 const note = "m-0 px-3 py-2 text-sm text-dim";
 
@@ -252,10 +252,10 @@ export function DirectoryBrowser({ start, onPick, onOpenFile, onFolder }: Direct
             {listing === null && <li className={cn(note, "dir-browser-note")} role="status">{t("Loading…")}</li>}
             {directories?.map((name) => (
               <li key={name}>
-                <button type="button" data-slot="button" className={cn(row, "dir-browser-item [&>svg]:text-accent")} disabled={loading} onClick={() => void open(childPath(path, name), hidden, false)}>
+                <button type="button" data-slot="button" className={cn(row, "dir-browser-item [&>svg:first-child]:text-accent")} disabled={loading} onClick={() => void open(childPath(path, name), hidden, false)}>
                   <FileGlyph name={name} kind="directory" />
                   <span className="min-w-0 flex-1 truncate">{name}</span>
-                  <ChevronRight aria-hidden="true" className="ml-auto size-4! text-dim opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 coarse:opacity-100" />
+                  <ChevronRight aria-hidden="true" className="ml-auto size-4 text-dim opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 coarse:opacity-100" />
                 </button>
               </li>
             ))}

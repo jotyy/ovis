@@ -495,7 +495,7 @@
   gap: var(--space-2);
 }
 
-.prompt-card-custom .input {
+.prompt-card-custom [data-slot="input"] {
   flex: 1 1 auto;
   min-width: 0;
 }

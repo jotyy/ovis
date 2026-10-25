@@ -23,7 +23,7 @@ export function DialogOverlay({ className, ...props }: ComponentProps<typeof Dia
   return <DialogPrimitive.Overlay data-slot="dialog-overlay" className={cn("fixed inset-0 z-30 bg-scrim backdrop-scrim data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out motion-reduce:animate-none", className)} {...props} />;
 }
 
-export function DialogContent({ className, children, variant = "modal", closeLabel = "Close", ...props }: ComponentProps<typeof DialogPrimitive.Content> & { variant?: keyof typeof contentVariants; closeLabel?: string }) {
+export function DialogContent({ className, children, variant = "modal", closeLabel, ...props }: ComponentProps<typeof DialogPrimitive.Content> & { variant?: keyof typeof contentVariants; /** the close button's name, translated by the caller */ closeLabel: string }) {
   return (
     <DialogPortal>
       <DialogOverlay />

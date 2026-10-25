@@ -5,7 +5,7 @@
   min-width: 0;
 }
 
-.portal-start .input {
+.portal-start [data-slot="input"] {
   flex: 1 1 auto;
   min-width: 0;
 }

@@ -360,14 +360,14 @@ try {
         assert.equal(await model.getAttribute("list"), "new-session-models", "Claude Code's documented aliases are offered");
         await model.fill("two words");
         const start = dialog.getByRole("button", { name: "Start", exact: true });
-        await page.waitForFunction(() => (document.querySelector<HTMLButtonElement>(".new-session-modal .btn-primary")?.disabled ?? false));
+        await page.waitForFunction(() => (document.querySelector<HTMLButtonElement>(".new-session-modal button[type=submit]")?.disabled ?? false));
         assert.equal(await model.getAttribute("aria-invalid"), "true");
         assert.equal(await dialog.getByRole("alert").count(), 1, "the refusal is said under the field");
         await dialog.getByLabel("Effort").selectOption("max");
         await settled(page);
         await page.screenshot({ path: join(evidence, "desktop-light-invalid-model.png") });
         await pickAgent(page, dialog, "Oh My Pi");
-        await page.waitForFunction(() => !(document.querySelector<HTMLButtonElement>(".new-session-modal .btn-primary")?.disabled ?? true));
+        await page.waitForFunction(() => !(document.querySelector<HTMLButtonElement>(".new-session-modal button[type=submit]")?.disabled ?? true));
         assert.equal(await dialog.getByLabel("Model").count(), 0, "the choices the next agent's launch does not take are dropped with it");
         await pickAgent(page, dialog, "Claude Code");
         assert.equal(await dialog.getByLabel("Model").inputValue(), "", "dropped, not kept for later");

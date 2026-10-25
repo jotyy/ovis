@@ -4,7 +4,7 @@ import { FolderSearch, X } from "../lib/icons.ts";
 import "./FilesDialog.css";
 import { DirectoryBrowser } from "./DirectoryBrowser.tsx";
 import { RepoChanges } from "./RepoChanges.tsx";
-import { Button, DialogBody, DialogHeader, IconButton, Tabs, TabsContent, TabsList, TabsTrigger, TooltipProvider } from "./ui/index.ts";
+import { DialogBody, DialogHeader, IconButton, Tabs, TabsContent, TabsList, TabsTrigger, TooltipProvider } from "./ui/index.ts";
 import type { RepoDiffFile } from "../../shared/protocol.ts";
 import { useT } from "../lib/i18n.ts";
 import type { RepoComparison } from "../lib/repoDiff.ts";
@@ -68,7 +68,7 @@ export function FilesDialog({ start, paneId, viewing, onOpenFile, onOpenDiff, on
               </TabsList>
               <span className="absolute top-3 right-3 flex items-center gap-1">
                 {!phone && <IconButton label={t("Browse folders in the palette")} onClick={browseFolders}><FolderSearch aria-hidden="true" /></IconButton>}
-                <Button variant="ghost" size="icon" className="text-dim" aria-label={t("Close files")} onClick={onClose}><X aria-hidden="true" /></Button>
+                <IconButton label={t("Close files")} onClick={onClose}><X aria-hidden="true" /></IconButton>
               </span>
             </DialogHeader>
             <DialogBody>
