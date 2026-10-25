@@ -13,6 +13,7 @@ import {
 } from "react";
 import { flushSync } from "react-dom";
 import { ArrowUp, FileText, Folder, FolderGit2, GitBranch, LoaderCircle, MessageSquarePlus, Minimize2, Package, Plus, Puzzle, Square, TriangleAlert, UserRound, X, type IconComponent } from "../lib/icons.ts";
+import { Alert, Badge, Button, IconButton, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/index.ts";
 
 import "./Composer.css";
 
@@ -210,9 +211,9 @@ function ContextRing({ context, shown, readOnly = false, onToggle, onCompact }: 
       </svg>
       {shown && <span className="composer-context-text">{label}</span>}
     </button>
-    {shown && onCompact && <button type="button" className="composer-compact" title={t("Compact context")} aria-label={t("Compact context")} onClick={onCompact}>
+    {shown && onCompact && <IconButton size="icon-sm" className="composer-compact" label={t("Compact context")} onClick={onCompact}>
       <Minimize2 aria-hidden="true" />
-    </button>}
+    </IconButton>}
     </>
   );
 }
@@ -1059,11 +1060,11 @@ export function Composer({
   // the suggestions' own close, for a pointer or a phone, which has no Escape: it does what Escape does, and the
   // text and the focus stay in the box (a press never takes the focus; a key on it hands it back)
   const menuClose = (
-    <button type="button" className="composer-menu-close" aria-label={t("Close suggestions")} title={t("Close suggestions")}
+    <IconButton className="composer-menu-close" label={t("Close suggestions")}
       onMouseDown={(event) => event.preventDefault()}
       onClick={(event) => { setMenuDismissed(true); if (event.detail === 0) textareaRef.current?.focus({ preventScroll: true }); }}>
       <X aria-hidden="true" />
-    </button>
+    </IconButton>
   );
   // the arrow keys move the selection, not the focus (it stays in the box), so the browser does not scroll to it
   useEffect(() => {
@@ -1071,38 +1072,40 @@ export function Composer({
   }, [menuOpen, menuId, selectedIndex, choices]);
 
   return (
+    <TooltipProvider>
     <div className={`composer${notices ? " has-notices" : ""}`} role="group" aria-label={t("Message composer")} data-dictating={dictation.voice.state !== "idle" ? "" : undefined} inert={inert || undefined}>
       {greeting}
       {notices}
       {/* no Tab key on a phone: the suggestion can be a chip there that fills the box, when Settings asks for it */}
       {settings.suggestionChip && offered !== null && text === "" && (
         <div className="composer-quick composer-suggestion-row">
-          <button type="button" className="composer-quick-reply composer-suggestion" title={t("Use the suggestion")} onClick={() => setTextAndCaret(offered, offered.length)}>
+          <Button variant="field" size="sm" className="composer-quick-reply composer-suggestion" title={t("Use the suggestion")} onClick={() => setTextAndCaret(offered, offered.length)}>
             <span aria-hidden="true">↹ </span>{offered}
-          </button>
+          </Button>
         </div>
       )}
 
       {quickOpen && quickReplies.length > 0 && (
         <div className="composer-quick" role="group" aria-label={t("Quick replies")}>
           {quickReplies.map((reply, index) => (
-            <button
+            <Button
               key={`${index}:${reply}`}
-              type="button"
+              variant="field"
+              size="sm"
               className="composer-quick-reply"
               title={t("Send “{reply}”", { reply })}
               disabled={!connected || sending}
               onClick={() => sendQuick(reply)}
             >
               {reply}
-            </button>
+            </Button>
           ))}
         </div>
       )}
 
       {/* why the message in the box did not go: on the box's top edge, read with it, its one way on beside it */}
       {note !== null && noteLine !== null && (
-        <div className={`composer-note${typeof note === "object" && !("failure" in note) ? " composer-note-offer" : ""}`} role="alert">
+        <Alert tone="danger" className={`composer-note${typeof note === "object" && !("failure" in note) ? " composer-note-offer" : ""}`}>
           <TriangleAlert className="composer-note-icon" aria-hidden="true" />
           <div className="composer-note-text">
             {noteLine}
@@ -1115,10 +1118,10 @@ export function Composer({
           {/* the draft named above, never what has replaced it since: the server checks; a box it could
               not tell empty, sent over only in the same Claude terminal the refusal was for */}
           {typeof note === "object" && ("failure" in note
-            ? offersRetry(note.failure) && <button type="button" className="composer-note-action" disabled={!connected} onClick={() => retryUpload(note.attachment)}>{t("Try again")}</button>
-            : <button type="button" className="composer-note-action" disabled={!connected || uploading || roomless !== undefined || sending || text.trim().length === 0}
-              onClick={() => "draft" in note ? send(note.draft) : send(undefined, true)}>{"draft" in note ? t("Clear it and send") : t("Send anyway")}</button>)}
-        </div>
+            ? offersRetry(note.failure) && <Button variant="field" size="sm" className="composer-note-action" disabled={!connected} onClick={() => retryUpload(note.attachment)}>{t("Try again")}</Button>
+            : <Button variant="field" size="sm" className="composer-note-action" disabled={!connected || uploading || roomless !== undefined || sending || text.trim().length === 0}
+              onClick={() => "draft" in note ? send(note.draft) : send(undefined, true)}>{"draft" in note ? t("Clear it and send") : t("Send anyway")}</Button>)}
+        </Alert>
       )}
 
       <div
@@ -1182,7 +1185,7 @@ export function Composer({
                     >
                       {Owner !== null && <Owner aria-hidden="true" />}
                       <span className="menu-item-main">{prefix}{command.name}</span>
-                      {terminalCommand(command) && <span className="badge composer-menu-badge">{t("Terminal")}</span>}
+                      {terminalCommand(command) && <Badge tone="idle" className="composer-menu-badge">{t("Terminal")}</Badge>}
                       {owner !== null && <span className="visually-hidden">{owner}</span>}
                       <span className="menu-item-hint">{withSource && owner === null ? `${t(SOURCE_LABEL[command.source])}${description ? " · " : ""}` : ""}{description}</span>
                     </button>
@@ -1263,9 +1266,9 @@ export function Composer({
                     ? <><TriangleAlert aria-hidden="true" /><span className="visually-hidden">{t(attachment.state === "error" ? "Failed" : "No room")}</span></>
                     : t(attachment.state === "uploading" ? "Uploading" : "Attached")}
                 </span>
-                <button type="button" aria-label={t("Remove {file}", { file: attachment.file.name })} onClick={() => removeAttachment(attachment)}>
+                <IconButton size="icon-sm" className="composer-attachment-remove" label={t("Remove {file}", { file: attachment.file.name })} onClick={() => removeAttachment(attachment)}>
                   <X aria-hidden="true" />
-                </button>
+                </IconButton>
               </div>
             ))}
           </div>
@@ -1341,30 +1344,26 @@ export function Composer({
               void uploadImages(picked);
             }}
           />
-          <button
-            type="button"
-            className="icon-button composer-attach"
-            aria-label={t("Attach files")}
-            title={t("Attach files")}
+          <IconButton
+            className="composer-attach"
+            label={t("Attach files")}
             disabled={!connected || uploading}
             onClick={() => fileInputRef.current?.click()}
           >
             <Plus aria-hidden="true" />
-          </button>
+          </IconButton>
           {dictation.shown && <MicButton dictation={dictation} />}
           {/* only once this device turned it on (Settings → Chat → Composer; the composer's row stays minimal, and
               the tab menu opens the same dialog), and in a mouse-driven window only, like the usage glance: a phone's
               card has no row to spare beside the mic and the tasks chip, and its tab menu carries New tab with agent… already */}
           {onOpenNewSession && settings.composerNewTabButton && role !== "observe" && !mobile && (
-            <button
-              type="button"
-              className="icon-button composer-new-session"
-              aria-label={t("New tab with an agent…")}
-              title={t("New tab with an agent…")}
+            <IconButton
+              className="composer-new-session"
+              label={t("New tab with an agent…")}
               onClick={onOpenNewSession}
             >
               <MessageSquarePlus aria-hidden="true" />
-            </button>
+            </IconButton>
           )}
           <BackgroundTasks paneId={paneId} count={backgroundTasks} omo={agent === "omo"} claude={agent === "claude"} plan={plan} />
         </div>
@@ -1418,31 +1417,43 @@ export function Composer({
         </div>
         <div className="composer-controls composer-controls-right">
           {!sendShown ? (
-            <button
-              type="button"
-              className="composer-action composer-stop"
-              aria-label={t("Stop agent")}
-              title={t("Stop agent")}
-              disabled={!connected}
-              onClick={onAbort}
-            >
-              <Square aria-hidden="true" />
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="field"
+                  size="icon"
+                  className="composer-action composer-stop"
+                  aria-label={t("Stop agent")}
+                  title={t("Stop agent")}
+                  disabled={!connected}
+                  onClick={onAbort}
+                >
+                  <Square aria-hidden="true" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t("Stop agent")}</TooltipContent>
+            </Tooltip>
           ) : (
-            <button
-              type="button"
-              className="composer-action composer-send"
-              aria-label={t("Send message")}
-              title={sending ? t("Sending…") : t("Send message")}
-              aria-busy={sending || undefined}
-              disabled={!connected || uploading || roomless !== undefined || sending || text.trim().length === 0}
-              // focus stays in the text box: leaving it closes the soft keyboard and moves the button
-              // out from under the tap before the click lands
-              onPointerDown={(event) => event.preventDefault()}
-              onClick={sendTapped}
-            >
-              {sending ? <LoaderCircle className="composer-send-progress" aria-hidden="true" /> : <ArrowUp aria-hidden="true" />}
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="accent"
+                  size="icon"
+                  className="composer-action composer-send"
+                  aria-label={t("Send message")}
+                  title={sending ? t("Sending…") : t("Send message")}
+                  aria-busy={sending || undefined}
+                  disabled={!connected || uploading || roomless !== undefined || sending || text.trim().length === 0}
+                  // focus stays in the text box: leaving it closes the soft keyboard and moves the button
+                  // out from under the tap before the click lands
+                  onPointerDown={(event) => event.preventDefault()}
+                  onClick={sendTapped}
+                >
+                  {sending ? <LoaderCircle className="composer-send-progress" aria-hidden="true" /> : <ArrowUp aria-hidden="true" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{sending ? t("Sending…") : t("Send message")}</TooltipContent>
+            </Tooltip>
           )}
         </div>
       </div>
@@ -1466,5 +1477,6 @@ export function Composer({
       {/* above the whole composer: inside the surface it would cover the text being dictated */}
       {dictation.shown && <VoiceRecordingPill dictation={dictation} align="start" />}
     </div>
+    </TooltipProvider>
   );
 }

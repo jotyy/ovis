@@ -23,8 +23,8 @@
   height: var(--keybar-h);
   /* the keys stand off the pane's edges rather than against its border */
   padding: 0 var(--space-2);
-  border-top: var(--hairline) solid var(--border);
-  background: var(--bg-panel);
+  /* parted from the grid by an etched rule (the divider token, as the divider-t utility) */
+  background: var(--divider) top / 100% var(--divider-h) no-repeat, var(--bg-panel);
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
@@ -74,13 +74,18 @@
      height is drawn at --key-h and reaches the touch target through the expander below */
   min-width: var(--touch-target);
   height: var(--key-h);
-  padding: 0 var(--space-1);
-  background: transparent;
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-sm);
+  padding: 0 var(--space-2);
+  /* a small raised cap (the Kbd of components/ui/kbd.tsx, at a finger's size): a field's face with
+     its ring of shadow, its legend set into it */
+  background: var(--bg-elevated);
+  border: 0;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-surface);
   color: var(--text);
   font-family: var(--font-mono);
   font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  text-shadow: var(--text-shadow-engraved);
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
@@ -89,16 +94,21 @@
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-in-out),
+    box-shadow var(--dur-fast) var(--ease-in-out),
+    color var(--dur-fast) var(--ease-in-out);
 }
 
-/* the key's --touch-target tap area: measured from the key's padding box, inside its hairline
-   edge, so the edge is counted out (as CommandPalette.css's filter chips) */
+/* the key's --touch-target tap area: measured from the key's padding box (as CommandPalette.css's
+   filter chips) */
 .key::before {
   content: "";
   position: absolute;
-  inset: calc((var(--key-h) - var(--touch-target)) / 2 - var(--hairline)) 0;
+  inset: calc((var(--key-h) - var(--touch-target)) / 2) 0;
+}
+
+.key:disabled {
+  opacity: 0.5;
 }
 
 .key svg {
@@ -126,21 +136,25 @@
 
 /* hover only where a pointer can hover: a tapped key must not stay lit */
 @media (hover: hover) {
-  .key:hover {
+  .key:hover:not(:disabled) {
     background: var(--bg-hover);
   }
 }
 
-.key:active,
-.key.is-armed {
-  background: var(--bg-elevated);
-  border-color: var(--accent);
+/* pressed: the fill of light a pressed control takes */
+.key:active:not(:disabled) {
+  background: var(--fill-3);
+  background-color: color-mix(in srgb, var(--bg-elevated) 80%, var(--bg));
   color: var(--text-strong);
+  opacity: 1;
 }
 
-/* a key shows its press in its own colours, not with the dim other buttons take (styles.css) */
-.key:active {
-  opacity: 1;
+/* a sticky modifier (and the Input line mode) held: the accent ring a segmented choice has, its legend in the accent */
+.key.is-armed,
+.key[data-state="on"] {
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 60%, transparent), var(--shadow-surface);
+  color: var(--accent);
 }
 
 @media (pointer: coarse), (max-width: 768px) {

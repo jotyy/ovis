@@ -7,10 +7,26 @@ import { DEFAULT_KEY_BAR_ITEMS, KEY_BAR_ITEMS_MAX, KEY_BAR_KEYS, keyBarInputSequ
 import { NO_STICKY_MODIFIERS, type StickyModifiers } from "../lib/keys.ts";
 import { useSettings } from "../lib/settings.ts";
 import { useT } from "../lib/i18n.ts";
+import { SettingsGroup, SettingsSelect } from "./SettingsControls.tsx";
+import { Button, CardRow, Field, Input, Kbd, ToggleGroup, ToggleGroupItem } from "./ui/index.ts";
 
 const MODIFIERS: readonly (keyof StickyModifiers)[] = ["ctrl", "alt", "shift"];
 const MODIFIER_CAPS: Record<keyof StickyModifiers, string> = { ctrl: "Ctrl", alt: "Alt", shift: "Shift" };
 const CHARACTER_KEY = "character";
+
+/** The modifiers chosen among the three, as a segmented group that takes several at once. */
+function ModifierPicks({ label, value, disabledWhenOff, onToggle }: { label: string; value: readonly (keyof StickyModifiers)[]; disabledWhenOff?: boolean; onToggle: (modifier: keyof StickyModifiers, on: boolean) => void }) {
+  return (
+    <ToggleGroup type="multiple" aria-label={label} value={[...value]} onValueChange={(next) => {
+      for (const modifier of MODIFIERS) {
+        const on = next.includes(modifier);
+        if (on !== value.includes(modifier)) onToggle(modifier, on);
+      }
+    }}>
+      {MODIFIERS.map((modifier) => <ToggleGroupItem key={modifier} value={modifier} className="font-mono" disabled={disabledWhenOff && !value.includes(modifier)}>{MODIFIER_CAPS[modifier]}</ToggleGroupItem>)}
+    </ToggleGroup>
+  );
+}
 
 /** The phone's key row, edited in its display order without requiring a drag gesture. */
 export function KeyBarSettings() {
@@ -48,71 +64,61 @@ export function KeyBarSettings() {
   const characterValid = comboKey !== CHARACTER_KEY || ([...character].length === 1 && keyBarInputSequence(character, false) !== null);
   const combo: KeyBarItem = { type: "key", key: base, modifiers: comboModifiers };
   const comboExists = characterValid && ids.has(keyBarItemId(combo));
+  const heldModifiers = MODIFIERS.filter((modifier) => ids.has(keyBarItemId({ type: "modifier", modifier })));
 
   return (
     <div className="key-bar-settings">
-      <p className="settings-hint">{t("Choose the keys and their order under the terminal. The keyboard mode button stays first.")}</p>
-      <ol className="key-bar-settings-list" aria-label={t("Key bar keys")}>
-        {items.map((item, index) => {
-          const name = keyBarItemLabel(item);
-          return (
-            <li className="key-bar-settings-row" key={keyBarItemId(item)}>
-              <span className="key-bar-settings-cap" title={name}>{name}</span>
-              <span className="key-bar-settings-kind">{item.type === "modifier" ? t("Held modifier") : item.modifiers ? t("Saved combination") : null}</span>
-              <span className="key-bar-settings-actions">
-                <button type="button" className="icon-button" disabled={index === 0} aria-label={t("Move {name} up", { name })} title={t("Move {name} up", { name })} onClick={() => move(index, -1)}><ChevronUp aria-hidden="true" /></button>
-                <button type="button" className="icon-button" disabled={index === items.length - 1} aria-label={t("Move {name} down", { name })} title={t("Move {name} down", { name })} onClick={() => move(index, 1)}><ChevronDown aria-hidden="true" /></button>
-                <button type="button" className="icon-button" aria-label={t("Remove {name}", { name })} title={t("Remove {name}", { name })} onClick={() => remove(index)}><X aria-hidden="true" /></button>
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-      {items.length === 0 && <p className="settings-hint">{t("No keys selected.")}</p>}
-      <div className="key-bar-settings-add">
-        <label className="key-bar-settings-field">
-          <span className="settings-label">{t("Add key")}</span>
-          <select className="input" value={chosenKey} disabled={full || available.length === 0} onChange={(event) => setChosenKey(event.target.value)}>
-            {available.length === 0 && <option value="">{t("All keys added")}</option>}
-            {available.map((key) => <option value={key} key={key}>{keyBarItemLabel({ type: "key", key })}</option>)}
-          </select>
-        </label>
-        <button type="button" className="btn" disabled={full || chosenKey === ""} onClick={() => add({ type: "key", key: chosenKey })}><Plus aria-hidden="true" />{t("Add key")}</button>
-      </div>
-      <div className="key-bar-settings-modifiers" role="group" aria-label={t("Held modifiers")}>
-        <span className="settings-label key-bar-settings-modifier-label">{t("Held modifiers")}</span>
-        {MODIFIERS.map((modifier) => {
-          const item: KeyBarItem = { type: "modifier", modifier };
-          const present = ids.has(keyBarItemId(item));
-          return <button type="button" className="key-bar-settings-modifier" key={modifier} aria-pressed={present} disabled={full && !present} onClick={() => present ? update({ keyBarItems: items.filter((current) => keyBarItemId(current) !== keyBarItemId(item)) }) : add(item)}>{MODIFIER_CAPS[modifier]}</button>;
-        })}
-      </div>
-      <div className="key-bar-settings-combo">
-        <span className="settings-label">{t("Custom combination")}</span>
-        <p className="settings-hint">{t("Saved combinations use only the selected modifiers. Other keys use held modifiers.")}</p>
+      <SettingsGroup note={t("Choose the keys and their order under the terminal. The keyboard mode button stays first.")}>
+        <ol className="key-bar-settings-list" aria-label={t("Key bar keys")}>
+          {items.map((item, index) => {
+            const name = keyBarItemLabel(item);
+            return (
+              <li key={keyBarItemId(item)}>
+                <CardRow className="key-bar-settings-row" title={<Kbd className="h-6 px-2 text-xs text-strong" title={name}>{name}</Kbd>} description={item.type === "modifier" ? t("Held modifier") : item.modifiers ? t("Saved combination") : undefined}>
+                  <span className="key-bar-settings-actions">
+                    <Button variant="ghost" size="icon" className="text-dim" disabled={index === 0} aria-label={t("Move {name} up", { name })} title={t("Move {name} up", { name })} onClick={() => move(index, -1)}><ChevronUp /></Button>
+                    <Button variant="ghost" size="icon" className="text-dim" disabled={index === items.length - 1} aria-label={t("Move {name} down", { name })} title={t("Move {name} down", { name })} onClick={() => move(index, 1)}><ChevronDown /></Button>
+                    <Button variant="ghost" size="icon" className="text-dim" aria-label={t("Remove {name}", { name })} title={t("Remove {name}", { name })} onClick={() => remove(index)}><X /></Button>
+                  </span>
+                </CardRow>
+              </li>
+            );
+          })}
+        </ol>
+        {items.length === 0 && <p className="settings-hint">{t("No keys selected.")}</p>}
+        <div className="key-bar-settings-add">
+          <Field label={t("Add key")} htmlFor="key-bar-add-key" className="key-bar-settings-field">
+            <SettingsSelect id="key-bar-add-key" className="w-full" value={chosenKey === "" ? "none" : chosenKey} disabled={full || available.length === 0} onChange={setChosenKey} options={available.length === 0 ? [{ value: "none", label: t("All keys added") }] : available.map((key) => ({ value: key, label: keyBarItemLabel({ type: "key", key }) }))} />
+          </Field>
+          <Button variant="field" size="md" disabled={full || chosenKey === ""} onClick={() => add({ type: "key", key: chosenKey })}><Plus />{t("Add key")}</Button>
+        </div>
+        <Field label={t("Held modifiers")}>
+          <ModifierPicks label={t("Held modifiers")} value={heldModifiers} disabledWhenOff={full} onToggle={(modifier, on) => {
+            const item: KeyBarItem = { type: "modifier", modifier };
+            if (on) add(item);
+            else update({ keyBarItems: items.filter((current) => keyBarItemId(current) !== keyBarItemId(item)) });
+          }} />
+        </Field>
+      </SettingsGroup>
+      <SettingsGroup title={t("Custom combination")} note={t("Saved combinations use only the selected modifiers. Other keys use held modifiers.")} className="key-bar-settings-combo">
         <div className="key-bar-settings-combo-key">
-          <label className="key-bar-settings-field">
-            <span className="settings-label">{t("Base key")}</span>
-            <select className="input" value={comboKey} onChange={(event) => setComboKey(event.target.value)}>
-              {comboKeys.map((key) => <option value={key} key={key}>{keyBarItemLabel({ type: "key", key })}</option>)}
-              <option value={CHARACTER_KEY}>{t("Single character")}</option>
-            </select>
-          </label>
-          {comboKey === CHARACTER_KEY && <label className="key-bar-settings-field">
-            <span className="settings-label">{t("Character")}</span>
-            <input className="input" value={character} maxLength={2} autoCapitalize="off" autoCorrect="off" spellCheck={false} onChange={(event) => setCharacter(event.target.value)} />
-          </label>}
+          <Field label={t("Base key")} htmlFor="key-bar-combo-key" className="key-bar-settings-field">
+            <SettingsSelect id="key-bar-combo-key" className="w-full" value={comboKey} onChange={setComboKey} options={[...comboKeys.map((key) => ({ value: key, label: keyBarItemLabel({ type: "key", key }) })), { value: CHARACTER_KEY, label: t("Single character") }]} />
+          </Field>
+          {comboKey === CHARACTER_KEY && <Field label={t("Character")} htmlFor="key-bar-combo-character" className="key-bar-settings-field">
+            <Input id="key-bar-combo-character" value={character} maxLength={2} autoCapitalize="off" autoCorrect="off" spellCheck={false} onChange={(event) => setCharacter(event.target.value)} />
+          </Field>}
         </div>
-        <div className="key-bar-settings-modifiers" role="group" aria-label={t("Combination modifiers")}>
-          {MODIFIERS.map((modifier) => <button type="button" className="key-bar-settings-modifier" key={modifier} aria-pressed={comboModifiers[modifier]} onClick={() => setComboModifiers((current) => ({ ...current, [modifier]: !current[modifier] }))}>{MODIFIER_CAPS[modifier]}</button>)}
-        </div>
+        <Field label={t("Combination modifiers")}>
+          <ModifierPicks label={t("Combination modifiers")} value={MODIFIERS.filter((modifier) => comboModifiers[modifier])} onToggle={(modifier, on) => setComboModifiers((current) => ({ ...current, [modifier]: on }))} />
+        </Field>
         <div className="key-bar-settings-combo-actions">
-          <span className="key-bar-settings-preview" aria-live="polite">{characterValid ? keyBarItemLabel(combo) : t("Enter one character.")}</span>
-          <button type="button" className="btn" disabled={full || !characterValid || base === "" || comboExists} onClick={() => add(combo)}><Plus aria-hidden="true" />{t("Add combination")}</button>
+          <span className="key-bar-settings-preview" aria-live="polite">{characterValid ? <Kbd className="h-6 px-2 text-xs text-strong">{keyBarItemLabel(combo)}</Kbd> : t("Enter one character.")}</span>
+          <Button variant="field" size="md" disabled={full || !characterValid || base === "" || comboExists} onClick={() => add(combo)}><Plus />{t("Add combination")}</Button>
         </div>
         {comboExists && <p className="settings-hint">{t("Already added")}</p>}
-      </div>
-      <button type="button" className="btn btn-ghost key-bar-settings-restore" onClick={() => update({ keyBarItems: [...DEFAULT_KEY_BAR_ITEMS] })}>{t("Restore defaults")}</button>
+      </SettingsGroup>
+      <Button variant="ghost" className="key-bar-settings-restore" onClick={() => update({ keyBarItems: [...DEFAULT_KEY_BAR_ITEMS] })}>{t("Restore defaults")}</Button>
     </div>
   );
 }

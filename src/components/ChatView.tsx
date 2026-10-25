@@ -4,6 +4,7 @@ import {
   ArrowDown, BookOpen, Check, ChevronDown, ChevronRight, Circle, CircleAlert, CircleCheck, CircleDot, CircleQuestionMark, CircleSlash, CircleX, Copy, Layers, SquareTerminal, Target, Undo2,
   type IconProps,
 } from "../lib/icons.ts";
+import { Badge, Button, Collapsible, CollapsibleContent, CollapsibleTrigger, IconButton, TooltipProvider } from "./ui/index.ts";
 
 import "./ChatView.css";
 // the timeline's styles stay in the entry: its chunk loads apart (chatTimelineLoader.ts), but
@@ -111,7 +112,7 @@ function FailureLine({ action, failure, onRetry }: { action: string; failure: Us
   const line = slow ? t("The PC isn't responding") : failure.cause === null ? action : `${action} · ${failure.cause}`;
   return <div className="chat-inline-error chat-failure" role="alert">
     <span className="chat-failure-line">{line}</span>
-    {offersRetry(failure) && <button type="button" className="btn chat-failure-retry" onClick={onRetry}>{t("Try again")}</button>}
+    {offersRetry(failure) && <Button variant="field" size="xs" className="chat-failure-retry" onClick={onRetry}>{t("Try again")}</Button>}
     {(failure.advice !== null || failure.detail !== null) && <details className="chat-failure-details">
       <summary>{t("Details")}</summary>
       {failure.advice !== null && <p>{failure.advice}</p>}
@@ -250,8 +251,8 @@ function plainText(markdown: string): string {
     .replace(/^>\s?/gm, "");
 }
 
-/** A quiet text button that copies and says "Copied" for a moment. */
-function CopyButton({ text, label, className = "icon-button chat-copy", children, onResult }: { text: string; label: string; className?: string; children?: React.ReactNode; onResult: (ok: boolean) => void }) {
+/** A quiet glyph button that copies and says "Copied" for a moment (its tooltip says what it copies). */
+function CopyButton({ text, label, className = "chat-copy", size = "icon-sm", children, onResult }: { text: string; label: string; className?: string; size?: "icon-sm" | "xs"; children?: React.ReactNode; onResult: (ok: boolean) => void }) {
   const t = useT();
   const [copied, setCopied] = useState(false);
   const copy = async (): Promise<void> => {
@@ -261,17 +262,17 @@ function CopyButton({ text, label, className = "icon-button chat-copy", children
     if (ok) window.setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <button type="button" className={copied ? `${className} is-copied` : className} onClick={() => void copy()} aria-label={copied ? t("Copied") : label} title={copied ? t("Copied") : label}>
+    <IconButton size={size} className={copied ? `${className} is-copied` : className} onClick={() => void copy()} label={copied ? t("Copied") : label}>
       {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
       {children}
-    </button>
+    </IconButton>
   );
 }
 
 function ChecklistView({ rows }: { rows: ChecklistRow[] }) {
   return <ul className="chat-checklist">{rows.map((row, index) => (
     <li key={index} className={row.heading ? "chat-checklist-phase" : row.done ? "is-done" : row.active ? "is-active" : undefined}>
-      {!row.heading && <span className="chat-checklist-box" aria-hidden="true">{row.done ? "✓" : "•"}</span>}{row.label}
+      {!row.heading && <span className="chat-checklist-box" aria-hidden="true">{row.done ? <CircleCheck /> : row.active ? <CircleDot /> : <Circle />}</span>}{row.label}
     </li>
   ))}</ul>;
 }
@@ -484,22 +485,28 @@ function WorkRow({ paneId, part, stateKey, state }: { paneId: string; part: Tool
   // an attempt inside a todo run says how it went, in the transcript's words; a failure already says "failed"
   const stateWord = state === undefined || part.error ? null
     : state === "ok" ? t("succeeded") : state === "pending" ? t("pending") : state === "error" ? t("failed") : t("outcome not recorded");
-  return <div className={`work-row${part.error ? " is-error" : ""}`}>
-    <button type="button" className="work-row-head" aria-expanded={open} title={narration || verb !== null ? `${part.name} · ${summary}` : undefined} onClick={() => setOpen(!open)}>
-      <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
-      {!narration && (verb !== null ? <span className="work-row-name is-verb">{t(verb)}</span> : <span className="work-row-name">{part.name}</span>)}
-      {/* the spaces are for a screen reader: the row is read as words, not "Ranbun test" */}
-      {!narration && part.error && verb === null && <>{" "}<span className="work-row-failed">{t("failed")}</span></>}
-      {summary.length > 0 && summary !== part.name && <>{" "}<span className="work-row-summary">{summary}</span></>}
-      {/* after a verb, or the agent's own sentence, the word follows it: "Ran pnpm test failed", not "Ran failed pnpm test" */}
-      {part.error && (narration || verb !== null) && <>{" "}<span className="work-row-failed">{t("failed")}</span></>}
-      {stateWord !== null && <>{" "}<span className={state === "error" ? "work-row-failed" : `work-row-state is-${state}`}>{stateWord}</span></>}
-    </button>
-    {open && <div className="work-row-detail">{verb !== null && <p className="work-row-tool">{part.name}</p>}<ToolInputView part={part} /><ToolImages paneId={paneId} part={part} />{output.length > 0 && <section className="chat-tool-output"><h4>{t(part.error ? "Error" : "Output")}</h4><pre className={`chat-tool-io${whole.text !== null ? " is-whole" : ""}`}>{linkFilePaths(output, openFile)}</pre>
-      {part.output_ref !== undefined && whole.text === null && <button type="button" className="btn btn-ghost chat-tool-more" disabled={whole.state === "loading"} onClick={whole.load}>
+  // the call's state as a filled glyph: failed in the alert colour, still pending in the working one, else done
+  const Glyph = part.error || state === "error" ? CircleX : state === "pending" ? CircleDot : CircleCheck;
+  const glyphTone = part.error || state === "error" ? "is-blocked" : state === "pending" ? "is-working" : state === "unknown" ? "is-idle" : "is-done";
+  return <Collapsible open={open} onOpenChange={setOpen} className={`work-row${part.error ? " is-error" : ""}`}>
+    <CollapsibleTrigger asChild>
+      <button type="button" className="work-row-head" title={narration || verb !== null ? `${part.name} · ${summary}` : undefined}>
+        <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
+        <Glyph className={`work-row-glyph ${glyphTone}`} aria-hidden="true" />
+        {!narration && (verb !== null ? <span className="work-row-name is-verb">{t(verb)}</span> : <span className="work-row-name">{part.name}</span>)}
+        {/* the spaces are for a screen reader: the row is read as words, not "Ranbun test" */}
+        {!narration && part.error && verb === null && <>{" "}<Badge tone="blocked" className="work-row-failed">{t("failed")}</Badge></>}
+        {summary.length > 0 && summary !== part.name && <>{" "}<span className="work-row-summary">{summary}</span></>}
+        {/* after a verb, or the agent's own sentence, the word follows it: "Ran pnpm test failed", not "Ran failed pnpm test" */}
+        {part.error && (narration || verb !== null) && <>{" "}<Badge tone="blocked" className="work-row-failed">{t("failed")}</Badge></>}
+        {stateWord !== null && <>{" "}<Badge tone={state === "error" ? "blocked" : state === "ok" ? "done" : state === "pending" ? "working" : "idle"} className={state === "error" ? "work-row-failed" : `work-row-state is-${state}`}>{stateWord}</Badge></>}
+      </button>
+    </CollapsibleTrigger>
+    <CollapsibleContent className="work-row-detail">{verb !== null && <p className="work-row-tool">{part.name}</p>}<ToolInputView part={part} /><ToolImages paneId={paneId} part={part} />{output.length > 0 && <section className="chat-tool-output"><h4>{t(part.error ? "Error" : "Output")}</h4><pre className={`chat-tool-io${whole.text !== null ? " is-whole" : ""}`}>{linkFilePaths(output, openFile)}</pre>
+      {part.output_ref !== undefined && whole.text === null && <Button variant="crumb" size="xs" className="chat-tool-more" disabled={whole.state === "loading"} onClick={whole.load}>
         {t(whole.state === "loading" ? "Loading the whole output…" : whole.state === "failed" ? "Couldn't load the whole output — retry" : "Show the whole output ({size} characters)", { size: formatTokens(part.output_size ?? 0) })}
-      </button>}</section>}</div>}
-  </div>;
+      </Button>}</section>}</CollapsibleContent>
+  </Collapsible>;
 }
 
 /**
@@ -522,37 +529,43 @@ function TodoGroupRow({ paneId, group, stateKeyOf }: { paneId: string; group: To
     : items === null ? t(current.state === "ok" ? "The latest successful update's list can't be read. An earlier list is not shown in its place." : "The latest update's list can't be read. An earlier list is not shown in its place.")
       : current.state === "ok" ? t("Current list") : t("Latest list. The transcript does not record whether this update succeeded.");
   // its failures are counted in words on its head; each failed attempt marks itself inside
-  return <div className="work-row work-todo-group" data-todo-group={group.id}>
-    <button type="button" className="work-row-head" aria-expanded={open} onClick={() => setOpen(!open)}>
-      <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
-      <span className="work-row-name is-verb">{t("Plan")}</span>
-      {" "}<span className="work-row-summary">{t("{n} updates", { n: group.attempts.length })} · {status}</span>
-      {/* the counts beside it are never the part a narrow row cuts */}
-      {group.pending > 0 && <>{" "}<span className="work-row-state is-pending">{t("{n} pending", { n: group.pending })}</span></>}
-      {group.failed > 0 && <>{" "}<span className="work-row-failed">{t("{n} failed", { n: group.failed })}</span></>}
-    </button>
-    {open && <div className="work-row-detail work-todo-detail">
+  const allDone = items !== null && items.length > 0 && done === items.length;
+  return <Collapsible open={open} onOpenChange={setOpen} className="work-row work-todo-group" data-todo-group={group.id}>
+    <CollapsibleTrigger asChild>
+      <button type="button" className="work-row-head">
+        <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
+        {group.failed > 0 ? <CircleX className="work-row-glyph is-blocked" aria-hidden="true" /> : allDone ? <CircleCheck className="work-row-glyph is-done" aria-hidden="true" /> : <CircleDot className="work-row-glyph is-working" aria-hidden="true" />}
+        <span className="work-row-name is-verb">{t("Plan")}</span>
+        {" "}<span className="work-row-summary">{t("{n} updates", { n: group.attempts.length })} · {status}</span>
+        {/* the counts beside it are never the part a narrow row cuts */}
+        {group.pending > 0 && <>{" "}<Badge tone="working" className="work-row-state is-pending">{t("{n} pending", { n: group.pending })}</Badge></>}
+        {group.failed > 0 && <>{" "}<Badge tone="blocked" className="work-row-failed">{t("{n} failed", { n: group.failed })}</Badge></>}
+      </button>
+    </CollapsibleTrigger>
+    <CollapsibleContent className="work-row-detail work-todo-detail">
       <p className="work-todo-caption">{caption}</p>
       {items !== null && (items.length > 0 ? <TodoList items={items} /> : <p className="work-todo-caption">{t("The list is empty.")}</p>)}
       <section className="work-todo-attempts" aria-label={t("Every update, in order")}>
         <h4>{t("Every update, in order")}</h4>
         {group.attempts.map((attempt) => <WorkRow key={stateKeyOf(attempt.part)} stateKey={stateKeyOf(attempt.part)} paneId={paneId} part={attempt.part} state={attempt.state} />)}
       </section>
-    </div>}
-  </div>;
+    </CollapsibleContent>
+  </Collapsible>;
 }
 
 function ThinkingRow({ text, stateKey }: { text: string; stateKey: string }) {
   const t = useT();
   const [chosen, setOpen] = useChatRowToggle(stateKey, false);
   const open = chosen === true;
-  return <div className="work-row work-row-thinking">
-    <button type="button" className="work-row-head" aria-expanded={open} onClick={() => setOpen(!open)}>
-      <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
-      <span className="work-row-name">{t("thinking")}</span>
-    </button>
-    {open && <div className="work-row-detail work-thinking-text">{text}</div>}
-  </div>;
+  return <Collapsible open={open} onOpenChange={setOpen} className="work-row work-row-thinking">
+    <CollapsibleTrigger asChild>
+      <button type="button" className="work-row-head">
+        <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
+        <span className="work-row-name">{t("thinking")}</span>
+      </button>
+    </CollapsibleTrigger>
+    <CollapsibleContent className="work-row-detail work-thinking-text">{text}</CollapsibleContent>
+  </Collapsible>;
 }
 
 /**
@@ -589,24 +602,31 @@ function WorkBlockView({ paneId, parts, turnParts, rowKey, duration, live, waiti
   const failed = workFailed(parts);
   // a blocked agent is not working: the open block takes the sidebar's words for it
   const title = waiting ? t("Needs you") : live ? t("Working…") : duration !== null ? t("Worked for {duration}", { duration }) : t("Worked");
-  return <section className={`work-block${live ? " is-live" : ""}${waiting ? " is-waiting" : ""}${open ? "" : " is-folded"}`}>
-    <button type="button" className="work-block-head" aria-expanded={open} onClick={() => setOpen(!open)}>
-      <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
-      <span className="work-block-title">{title}</span>
-      {summary.length > 0 && <span className="work-block-summary">· {summary}</span>}
-      {/* its own span: the counts before it are cut on a narrow screen, a failure never is */}
-      {failed > 0 && <span className="work-block-failed">· {t("{n} failed", { n: failed })}</span>}
-    </button>
-    {/* the rows open and fold at the block's measured height; folded and settled, they are not drawn */}
-    <AnimatedHeight open={open} animateContent={false}>
-      <div className="work-block-rows" onFocus={keepOpen} onClick={keepOpen}>{visible.map((part, index) =>
-        part.kind === "thinking" ? <ThinkingRow key={index} stateKey={`thinking:${parts.indexOf(part)}`} text={part.text} />
-          : part.kind === "text" ? <div key={index} className="work-narration"><Markdown>{part.text}</Markdown></div>
-            : part.kind === "tool" ? groups.has(part) ? <TodoGroupRow key={groups.get(part)!.id} paneId={paneId} group={groups.get(part)!} stateKeyOf={toolKey} />
-              : grouped.has(part) ? null : <WorkRow key={index} stateKey={toolKey(part)} paneId={paneId} part={part} /> : null)}
-      </div>
-    </AnimatedHeight>
-  </section>;
+  return <Collapsible asChild open={open} onOpenChange={setOpen}>
+    <section className={`work-block${live ? " is-live" : ""}${waiting ? " is-waiting" : ""}${open ? "" : " is-folded"}`}>
+      <CollapsibleTrigger asChild>
+        <button type="button" className="work-block-head">
+          <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
+          <span className="work-block-title">{title}</span>
+          {summary.length > 0 && <span className="work-block-summary">· {summary}</span>}
+          {/* its own badge: the counts before it are cut on a narrow screen, a failure never is */}
+          {failed > 0 && <Badge tone="blocked" className="work-block-failed">{t("{n} failed", { n: failed })}</Badge>}
+        </button>
+      </CollapsibleTrigger>
+      {/* the rows open and fold at the block's measured height (forceMount: the fold is the box's
+          own slide, not Radix's unmount); folded and settled, they are not drawn */}
+      <CollapsibleContent forceMount>
+        <AnimatedHeight open={open} animateContent={false}>
+          <div className="work-block-rows" onFocus={keepOpen} onClick={keepOpen}>{visible.map((part, index) =>
+            part.kind === "thinking" ? <ThinkingRow key={index} stateKey={`thinking:${parts.indexOf(part)}`} text={part.text} />
+              : part.kind === "text" ? <div key={index} className="work-narration"><Markdown>{part.text}</Markdown></div>
+                : part.kind === "tool" ? groups.has(part) ? <TodoGroupRow key={groups.get(part)!.id} paneId={paneId} group={groups.get(part)!} stateKeyOf={toolKey} />
+                  : grouped.has(part) ? null : <WorkRow key={index} stateKey={toolKey(part)} paneId={paneId} part={part} /> : null)}
+          </div>
+        </AnimatedHeight>
+      </CollapsibleContent>
+    </section>
+  </Collapsible>;
 }
 
 /** Skill evidence stays visible even when the surrounding work block is folded. */
@@ -616,11 +636,11 @@ function SkillActivityList({ parts }: { parts: ConversationPart[] }) {
   if (skills.length === 0) return null;
   return <div className="chat-skills" role="group" aria-label={t("Skill activity")}>
     {skills.map((skill) => <ChatDetails memoryKey={`skill:${skill.evidence}:${skill.path ?? skill.name}`} className={`chat-skill${skill.status === "failed" ? " is-error" : ""}`} key={`${skill.evidence}:${skill.path ?? skill.name}`}>
-      <summary><BookOpen aria-hidden="true" /><span className="chat-skill-name">{skill.name}</span><span className="chat-skill-status">{
+      <summary><BookOpen aria-hidden="true" /><span className="chat-skill-name">{skill.name}</span><Badge tone={skill.status === "failed" ? "blocked" : skill.status === "requested" ? "working" : "done"} className="chat-skill-status">{
         skill.evidence === "invocation"
           ? skill.status === "failed" ? t("Skill invocation failed") : skill.status === "requested" ? t("Skill requested") : t("Skill invoked")
           : skill.status === "failed" ? t("Skill read failed") : skill.status === "requested" ? t("Reading skill requested") : t("Skill instructions loaded")
-      }</span><ChevronDown className="chat-skill-caret" aria-hidden="true" /></summary>
+      }</Badge><ChevronDown className="chat-skill-caret" aria-hidden="true" /></summary>
       <div className="chat-skill-detail"><p>{skill.evidence === "invocation" ? t("Recorded by the agent's Skill tool. This does not mean the skill's work is complete.") : t("The transcript records loading this skill's instructions. This does not confirm every step was followed.")}</p>
         {skill.path && <code>{skill.path}</code>}
       </div>
@@ -640,7 +660,7 @@ function GoalActivity({ goal }: { goal: GoalState }) {
   ].filter((item) => item !== null).join(" · ");
   return <ChatDetails memoryKey="goal" className={`chat-goal is-${goal.status}`}>
     <summary><Target aria-hidden="true" /><span className="chat-goal-label">{t("Goal")}</span><span className="chat-goal-objective">{goal.objective}</span>
-      <span className="chat-goal-status">{word[goal.status]}</span><ChevronDown className="chat-skill-caret" aria-hidden="true" /></summary>
+      <Badge tone={goal.status === "active" ? "working" : goal.status === "complete" ? "done" : goal.status === "paused" ? "idle" : "blocked"} className="chat-goal-status">{word[goal.status]}</Badge><ChevronDown className="chat-skill-caret" aria-hidden="true" /></summary>
     <div className="chat-goal-detail">
       <p className="chat-goal-text">{goal.objective}</p>
       {goal.blockedReason !== null && <p className="chat-goal-reason">{goal.blockedReason}</p>}
@@ -711,7 +731,7 @@ function UserMessage({ text, skills = null }: { text: string; skills?: SkillMatc
   return <div ref={card} className={`chat-bubble${capped ? " is-capped" : ""}${clipped ? " is-folded" : ""}`}>
     <div ref={body} className="chat-bubble-body"><Markdown skills={skills}>{text}</Markdown></div>
     {(open || clipped) && <div className="chat-bubble-foot">
-      <button type="button" className="chat-bubble-fold" aria-expanded={open} onClick={toggle}>{open ? t("Show less") : t("Show full message")}</button>
+      <Button variant="crumb" size="xs" className="chat-bubble-fold" aria-expanded={open} onClick={toggle}>{open ? t("Show less") : t("Show full message")}</Button>
     </div>}
   </div>;
 }
@@ -734,7 +754,7 @@ function TerminalCommandRow({ outcome, actions }: { outcome: CommandOutcome; act
     <SquareTerminal aria-hidden="true" />
     <code title={outcome.text}>{outcomeCommand(outcome.text)}</code>
     <span>· {t("Ran in terminal")}</span>
-    {actions?.terminal && <button type="button" className="chat-outcome-action" onClick={() => actions.terminal?.(outcome.text)}>{t("Open Terminal")}</button>}
+    {actions?.terminal && <Button variant="crumb" size="xs" className="chat-outcome-action" onClick={() => actions.terminal?.(outcome.text)}>{t("Open Terminal")}</Button>}
   </article>;
 }
 
@@ -761,7 +781,7 @@ function OutcomeChip({ outcome, actions }: { outcome: CommandOutcome; actions: O
   return <div className="chat-outcome" data-outcome-state={chip.state}>
     <div className="chat-outcome-row">
       <span className="chat-outcome-state" role="status"><Icon aria-hidden="true" />{outcomeLabel(t, chip)}</span>
-      {action !== null && <button type="button" className="chat-outcome-action" onClick={action}>{chip.action === "answer" ? t("Answer") : t("Open Terminal")}</button>}
+      {action !== null && <Button variant="field" size="xs" className="chat-outcome-action" onClick={action}>{chip.action === "answer" ? t("Answer") : t("Open Terminal")}</Button>}
     </div>
     {/* why it went as plain text, read with the state it explains */}
     {note !== null && <p className="chat-outcome-note">{note}</p>}
@@ -773,7 +793,7 @@ function OutcomeChip({ outcome, actions }: { outcome: CommandOutcome; actions: O
     {/* the agent's own lines, verbatim; Dismiss only hides them here and sends nothing to the pane */}
     {result !== null && <section className="chat-outcome-result" role="status" aria-label={t("What {command} printed", { command: outcomeCommand(outcome.text) })}>
       <pre className="chat-outcome-result-text" tabIndex={0}>{result}</pre>
-      <button type="button" className="chat-outcome-action" onClick={() => setDismissed(true)}>{t("Dismiss")}</button>
+      <Button variant="crumb" size="xs" className="chat-outcome-action" onClick={() => setDismissed(true)}>{t("Dismiss")}</Button>
     </section>}
   </div>;
 }
@@ -840,7 +860,7 @@ function TaskResultRow({ task }: { task: OmoTaskResult }) {
         <span className="chat-task-result-title">{task.title}</span>
         {meta.length > 0 && <span className="chat-task-result-meta">{meta}</span>}
       </span>
-      <span className="chat-task-result-status">{word[task.status]}</span>
+      <Badge tone={task.status === "completed" ? "done" : task.status === "failed" ? "blocked" : "idle"} className="chat-task-result-status">{word[task.status]}</Badge>
       <ChevronDown className="chat-skill-caret" aria-hidden="true" />
     </summary>
     {opened && <div className="chat-task-result-body">
@@ -862,7 +882,7 @@ function TeammateMessageRow({ message, stateKey }: { message: TeammateMessage; s
         <span className="chat-task-result-title">{message.name}</span>
         {message.summary && <span className="chat-task-result-meta chat-teammate-preview">{message.summary}</span>}
       </span>
-      <span className="chat-task-result-status">{message.status === "idle" ? t("Teammate idle") : t("Teammate message")}</span>
+      <Badge tone={message.status === "idle" ? "idle" : "accent"} className="chat-task-result-status">{message.status === "idle" ? t("Teammate idle") : t("Teammate message")}</Badge>
       <ChevronDown className="chat-skill-caret" aria-hidden="true" />
     </summary>
     {opened && <div className="chat-task-result-body">
@@ -937,7 +957,7 @@ const Turn = memo(function Turn({ paneId, turn, rowKey, live, waiting, showThink
         {text.length > 0 && <UserMessage text={text} skills={userSkills} />}
         <div className="chat-turn-meta">{time}{text.length > 0 && <CopyButton text={text} label={t("Copy message")} onResult={copied} />}
           {text.length > 0 && onRewindInTerminal !== null && (
-            <button type="button" className="icon-button chat-copy chat-rewind" aria-label={t("Rewind in terminal")} title={t("Rewind in terminal")} onClick={onRewindInTerminal}><Undo2 aria-hidden="true" /></button>
+            <IconButton size="icon-sm" className="chat-copy chat-rewind" label={t("Rewind in terminal")} onClick={onRewindInTerminal}><Undo2 aria-hidden="true" /></IconButton>
           )}
         </div>
       </div>
@@ -958,8 +978,8 @@ const Turn = memo(function Turn({ paneId, turn, rowKey, live, waiting, showThink
     {answer.map((part, index) => <Markdown key={index} skills={skills}>{part.text}</Markdown>)}
     {answerText.length > 0 && <div className="chat-turn-meta chat-agent-meta">
       {/* a mouse reads one copy glyph and the words "Plain text"; touch reads the two formats */}
-      <CopyButton className="chat-meta-btn" text={answerText} label={t("Copy as markdown")} onResult={copied}><span className="chat-meta-fmt">MD</span></CopyButton>
-      <CopyButton className="chat-meta-btn chat-meta-plain" text={plainText(answerText)} label={t("Copy as plain text")} onResult={copied}><span className="chat-meta-fmt">TXT</span><span className="chat-meta-word">{t("Plain text")}</span></CopyButton>
+      <CopyButton className="chat-meta-btn" size="xs" text={answerText} label={t("Copy as markdown")} onResult={copied}><span className="chat-meta-fmt">MD</span></CopyButton>
+      <CopyButton className="chat-meta-btn chat-meta-plain" size="xs" text={plainText(answerText)} label={t("Copy as plain text")} onResult={copied}><span className="chat-meta-fmt">TXT</span><span className="chat-meta-word">{t("Plain text")}</span></CopyButton>
       {time}
     </div>}
     {copyError}
@@ -982,12 +1002,13 @@ export function ChatFallback({ paneId, agent, visible, messages, outcomes, resto
 }) {
   const turns = useMemo(() => messages.filter((message) => message.role !== "status").map(fallbackTurn), [messages]);
   const rows = useMemo(() => outcomeRows(turns, outcomes, { restored }), [turns, outcomes, restored]);
-  return <>
+  // its own tooltip provider: the fallback is rendered on its own too (ChatFallback.test.ts)
+  return <TooltipProvider>
     {agent !== null && <TerminalFallback key={paneId} paneId={paneId} visible={visible} />}
     {rows.map((row) => row.kind === "sent"
       ? <OutcomeRow key={`outcome:${row.outcome.id}`} outcome={row.outcome} actions={actions} skills={skills} />
       : <Turn key={row.index} paneId={paneId} turn={turns[row.index]!} rowKey={`fallback:${row.index}`} live={false} waiting={false} showThinking={false} outcome={row.outcome} outcomeActions={actions} />)}
-  </>;
+  </TooltipProvider>;
 }
 
 /** Optional terminal output must never hold initial display or transcript polling. */
@@ -1947,9 +1968,9 @@ export const ChatView = memo(function ChatView({ paneId, presentationKey, finish
       )}
       {/* one button in every state: swapping it for a status line of another height would shift the reader */}
       {state.source === "conversation" && typeof olderCursor === "string" && (
-        <button type="button" className="btn btn-ghost chat-older" disabled={olderState === "loading"} onClick={() => void loadOlder()}>
+        <Button variant="field" size="xs" className="chat-older" disabled={olderState === "loading"} onClick={() => void loadOlder()}>
           {t(olderState === "loading" ? "Loading earlier messages…" : olderState === "failed" ? "Couldn't load earlier messages — retry" : "Earlier messages")}
-        </button>
+        </Button>
       )}
       {state.source === "conversation" && olderCursor === null && older.length > 0 && <p className="chat-endcap">{t("beginning of conversation")}</p>}
   </>;
@@ -1981,9 +2002,10 @@ export const ChatView = memo(function ChatView({ paneId, presentationKey, finish
       {loaded && empty && error === null && prompt === null && activity === "idle" && !(greeted && blank) && <div className="chat-empty"><AgentMark agent={agent ?? "agent"} size={32} /><p>{t("No conversation yet — say something below")}</p></div>}
       {ended && <p className="chat-endcap">{t("terminal ended")}</p>}
   </>;
-  const jump = newMessages ? <button type="button" className="btn chat-new-messages chat-virtual-jump" onClick={scrollToBottom}>{t("New messages")} <ArrowDown aria-hidden="true" /></button>
-    : away && <button type="button" className="btn chat-new-messages chat-virtual-jump is-icon" aria-label={t("Jump to latest")} title={t("Jump to latest")} onClick={scrollToBottom}><ArrowDown aria-hidden="true" /></button>;
-  return <ChatPaneContext.Provider value={paneId}><ChatHistoryContext.Provider value={historyId ?? ""}><ImageViewerContext.Provider value={openViewer}><ToolPathRootContext.Provider value={toolPathRoot(cwd)}>
+  // the way back to the end: a raised pill; the wordless one keeps its native title, which a regression script finds it by
+  const jump = newMessages ? <Button variant="field" size="sm" className="chat-new-messages chat-virtual-jump" onClick={scrollToBottom}>{t("New messages")} <ArrowDown aria-hidden="true" /></Button>
+    : away && <Button variant="field" size="icon" className="chat-new-messages chat-virtual-jump is-icon" aria-label={t("Jump to latest")} title={t("Jump to latest")} onClick={scrollToBottom}><ArrowDown aria-hidden="true" /></Button>;
+  return <TooltipProvider><ChatPaneContext.Provider value={paneId}><ChatHistoryContext.Provider value={historyId ?? ""}><ImageViewerContext.Provider value={openViewer}><ToolPathRootContext.Provider value={toolPathRoot(cwd)}>
     {/* a reader away from the end has not seen the answer a finish lands there: presented only at the end */}
     <div className="chat-frame" data-pane-content={active && visible && !covered && connected && !ended && loaded && error === null && !away && !newMessages
       && endPresentation?.state === state && endPresentation.key === presentationKey
@@ -2038,5 +2060,5 @@ export const ChatView = memo(function ChatView({ paneId, presentationKey, finish
       onPendingAnswerDone?.(paneId, prompt.id);
     }} />, promptDock)}
   {viewer !== null && <ImageLightbox images={viewer.images} index={viewer.index} onClose={closeViewer} />}
-  </ToolPathRootContext.Provider></ImageViewerContext.Provider></ChatHistoryContext.Provider></ChatPaneContext.Provider>;
+  </ToolPathRootContext.Provider></ImageViewerContext.Provider></ChatHistoryContext.Provider></ChatPaneContext.Provider></TooltipProvider>;
 });

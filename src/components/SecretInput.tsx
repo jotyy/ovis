@@ -3,6 +3,7 @@ import { LockKeyhole, Send } from "../lib/icons.ts";
 import { validSecret } from "../../shared/secret-prompt.ts";
 import { useT } from "../lib/i18n.ts";
 import type { SubmitResult } from "../lib/ws.ts";
+import { Button, Input } from "./ui/index.ts";
 import "./SecretInput.css";
 
 /** A DOM-only value: no drafts, queue, React state or retry copy of the secret. */
@@ -45,13 +46,13 @@ export function SecretInput({ prompt, active = true, onSend, onCancel }: {
     });
   }}>
     <label className="secret-input-label"><LockKeyhole size={16} aria-hidden="true" /> {prompt}
-      <input ref={input} className="input" type="password" aria-label={t("Password or PIN")} autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={4096} disabled={pending}
+      <Input ref={input} type="password" aria-label={t("Password or PIN")} autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={4096} disabled={pending}
         onKeyDown={(event) => { if (event.key === "Enter" && (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229)) event.preventDefault(); }} />
     </label>
     <p className="secret-input-note">{t("Sent directly to this terminal. Never saved as a draft or queued.")}</p>
     <div className="secret-input-actions">
-      <button type="submit" className="btn btn-primary" disabled={pending}><Send size={14} aria-hidden="true" /> {t("Send")}</button>
-      <button type="button" className="btn" disabled={pending} onClick={() => { if (input.current) input.current.value = ""; onCancel(); }}>{t("Cancel")}</button>
+      <Button type="submit" variant="accent" size="sm" disabled={pending}><Send aria-hidden="true" />{t("Send")}</Button>
+      <Button variant="field" size="sm" disabled={pending} onClick={() => { if (input.current) input.current.value = ""; onCancel(); }}>{t("Cancel")}</Button>
     </div>
     {error && <p className="secret-input-error" role="status">{error}</p>}
   </form>;

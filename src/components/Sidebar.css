@@ -7,8 +7,18 @@
   --side-row: var(--control-h);
   --side-row-2: calc(var(--control-h) + var(--space-3));
   --side-action: var(--space-6);
-  --side-hover: color-mix(in srgb, var(--bg-hover) 50%, var(--bg-panel));
-  --side-selected: var(--bg-hover);
+  /* hover is the fill the colour of light every surface takes under the pointer (styles.css) */
+  --side-hover: var(--fill-2);
+  /* the selected row is the chosen nav row of the surface language: a raised face lit from
+     above, in a ring of ink with the light along its top edge, never a flat fill */
+  --side-selected: var(--bg-elevated);
+  --side-selected-face: var(--raised-face);
+  --side-selected-edge: var(--shadow-raised);
+  /* a breath between rows, so a raised face never touches its neighbour's fill */
+  --side-row-gap: calc(var(--hairline) * 2);
+  /* a row's glyphs (marks, folders, carets, the footer's) one step under the app's icons: the
+     rows are dense, and at 16px the mark sits inside its cell with air on each side */
+  --icon-size: var(--space-4);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -20,7 +30,7 @@
   padding: 0 var(--side-gutter);
 }
 
-/* a section head (Agents): quiet words, never a rule */
+/* a section head (Agents): a small-caps caption in the dim text, as the pinned card's is, never a rule */
 .sidebar-section-label {
   display: flex;
   align-items: center;
@@ -32,11 +42,13 @@
   background: transparent;
   color: var(--text-dim);
   font: inherit;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-regular);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-caps);
   border-radius: var(--radius-md);
   line-height: var(--lh-tight);
   text-align: left;
+  text-transform: uppercase;
 }
 
 button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-offset) * -1); }
@@ -76,35 +88,45 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   color: var(--text);
 }
 
-/* The filter over both lists (MachineSidebar.tsx): its word, then one field the height of a row, in the rows'
-   gutter, and its clear inside the field's trailing cell. It never grows: a long query scrolls inside the field. */
+/* The filter over both lists (MachineSidebar.tsx): one field the height of a row, in the rows' gutter,
+   a magnifier in its leading cell, its word only for screen readers, and its clear inside its trailing
+   cell. It never grows: a long query scrolls inside the field. */
 .sidebar-filter {
   position: relative;
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: var(--space-2);
   padding: var(--space-2) var(--side-gutter) 0;
 }
 
-/* the field's label stays in view whatever is typed: the section head's words (Agents) */
-.sidebar-filter-label {
-  flex: none;
+.sidebar-filter-glyph {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--side-gutter);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--side-box);
+  height: var(--side-row);
   color: var(--text-dim);
-  font-size: var(--fs-input);
-  line-height: var(--lh-tight);
+  pointer-events: none;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
-/* the size of the field's own text beside it, as .input steps down on a wide screen */
-@media (min-width: 641px) {
-  .sidebar-filter-label { font-size: var(--fs-md); }
+.sidebar-filter-glyph svg {
+  width: var(--icon-size);
+  height: var(--icon-size);
 }
+
+/* the magnifier wakes with the field */
+.sidebar-filter:focus-within .sidebar-filter-glyph { color: var(--text); }
 
 .sidebar-filter-input {
   flex: 1 1 auto;
   min-width: 0;
   height: var(--side-row);
   padding-right: var(--side-row);
+  padding-left: var(--side-box);
   text-overflow: ellipsis;
 }
 
@@ -228,28 +250,15 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   list-style: none;
 }
 
-/* Pinned rows, agents and workspaces alike, stand first in a card: an edge, not a fill, so a row's
-   hover and selection read inside it as anywhere else, its corner the rows' own plus its padding.
-   The list under it follows a gap below. */
-/* Pinned rows stand first in a card whose top edge carries "── Pinned ──", like a fieldset's
-   legend: the caption sits on the line, masked by the sidebar's own background. The list carries the
-   name for screen readers, so the caption is hidden from them. */
-.sidebar-pinned {
-  padding: var(--space-2) var(--space-1) var(--space-1);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-lg);
-}
-
-.sidebar-pinned + ul { margin-top: var(--space-2); }
+/* Pinned rows, agents and workspaces alike, stand first as a group of rows under a small-caps
+   caption in the title column, as a section head is; no edge, no fill, so the rows read as any
+   other. The list carries the name for screen readers, so the caption is hidden from them. The
+   rest follow a breath below. */
+.sidebar-pinned + ul { margin-top: var(--space-3); }
 
 .sidebar-pinned-label {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* half the caption's height above the card's edge, half below it */
-  margin: var(--space-1) 0 calc(var(--fs-2xs) * var(--lh-tight) / -2);
+  margin: 0;
+  padding: var(--space-1) 0 var(--space-1) var(--side-box);
   color: var(--text-dim);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-semibold);
@@ -257,20 +266,6 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   line-height: var(--lh-tight);
   text-transform: uppercase;
   pointer-events: none;
-}
-
-.sidebar-pinned-label > span {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding-inline: var(--space-2);
-  background: var(--bg-panel);
-}
-
-.sidebar-pinned-label svg {
-  flex: none;
-  width: 1em;
-  height: 1em;
 }
 
 .workspace {
@@ -298,9 +293,10 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   align-items: center;
   min-width: 0;
   min-height: var(--side-row);
+  margin-block: calc(var(--side-row-gap) / 2);
   padding-right: var(--side-box);
   border-radius: var(--radius-md);
-  transition: background-color var(--dur-fast) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .pane-select {
@@ -323,29 +319,33 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
    row's content moves. */
 .worktree-children .workspace-header { padding-left: var(--side-box); }
 
-/* herdr's tree: a worktree hangs from its repository's folder on a dim branch, a tee for each
-   but the last and an elbow for the last, drawn in the indent and never in the way of a click */
+/* herdr's tree: a worktree hangs from its repository's folder on a dim branch, an elbow with a
+   rounded corner into each row (::after) and the trunk on down past every row but the last
+   (::before), drawn in the indent, through the gap between rows, and never in the way of a click */
 .worktree-children .workspace-group > .workspace-header::before,
 .worktree-children .workspace-group > .workspace-header::after {
   position: absolute;
   left: calc(var(--side-box) / 2);
   content: "";
-  background: var(--border-strong);
   pointer-events: none;
 }
 
 .worktree-children .workspace-group > .workspace-header::before {
-  top: 0;
-  bottom: 0;
+  top: 50%;
+  bottom: calc(-1 * var(--side-row-gap));
   width: var(--hairline);
+  background: var(--border-strong);
 }
 
-.worktree-children .workspace-group:last-child > .workspace-header::before { bottom: 50%; }
+.worktree-children .workspace-group:last-child > .workspace-header::before { display: none; }
 
 .worktree-children .workspace-group > .workspace-header::after {
-  top: 50%;
+  top: calc(-1 * var(--side-row-gap));
   width: calc(var(--side-box) / 2 - var(--space-1));
-  height: var(--hairline);
+  height: calc(50% + var(--side-row-gap));
+  border-left: var(--hairline) solid var(--border-strong);
+  border-bottom: var(--hairline) solid var(--border-strong);
+  border-bottom-left-radius: var(--radius-sm);
 }
 
 /* The face that leads a workspace row is also the fold when linked worktrees sit under it: under a
@@ -407,6 +407,8 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
 
 .workspace-group.is-selected > .workspace-header {
   background: var(--side-selected);
+  background-image: var(--side-selected-face);
+  box-shadow: var(--side-selected-edge);
 }
 
 /* keyboard focus draws the ring on the whole row and no fill */
@@ -611,8 +613,10 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
 }
 
 /* Compact states keep the label and tooltip the badges have on the other surfaces. The cell is
-   a box for every state, also when ready or unknown draw nothing in it. */
-.sidebar-status {
+   a box for every state, also when ready or unknown draw nothing in it: nothing of the chip the
+   badge is elsewhere (styles.css .badge: its ring shadow, sheen, engraved word, unknown's dashed
+   edge) is drawn here, only the state's own mark. */
+.badge.sidebar-status {
   justify-content: center;
   flex: 0 0 var(--side-box);
   width: var(--side-box);
@@ -621,6 +625,9 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   border: 0;
   border-radius: 0;
   background: transparent;
+  box-shadow: none;
+  outline: none;
+  text-shadow: none;
 }
 
 .sidebar-status::before { display: none; }
@@ -652,11 +659,13 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   line-height: 1;
 }
 
+/* the dot sits in a halo of its own colour, so it reads as set in the cell and not dropped on it */
 .sidebar-status-dot {
   width: var(--space-2);
   height: var(--space-2);
   border-radius: var(--radius-pill);
   background: currentColor;
+  box-shadow: 0 0 0 calc(var(--hairline) * 3) color-mix(in srgb, currentColor 16%, transparent);
 }
 
 /* Settings -> Status indicators, Dots or Symbols: herdr's TUI glyph for every state

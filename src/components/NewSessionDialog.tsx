@@ -1,15 +1,17 @@
-import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { flushSync } from "react-dom";
-import { FolderOpen, X } from "../lib/icons.ts";
+import { ChevronDown, FolderOpen, X } from "../lib/icons.ts";
 
 import "./NewSessionDialog.css";
 
 import type { AgentKind, SlashCommand } from "../../shared/protocol.ts";
 import { MAX_LABEL_CHARS } from "../../shared/labels.ts";
 import { ApiError } from "../lib/api.ts";
+import { cn } from "../lib/cn.ts";
 import { AgentPicker, rememberAgent, rememberedAgent } from "./AgentPicker.tsx";
 import { DirectoryBrowser, homeRelative } from "./DirectoryBrowser.tsx";
 import { RecentFolderChips } from "./RecentFolderChips.tsx";
+import { Alert, AlertDescription, Button, DialogBody, DialogFooter, DialogHeader, Field, fieldSurface, Input, Label, Textarea } from "./ui/index.ts";
 import { useMachineApi, useMachineId } from "../lib/machineContext.tsx";
 import { useT } from "../lib/i18n.ts";
 import { useSettings } from "../lib/settings.ts";
@@ -68,6 +70,9 @@ const SKILLS_MS = 300;
 /** recent folders offered: one row a phone swipes sideways; a wider screen fits what one row holds and lists the rest under "+N" */
 const RECENT_FOLDERS_SHOWN = 8;
 
+/** a native select on the field surface: the regression scripts choose its options as a select's (selectOption) */
+export const nativeSelect = cn(fieldSurface, "h-input w-full cursor-pointer appearance-none px-3 pr-9 text-input font-regular sm:text-sm coarse:h-touch");
+
 function directoryBasename(value: string): string {
   const trimmed = value.replace(/\\/g, "/").replace(/\/+$/, "");
   return trimmed.split("/").pop() || value;
@@ -90,12 +95,22 @@ export function insertToken(text: string, at: number, token: string): { text: st
   return { text: `${head}${after}`.slice(0, MAX_COMPOSER_CHARS), caret: Math.min(head.length, MAX_COMPOSER_CHARS) };
 }
 
+/** what went wrong, said in the dialog's own words with the PC's beneath */
+export function DialogError({ error, className }: { error: UserError; className?: string }) {
+  return (
+    <Alert tone="danger" className={cn("[overflow-wrap:anywhere]", className)}>
+      <AlertDescription className="text-danger-text">{error.message}{error.detail !== null && <><br /><code className="font-mono text-xs">{error.detail}</code></>}</AlertDescription>
+    </Alert>
+  );
+}
+
 export function NewSessionDialog({ open, defaultCwd, tab = null, onClose, onCreated, machineName, prefill = null, onDraft, worktrees = [] }: NewSessionDialogProps) {
   const t = useT();
   const { settings } = useSettings();
   const machineId = useMachineId();
   const { createTab, createWorkspace, fetchAgentKinds, fetchAgentCommands } = useMachineApi();
   const machineSessions = useMachineSessions();
+  const nameId = useId();
   const [agents, setAgents] = useState<AgentKind[]>([]);
   const [agentKind, setAgentKind] = useState(rememberedAgent);
   const [cwd, setCwd] = useState(defaultCwd ?? "");
@@ -322,53 +337,50 @@ export function NewSessionDialog({ open, defaultCwd, tab = null, onClose, onCrea
 
   return (
     <div className="modal-scrim new-session-scrim" onMouseDown={closeFromScrim}>
-      <form ref={surface} className="modal new-session-modal" role="dialog" aria-modal="true" aria-labelledby="new-session-title" tabIndex={-1} onSubmit={(event) => { event.preventDefault(); void startWorkspace(cwd); }}>
-        <header className="modal-header">
-          <h2 className="modal-title" id="new-session-title">{tab ? `${t("New tab")} · ${tab.workspaceLabel}` : `${t("New workspace")} · ${machineName ?? machineId}`}</h2>
-          <button type="button" className="icon-button" aria-label={t("Close dialog")} disabled={pending} onClick={onClose}>
+      <form ref={surface} className="modal new-session-modal relative" role="dialog" aria-modal="true" aria-labelledby="new-session-title" tabIndex={-1} onSubmit={(event) => { event.preventDefault(); void startWorkspace(cwd); }}>
+        <DialogHeader>
+          <h2 className="text-lg font-medium text-strong text-engraved text-balance" id="new-session-title">{tab ? `${t("New tab")} · ${tab.workspaceLabel}` : `${t("New workspace")} · ${machineName ?? machineId}`}</h2>
+          <Button variant="ghost" size="icon" className="absolute top-3 right-3 text-dim" aria-label={t("Close dialog")} disabled={pending} onClick={onClose}>
             <X aria-hidden="true" />
-          </button>
-        </header>
-        <div className="modal-body">
-          <div className="field">
-            <span className="field-label" id="new-session-agent">{t("Agent")}</span>
+          </Button>
+        </DialogHeader>
+        <DialogBody className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <Label className="flex h-6 items-center" id="new-session-agent">{t("Agent")}</Label>
             <AgentPicker ref={firstFieldRef} agents={agents} value={agentKind} disabled={fieldsDisabled} labelledBy="new-session-agent" hints={pickerHints} onChange={pickAgent} />
           </div>
           {tab ? (
-            <div className="field">
-              <span className="field-label">{t("Directory")}</span>
-              <div className="new-session-folder">
-                <FolderOpen aria-hidden="true" />
-                <span>{tab.cwd ?? tab.workspaceLabel}</span>
+            <Field label={t("Directory")} hint={t("Uses the workspace's folder")}>
+              {/* New tab: the folder is the workspace's, shown as a fact on a field's surface, not asked for */}
+              <div className="new-session-folder flex h-input items-center gap-2 rounded-md bg-fill-1 px-3 text-sm text-dim shadow-[0_0_0_1px_var(--ink-1),inset_0_0_0_1px_var(--edge-light)]">
+                <FolderOpen aria-hidden="true" className="size-4 shrink-0" />
+                <span className="min-w-0 truncate text-text">{tab.cwd ?? tab.workspaceLabel}</span>
               </div>
-              <span className="field-hint">{t("Uses the workspace's folder")}</span>
-            </div>
+            </Field>
           ) : (
-            <div className="field">
-              <label className="field-label" htmlFor="new-session-cwd">{t("Directory")}</label>
-              <div className="new-session-cwd">
-                <input ref={cwdField} id="new-session-cwd" className="input" value={cwd} placeholder="~/projects/app" disabled={fieldsDisabled} autoComplete="off" onChange={(event) => setCwd(event.target.value)} onBlur={showPathEnd} />
-                <button type="button" className="btn" aria-expanded={browsing} disabled={fieldsDisabled} onClick={() => setBrowsing((open) => !open)}>
+            <Field label={t("Directory")} htmlFor="new-session-cwd" hint={t("absolute path or ~/…")}>
+              <div className="new-session-cwd flex gap-2">
+                <Input ref={cwdField} id="new-session-cwd" className="min-w-0 flex-1 coarse:h-touch" value={cwd} placeholder="~/projects/app" disabled={fieldsDisabled} autoComplete="off" onChange={(event) => setCwd(event.target.value)} onBlur={showPathEnd} />
+                <Button variant="field" size="field" className="h-input shrink-0 pr-3 coarse:h-touch" aria-expanded={browsing} disabled={fieldsDisabled} onClick={() => setBrowsing((open) => !open)}>
                   <FolderOpen aria-hidden="true" />
                   {t("Browse")}
-                </button>
+                </Button>
               </div>
               {/* Browse updates Directory as you open folders, so Start uses what the path bar shows
                   even when Use this folder was never pressed (issue #1162); a folder under home
                   keeps the `~/…` form typed or picked, rather than turning absolute on opening Browse. */}
               {browsing && <DirectoryBrowser start={cwd} onPick={(picked) => { setCwd(picked); setBrowsing(false); }} onFolder={(path, home) => setCwd(homeRelative(path, home))} />}
-              <span className="field-hint">{t("absolute path or ~/…")}</span>
-            </div>
+            </Field>
           )}
-          {!tab && shownFolders.length > 0 && <div className="field new-session-recents">
-            <span className="field-label" id="new-session-recents">{t("Recent folders")}</span>
+          {!tab && shownFolders.length > 0 && <div className="new-session-recents flex flex-col gap-1">
+            <Label className="flex h-6 items-center" id="new-session-recents">{t("Recent folders")}</Label>
             <RecentFolderChips folders={shownFolders} disabled={fieldsDisabled} labelledBy="new-session-recents" basename={directoryBasename}
               onPick={(path) => { setCwd(path); setBrowsing(false); }} />
           </div>}
-          <label className="field">
-            <span className="field-label">{t("Name")}</span>
-            <input
-              className="input"
+          <Field label={t("Name")} htmlFor={nameId} hint={t(tab ? "Tab name (optional)" : "Optional workspace label")}>
+            <Input
+              id={nameId}
+              className="coarse:h-touch"
               value={name}
               maxLength={MAX_LABEL_CHARS}
               disabled={fieldsDisabled}
@@ -376,15 +388,16 @@ export function NewSessionDialog({ open, defaultCwd, tab = null, onClose, onCrea
               placeholder={tab ? String(tab.number) : directoryBasename(cwd)}
               onChange={(event) => setName(event.target.value)}
             />
-            <span className="field-hint">{t(tab ? "Tab name (optional)" : "Optional workspace label")}</span>
-          </label>
+          </Field>
           {/* the launch's own choices, only where the agent's command line takes them (lib/agentLaunchMode.ts) */}
           {(can.model || can.efforts.length > 0) && <div className="new-session-launch">
-            {can.model && <div className="field">
-              <label className="field-label" htmlFor="new-session-model">{t("Model")}</label>
-              <input
+            {can.model && <Field label={t("Model")} htmlFor="new-session-model" className="min-w-0"
+              hint={<span id="new-session-model-hint" className={fault === "model" ? "text-blocked" : undefined} role={fault === "model" ? "alert" : undefined}>
+                {fault === "model" ? t("One model name, without spaces.") : t("Empty: the agent's own model.")}
+              </span>}>
+              <Input
                 id="new-session-model"
-                className="input"
+                className="coarse:h-touch"
                 value={model}
                 list={suggestions.length > 0 ? "new-session-models" : undefined}
                 disabled={fieldsDisabled}
@@ -397,25 +410,22 @@ export function NewSessionDialog({ open, defaultCwd, tab = null, onClose, onCrea
                 onChange={(event) => setModel(event.target.value)}
               />
               {suggestions.length > 0 && <datalist id="new-session-models">{suggestions.map((alias) => <option key={alias} value={alias} />)}</datalist>}
-              <span id="new-session-model-hint" className={`field-hint${fault === "model" ? " new-session-error" : ""}`} role={fault === "model" ? "alert" : undefined}>
-                {fault === "model" ? t("One model name, without spaces.") : t("Empty: the agent's own model.")}
-              </span>
-            </div>}
-            {can.efforts.length > 0 && <div className="field">
-              <label className="field-label" htmlFor="new-session-effort">{t("Effort")}</label>
-              <select id="new-session-effort" className="select" value={effort} disabled={fieldsDisabled} aria-describedby="new-session-effort-hint" onChange={(event) => setEffort(event.target.value)}>
-                <option value="">{t("Agent default")}</option>
-                {can.efforts.map((level) => <option key={level} value={level}>{level}</option>)}
-              </select>
-              <span id="new-session-effort-hint" className="field-hint">{t("Levels depend on the model.")}</span>
-            </div>}
+            </Field>}
+            {can.efforts.length > 0 && <Field label={t("Effort")} htmlFor="new-session-effort" className="min-w-0" hint={<span id="new-session-effort-hint">{t("Levels depend on the model.")}</span>}>
+              <div className="relative">
+                <select id="new-session-effort" className={nativeSelect} value={effort} disabled={fieldsDisabled} aria-describedby="new-session-effort-hint" onChange={(event) => setEffort(event.target.value)}>
+                  <option value="">{t("Agent default")}</option>
+                  {can.efforts.map((level) => <option key={level} value={level}>{level}</option>)}
+                </select>
+                <ChevronDown aria-hidden="true" className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-dim" />
+              </div>
+            </Field>}
           </div>}
-          {agentKind !== "" && <div className="field">
-            <label className="field-label" htmlFor="new-session-prompt">{t("First message")}</label>
-            <textarea
+          {agentKind !== "" && <Field label={t("First message")} htmlFor="new-session-prompt" hint={<span id="new-session-prompt-hint">{promptHint}</span>}>
+            <Textarea
               ref={promptField}
               id="new-session-prompt"
-              className="input new-session-prompt"
+              className="new-session-prompt min-h-20 resize-y leading-[var(--lh-base)]"
               value={prompt}
               rows={3}
               maxLength={MAX_COMPOSER_CHARS}
@@ -424,36 +434,36 @@ export function NewSessionDialog({ open, defaultCwd, tab = null, onClose, onCrea
               aria-describedby="new-session-prompt-hint"
               onChange={(event) => setPrompt(event.target.value)}
             />
-            <span id="new-session-prompt-hint" className="field-hint">{promptHint}</span>
             {/* the agent's skills in the folder, before it runs: a tap puts the skill's token in the message */}
-            {skills !== null && (skills.rows.length > 0 || skills.note !== null) && <div className="new-session-skills-field">
-              <span className="field-label" id="new-session-skills">{t("Skills")}</span>
-              {skills.rows.length > 0 && <div className="new-session-skills" role="group" aria-labelledby="new-session-skills">
+            {skills !== null && (skills.rows.length > 0 || skills.note !== null) && <div className="new-session-skills-field mt-2 flex flex-col gap-1">
+              <Label id="new-session-skills">{t("Skills")}</Label>
+              {skills.rows.length > 0 && <div className="new-session-skills -m-1 flex flex-wrap gap-2 overflow-y-auto p-1" role="group" aria-labelledby="new-session-skills">
                 {skills.rows.map((skill) => (
-                  <button
-                    type="button"
+                  <Button
+                    variant="field"
+                    size="xs"
                     key={skillToken(skill)}
-                    className="btn new-session-skill-chip"
+                    className="new-session-skill-chip max-w-full rounded-full font-mono text-sm font-regular"
                     disabled={fieldsDisabled}
                     title={skill.description}
                     aria-label={t("Add {skill} to the message", { skill: skillToken(skill) })}
                     onClick={() => insertSkill(skill)}
                   >
-                    {skillToken(skill)}
-                  </button>
+                    <span className="truncate">{skillToken(skill)}</span>
+                  </Button>
                 ))}
               </div>}
-              {skills.note !== null && <span className="field-hint">{skills.note}</span>}
+              {skills.note !== null && <span className="text-xs leading-4 text-dim">{skills.note}</span>}
             </div>}
-            {skills !== null && skills.rows.length === 0 && skills.note === null && <span className="field-hint">{t("No skills for {agent} in this folder.", { agent: agentLabel })}</span>}
-          </div>}
-          {pending && <p className="new-session-note" role="status">{pendingLabel}</p>}
-          {error && <p className="field-hint new-session-error" role="alert">{error.message}{error.detail !== null && <><br /><code>{error.detail}</code></>}</p>}
-        </div>
-        <footer className="modal-footer">
-          <button type="button" className="btn btn-ghost" disabled={pending} onClick={onClose}>{t("Cancel")}</button>
-          <button type="submit" className="btn btn-primary" disabled={pending || fault !== null}>{t(pending ? "Starting…" : createdPaneId !== null ? "Open" : "Start")}</button>
-        </footer>
+            {skills !== null && skills.rows.length === 0 && skills.note === null && <span className="text-xs leading-4 text-dim">{t("No skills for {agent} in this folder.", { agent: agentLabel })}</span>}
+          </Field>}
+          {pending && <p className="new-session-note m-0 text-sm text-dim" role="status">{pendingLabel}</p>}
+          {error && <DialogError error={error} className="new-session-error" />}
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="field" size="sm" className="coarse:h-touch" disabled={pending} onClick={onClose}>{t("Cancel")}</Button>
+          <Button type="submit" variant="accent" size="sm" className="coarse:h-touch" disabled={pending || fault !== null}>{t(pending ? "Starting…" : createdPaneId !== null ? "Open" : "Start")}</Button>
+        </DialogFooter>
       </form>
     </div>
   );

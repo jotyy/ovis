@@ -1,8 +1,9 @@
+/* the find bar over the grid: the pane's chrome, parted from the grid by an etched rule; the query
+   is an Input (components/ui/input.tsx) with ghost glyph buttons after it */
 .find-bar {
   flex: 0 0 auto;
   padding: var(--space-2) var(--space-3);
-  background: var(--bg-panel);
-  border-bottom: var(--hairline) solid var(--border);
+  background: var(--divider) bottom / 100% var(--divider-h) no-repeat, var(--bg-panel);
 }
 
 .find-bar-controls {
@@ -20,7 +21,7 @@
   color: var(--text-dim);
 }
 
-.find-bar-query .input {
+.find-bar-query input {
   width: 100%;
   min-width: 0;
 }
@@ -44,7 +45,7 @@
 }
 
 .find-bar-error {
-  color: var(--status-blocked);
+  color: var(--danger-text);
 }
 
 @media (max-width: 480px) {

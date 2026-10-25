@@ -7,6 +7,7 @@ import { readTerminalDraft, writeTerminalDraft, TERMINAL_LINE_LIMIT, subscribeTe
 import { useT } from "../lib/i18n.ts";
 import { useSettings } from "../lib/settings.ts";
 import { MicButton, VoiceRecordingPill, useDictation } from "./VoiceInput.tsx";
+import { TooltipProvider } from "./ui/index.ts";
 
 export interface TerminalInputProps {
   owner: string;
@@ -364,7 +365,7 @@ export function TerminalInput({ owner, active = true, connected, onSend, onEnter
         onKeyDown={onKeyDown}
         onFocus={onFocus}
       />
-      {dictation.shown && <MicButton dictation={dictation} className="terminal-input-mic" />}
+      {dictation.shown && <TooltipProvider><MicButton dictation={dictation} className="terminal-input-mic" /></TooltipProvider>}
       <span className="terminal-input-actions">
         {/* Insert, apart from Send by its words, its outline and its name: the text goes to the
             prompt and stays there to edit. Each says what it does above its round target */}

@@ -38,6 +38,7 @@ import { ChatView } from "./ChatView.tsx";
 import { RenderBoundary } from "./RenderBoundary.tsx";
 import { Composer } from "./Composer.tsx";
 import { ComposerNotices, type ComposerNoticeRow } from "./ComposerNotices.tsx";
+import { Alert, Button, IconButton, TooltipProvider } from "./ui/index.ts";
 import { PendingMessages } from "./PendingMessages.tsx";
 import type { AgentStatus, ClientRole, PlanSummary, ServerMessage } from "../../shared/protocol.ts";
 import type { PaneControls, PaneView } from "../lib/actions.ts";
@@ -744,11 +745,11 @@ export function PaneTerminal({
     if (held) noticeItems.push({
       id: `${owner}:held`, priority: "urgent", revision: takeOver ? "open-here" : "", warning: true, mark: <Unplug />,
       text: t("Another app has this pane open. It connects here as soon as that app lets go."),
-      actions: takeOver && <button type="button" className="composer-notice-action" title={t("Take this pane from another web app or terminal attach. That connection will close.")} onClick={() => { socketRef.current?.takeOver(paneId); }}>{t("Open here")}</button>,
+      actions: takeOver && <Button variant="field" size="sm" className="composer-notice-action" title={t("Take this pane from another web app or terminal attach. That connection will close.")} onClick={() => { socketRef.current?.takeOver(paneId); }}>{t("Open here")}</Button>,
     });
     if (outputError) noticeItems.push({
       id: `${owner}:output`, priority: "urgent", revision: outputError, warning: true, mark: <TriangleAlert />, text: outputError,
-      actions: <a className="composer-notice-action" href={`?machine=${encodeURIComponent(machineId)}&pane=${encodeURIComponent(paneId)}`}>{t("Reconnect")}</a>,
+      actions: <Button variant="field" size="sm" className="composer-notice-action" asChild><a href={`?machine=${encodeURIComponent(machineId)}&pane=${encodeURIComponent(paneId)}`}>{t("Reconnect")}</a></Button>,
     });
     if (!ended && connected && !draftIsEmpty(draft)) noticeItems.push({
       id: `${owner}:draft`, priority: "activity", revision: `${draft.truncated ? "…" : ""}${draft.text}`, warning: false, mark: <Clock />,
@@ -761,8 +762,8 @@ export function PaneTerminal({
       </>,
       actions: <>
         {/* the composer's send glyph (an up arrow) on the row's plain icon button, beside its Discard */}
-        <button type="button" className="icon-button" aria-label={t("Send held input")} title={t("Send held input")} disabled={draft.text.length === 0 || observing || secretActive || held} onClick={sendDraft}><ArrowUp aria-hidden="true" /></button>
-        <button type="button" className="icon-button" aria-label={t("Discard held input")} title={t("Discard held input")} onClick={discardDraft}><Trash2 aria-hidden="true" /></button>
+        <Button variant="ghost" size="icon" aria-label={t("Send held input")} title={t("Send held input")} disabled={draft.text.length === 0 || observing || secretActive || held} onClick={sendDraft}><ArrowUp aria-hidden="true" /></Button>
+        <Button variant="ghost" size="icon" aria-label={t("Discard held input")} title={t("Discard held input")} onClick={discardDraft}><Trash2 aria-hidden="true" /></Button>
       </>,
     });
     if (clipboardNote) noticeItems.push({ id: `${owner}:clipboard`, priority: "notice", revision: clipboardNote, warning: false, mark: <ClipboardCheck />, text: clipboardNote });
@@ -770,7 +771,7 @@ export function PaneTerminal({
     if (stillOpen !== null && stillOpen.pane === paneId) noticeItems.push({
       id: `${owner}:still-open`, priority: "urgent", revision: stillOpen.named ? stillOpen.command : "", warning: false, mark: <SquareTerminal />,
       text: stillOpen.named ? t("{command} is still open in the terminal", { command: stillOpen.command }) : t("A screen is still open in the terminal"),
-      actions: <button type="button" className="composer-notice-action" onClick={showStillOpen}>{t("Show terminal")}</button>,
+      actions: <Button variant="field" size="sm" className="composer-notice-action" onClick={showStillOpen}>{t("Show terminal")}</Button>,
     });
   }
   const settledNotices = settleDismissed(dismissedNotices, noticeItems);
@@ -905,51 +906,53 @@ export function PaneTerminal({
         </div>
       )}
       <div className="terminal-banners">
+        <TooltipProvider>
         {paneId !== null && held && !noticesDocked && (
-          <div className="terminal-banner terminal-banner-warning" role="status">
+          <Alert tone="notice" role="status" className="terminal-banner terminal-banner-warning">
             <span>{t("Another app has this pane open. It connects here as soon as that app lets go.")}</span>
             {!observing && socketRef.current?.canTakeOver() && (
-              <button type="button" className="btn terminal-banner-action" title={t("Take this pane from another web app or terminal attach. That connection will close.")} onClick={() => { if (paneId !== null) socketRef.current?.takeOver(paneId); }}>{t("Open here")}</button>
+              <Button variant="accent" size="sm" className="terminal-banner-action" title={t("Take this pane from another web app or terminal attach. That connection will close.")} onClick={() => { if (paneId !== null) socketRef.current?.takeOver(paneId); }}>{t("Open here")}</Button>
             )}
-          </div>
+          </Alert>
         )}
         {paneId !== null && !chatView && unsupported && (
-          <div className="terminal-banner terminal-banner-soon" role="status">
+          <Alert tone="neutral" role="status" className="terminal-banner terminal-banner-soon">
             <span>{t("Live terminal is coming to Windows PCs: herdr cannot attach a terminal there yet. The chat lens works now.")}</span>
-          </div>
+          </Alert>
         )}
         {paneId !== null && outputError && !noticesDocked && (
-          <div className="terminal-banner terminal-banner-warning terminal-banner-output-error" role="status">
+          <Alert tone="danger" role="status" className="terminal-banner terminal-banner-warning terminal-banner-output-error">
             <span>{outputError}</span>
-            <button type="button" className="btn" onClick={() => reattachRef.current()}>{t("Reconnect")}</button>
-          </div>
+            <Button variant="field" size="sm" className="terminal-banner-action" onClick={() => reattachRef.current()}>{t("Reconnect")}</Button>
+          </Alert>
         )}
-        {!chatView && inputError && <div className="terminal-banner" role="status">{inputError}<button type="button" className="btn terminal-banner-action" onClick={() => setInputError(null)}>{t("Dismiss")}</button></div>}
-        <div className={waitingWords === null ? "visually-hidden" : "terminal-banner"} role="status">{waitingWords}</div>
-        {paneId !== null && !chatView && released && <div className="terminal-banner" role="status">{t(watching ? "View only while you use another window · click to type" : "Paused while you use another window")}</div>}
+        {!chatView && inputError && <Alert tone="neutral" role="status" className="terminal-banner">{inputError}<Button variant="field" size="sm" className="terminal-banner-action" onClick={() => setInputError(null)}>{t("Dismiss")}</Button></Alert>}
+        {/* one element either way: a live region that appears with its words is not read */}
+        <Alert tone="neutral" role="status" className={waitingWords === null ? "visually-hidden" : "terminal-banner"}>{waitingWords}</Alert>
+        {paneId !== null && !chatView && released && <Alert tone="neutral" role="status" className="terminal-banner">{t(watching ? "View only while you use another window · click to type" : "Paused while you use another window")}</Alert>}
         {/* the chat lens says these itself (ChatView), inline; the pills are the grid's */}
         {paneId !== null && !chatView && ended && !outputError && (
-          <div className="terminal-banner" role="status">
+          <Alert tone="neutral" role="status" className="terminal-banner">
             {t("Terminal ended")}
-          </div>
+          </Alert>
         )}
         {paneId !== null && !chatView && !ended && !connected && (
-          <div className="terminal-banner terminal-banner-warning" role="status">
+          <Alert tone="notice" role="status" className="terminal-banner terminal-banner-warning">
             {t(connectedBefore ? "Reconnecting to Ovis…" : "Connecting to Ovis…")}
             {/* one line, cut with an ellipsis: a command is never broken inside a word; the title holds it whole */}
             {draft.text.length > 0 && <span className="draft-held" title={draft.text}> {t("Input held:")} <code>“{draft.text}”</code></span>}
-          </div>
+          </Alert>
         )}
         {paneId !== null && !chatView && rewindHint === paneId && (
-          <div className="terminal-banner terminal-banner-rewind" role="status">
+          <Alert tone="neutral" role="status" className="terminal-banner terminal-banner-rewind">
             <span>{t("Run /rewind here to choose the message to go back to. The chat follows.")}</span>
-            <button type="button" className="icon-button" aria-label={t("Dismiss")} title={t("Dismiss")} onClick={() => setRewindHint(null)}><X aria-hidden="true" /></button>
-          </div>
+            <IconButton label={t("Dismiss")} onClick={() => setRewindHint(null)}><X aria-hidden="true" /></IconButton>
+          </Alert>
         )}
         {/* the peek's head: no grid row of its own, no focus trap and no Escape of its own (Escape is the
             agent's). Keep Terminal saves the terminal lens, which ends the peek */}
         {paneId !== null && peek !== null && (
-          <div className="terminal-banner terminal-banner-command" role="status">
+          <Alert tone="neutral" role="status" className="terminal-banner terminal-banner-command">
             <span className="terminal-command-label">
               <SquareTerminal aria-hidden="true" />
               <span className="terminal-command-words">
@@ -958,39 +961,39 @@ export function PaneTerminal({
               </span>
             </span>
             <span className="terminal-command-actions">
-              <button type="button" className="btn btn-ghost" onClick={() => onEndPeek?.(peek)}><ArrowLeft aria-hidden="true" />{t("Back to Chat")}</button>
-              {onOpenTerminal && <button type="button" className="btn btn-ghost" onClick={onOpenTerminal}>{t("Keep Terminal")}</button>}
+              <Button variant="field" size="sm" onClick={() => onEndPeek?.(peek)}><ArrowLeft aria-hidden="true" />{t("Back to Chat")}</Button>
+              {onOpenTerminal && <Button variant="ghost" size="sm" onClick={onOpenTerminal}>{t("Keep Terminal")}</Button>}
             </span>
-          </div>
+          </Alert>
         )}
         {paneId !== null && !ended && connected && !draftIsEmpty(draft) && !noticesDocked && (
-          <div className="terminal-banner terminal-banner-draft" role="status">
+          <Alert tone="neutral" role="status" className="terminal-banner terminal-banner-draft">
             {/* on screen the row is its parts, the command and its two controls; the words are for the live region */}
             <span className="visually-hidden">{t("Input held:")}</span>
             {draft.text.length > 0 && <code className="draft-text" title={draft.text}>{draft.text}</code>}
             <span className="draft-actions">
-              <button type="button" className="icon-button draft-send" aria-label={t("Send held input")} title={t("Send held input")} disabled={draft.text.length === 0 || observing || secretActive || held} onClick={sendDraft}>
+              <IconButton variant="accent" className="draft-send" label={t("Send held input")} disabled={draft.text.length === 0 || observing || secretActive || held} onClick={sendDraft}>
                 <SendHorizontal aria-hidden="true" />
-              </button>
-              <button type="button" className="icon-button draft-discard" aria-label={t("Discard held input")} title={t("Discard held input")} onClick={discardDraft}>
+              </IconButton>
+              <IconButton className="draft-discard" label={t("Discard held input")} onClick={discardDraft}>
                 <Trash2 aria-hidden="true" />
-              </button>
+              </IconButton>
             </span>
             {/* said only when it applies, on a line under the row. The preview shows the start of the
                 text: without this, a draft that lost its end looks whole */}
             {draft.truncated && <span className="draft-truncated">{t("Some input could not be held and was left out.")}</span>}
             {/* Enter is never held: without this, two commands look like one line and a paste looks whole */}
             {draft.leftOut && <span className="draft-truncated">{t("An Enter or line break was left out: Send never presses Enter.")}</span>}
-          </div>
+          </Alert>
         )}
         {paneId !== null && !ended && observing && (
-          <div className="terminal-banner terminal-banner-observe" role="status">
+          <Alert tone="neutral" role="status" className="terminal-banner terminal-banner-observe">
             <Eye aria-hidden="true" />
             {t("View only")}
-          </div>
+          </Alert>
         )}
         {paneId !== null && !chatView && selectionQuote?.pane === paneId && (
-          <button type="button" className="terminal-banner terminal-banner-action terminal-quote"
+          <Button variant="field" size="sm" className="terminal-banner terminal-banner-action terminal-quote"
             onMouseDown={(event) => { event.preventDefault(); }}
             onClick={() => {
               const block = formatTerminalQuote({ label: title?.trim() || paneId, range: selectionQuote.range, text: selectionQuote.text });
@@ -1003,13 +1006,14 @@ export function PaneTerminal({
               noteClipboard(t("Added to the message draft"));
             }}>
             <Quote aria-hidden="true" />{t("Quote in message")}
-          </button>
+          </Button>
         )}
         {clipboardNote && !noticesDocked && (
-          <div className="terminal-banner" role="status">
+          <Alert tone="done" role="status" className="terminal-banner">
             {clipboardNote}
-          </div>
+          </Alert>
         )}
+        </TooltipProvider>
       </div>
       {/* its own key: under a peek it is the Composer's sibling, which is keyed by the pane too, and
           two siblings with one key leave stray copies of the bar in the stack */}
@@ -1035,7 +1039,7 @@ export function PaneTerminal({
           <RenderBoundary resetKey={paneId} fallback={(retry) => (
             <div className="chat-view"><div className="chat-empty" role="alert">
               <p>{t("The chat can't be shown. The terminal still works.")}</p>
-              <button type="button" className="btn" onClick={retry}>{t("Try again")}</button>
+              <Button variant="field" size="sm" onClick={retry}>{t("Try again")}</Button>
             </div></div>
           )}>
           {/* a pane's chat never commits another pane's turns: a new pane is a new ChatView.
@@ -1129,7 +1133,7 @@ export function PaneTerminal({
               onChange={(event) => { queueStore.edit(queueOwner, message.id, event.target.value); }}
             />
             <div className="composer-queue-actions">
-              <button type="button" className="composer-queue-send"
+              <Button variant={readyForQueue ? "accent" : "field"} size="sm" className="composer-queue-send"
                 disabled={!connected || held || secretActive || queueSending !== null || queued.some((item) => queueStore.isSending(item.id)) || heldByOpenQueue || message.text.trim().length === 0}
                 title={heldByOpenQueue ? t("Codex has a question open in the terminal: answer it above first") : undefined}
                 onClick={() => {
@@ -1144,12 +1148,12 @@ export function PaneTerminal({
                     })
                     .catch(() => setQueueError({ owner, id: message.id, text: t("Not confirmed. Check the terminal before sending again.") }))
                     .finally(() => { queueStore.endSend(owner, message.id); sendingRef.current = false; setQueueSending(null); });
-                }}>{t("Send now")}</button>
-              <button type="button" className="composer-queue-discard" disabled={queueStore.isSending(message.id)}
+                }}>{t("Send now")}</Button>
+              <Button variant="ghost" size="sm" className="composer-queue-discard" disabled={queueStore.isSending(message.id)}
                 onClick={() => { queueStore.remove(queueOwner, message.id); }}>
                 {/* a phone draws the X; the word stays the button's name */}
                 <span className="composer-queue-discard-text">{t("Discard")}</span><X aria-hidden="true" />
-              </button>
+              </Button>
             </div>
             {queueError?.owner === queueOwner && queueError.id === message.id && <p className="composer-queue-error" role="status">{queueError.text}</p>}
           </li>)}

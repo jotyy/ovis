@@ -1,9 +1,14 @@
-/* Browse | Changes in the Files dialog's header, between the title and Close */
-.files-dialog-tabs {
-  flex: none;
+/* Files: Browse | Changes in the header, the browser or the changes under it (FilesDialog.tsx) */
+.files-dialog {
+  width: min(100%, 560px);
 }
 
 /* the dialog keeps one height across its two tabs: a short list of changes does not shrink it */
-.files-dialog .modal-body {
+.files-dialog [data-slot="dialog-body"] {
   min-height: calc(var(--control-h) * 8);
+}
+
+/* a hidden tab takes no room: the one shown sets the body's height */
+.files-dialog [data-slot="tabs-content"][hidden] {
+  display: none;
 }

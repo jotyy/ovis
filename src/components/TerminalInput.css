@@ -45,8 +45,8 @@
   /* the same room under the field and the send button as over them, so they never sit on the key
      bar's rule (or the screen's edge) below; the sides keep the key bar's --space-2 */
   padding: var(--space-1) var(--space-2);
-  border-top: var(--hairline) solid var(--border);
-  background: var(--bg-panel);
+  /* parted from the grid by an etched rule (the divider token, as the divider-t utility) */
+  background: var(--divider) top / 100% var(--divider-h) no-repeat, var(--bg-panel);
 }
 
 .terminal-input.has-voice {
@@ -67,15 +67,15 @@
   grid-row: 2;
 }
 
-/* the same round target as the send button beside it */
+/* the same square target as the send button beside it, on a field's face */
 .terminal-input-mic .voice-mic {
   width: var(--touch-target);
   height: var(--touch-target);
 }
 
 .terminal-input-mic .voice-mic:not([aria-pressed="true"]) {
-  border-color: var(--border);
   background: var(--bg-elevated);
+  box-shadow: var(--shadow-surface);
 }
 
 .terminal-input-text {
@@ -84,20 +84,28 @@
   min-height: var(--touch-target);
   max-height: 100%; /* of its row, which the line's cap above shortens */
   padding: var(--space-2) var(--space-3);
-  border: var(--hairline) solid var(--border);
+  /* the field surface (components/ui/input.tsx): the well, its ring, the accent when focused. The
+     hairline stays, transparent, so the slot's height sum above holds */
+  border: var(--hairline) solid transparent;
   border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-  color: var(--text);
+  background: var(--bg-input);
+  box-shadow: var(--shadow-surface);
+  color: var(--text-strong);
   font: inherit;
   /* body text a phone reads at arm's length; never below 16px, where iOS zooms the page on focus */
   font-size: max(var(--fs-input), var(--fs-xl));
   line-height: var(--lh-base);
   resize: none;
+  transition: box-shadow var(--dur-fast) var(--ease-in-out);
+}
+
+.terminal-input-text::placeholder {
+  color: var(--text-dim);
 }
 
 .terminal-input-text:focus {
   outline: none;
-  border-color: var(--accent);
+  box-shadow: var(--shadow-focus);
 }
 
 /* the two actions, the last grid column from the label's row down: Insert first, Send last at
@@ -138,25 +146,26 @@
   justify-content: center;
   width: var(--touch-target);
   height: var(--touch-target);
-  border: var(--hairline) solid transparent;
-  border-radius: var(--radius-pill);
-}
-
-.terminal-input-send .terminal-input-face {
-  background: var(--accent);
-  color: var(--bg);
-}
-
-/* Insert is the quieter of the two: an outline on the elevated surface, so Send alone is the
-   filled one. The outline is the dim text colour, which holds 3:1 against the panel in every
-   theme (the hairline border colour does not); the pressed state is the key bar's */
-.terminal-input-insert .terminal-input-face {
-  border-color: var(--text-dim);
-  background: var(--bg-elevated);
-  color: var(--text);
+  border-radius: var(--radius-md);
   transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-in-out),
+    box-shadow var(--dur-fast) var(--ease-in-out),
+    color var(--dur-fast) var(--ease-in-out);
+}
+
+/* Send is the line's accent action (the accent button of components/ui/button.tsx): lit from above */
+.terminal-input-send .terminal-input-face {
+  background: var(--primary-sheen), var(--primary);
+  box-shadow: var(--shadow-primary);
+  color: var(--primary-text);
+  text-shadow: var(--text-shadow-engraved);
+}
+
+/* Insert is the quieter of the two: a field face, so Send alone is the lit one */
+.terminal-input-insert .terminal-input-face {
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-surface);
+  color: var(--text);
 }
 
 @media (hover: hover) {
@@ -166,23 +175,23 @@
 }
 
 .terminal-input-insert:active:not(:disabled) .terminal-input-face {
-  border-color: var(--accent);
+  background: color-mix(in srgb, var(--bg-elevated) 80%, var(--bg));
   color: var(--text-strong);
 }
 
-/* off (an empty line, a send on its way, offline): the face turns to a dashed outline and the words
-   and glyph to the dim text colour, a shape and a colour that both still read at 3:1 or more,
-   rather than a fade */
+/* off (an empty line, a send on its way, offline): the face keeps a ring and loses its fill, and
+   the words and glyph take the dim text colour, a shape and a colour that both still read at 3:1
+   or more, rather than a fade */
 .terminal-input-action:disabled {
   color: var(--text-dim);
   cursor: default;
 }
 
 .terminal-input-action:disabled .terminal-input-face {
-  border-style: dashed;
-  border-color: var(--text-dim);
   background: transparent;
+  box-shadow: 0 0 0 1px var(--ink-2);
   color: var(--text-dim);
+  text-shadow: none;
 }
 
 .terminal-input-face svg {

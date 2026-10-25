@@ -15,6 +15,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  gap: var(--space-1);
   margin-top: var(--space-2);
 }
 
@@ -22,14 +23,16 @@
   margin-top: 0;
 }
 
+/* a held message is a card as the user's sent turn is (ChatView.css .chat-bubble): the panel ring,
+   no drawn edge; a row on its way sits quieter until it is in the transcript */
 .pending-message-bubble {
   display: block;
   max-width: 80%;
   min-height: var(--control-h);
   padding: var(--space-3) var(--space-4);
-  border: var(--hairline) solid var(--bubble-border);
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
+  box-shadow: var(--shadow-panel);
   color: var(--text-strong);
   font: inherit;
   line-height: var(--lh-prose);
@@ -38,6 +41,11 @@
   text-align: start;
   cursor: text;
   user-select: text;
+  transition: opacity var(--dur-fast) var(--ease-in-out);
+}
+
+.pending-message-bubble[aria-busy="true"] {
+  opacity: 0.7;
 }
 
 .pending-message-meta {
@@ -55,29 +63,40 @@
   overflow-wrap: anywhere;
 }
 
+/* the state as a Badge: it may run to a sentence, so it wraps instead of holding one line */
+.pending-message-status {
+  height: auto;
+  min-height: var(--chip-h);
+  margin-right: var(--space-1);
+  white-space: normal;
+  line-height: var(--lh-tight);
+  padding-block: 2px;
+}
+
 .pending-message-action {
   color: var(--text-dim);
 }
 
 .pending-message-send {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   gap: var(--space-1);
-  width: auto;
-  padding: 0 var(--space-2);
   color: var(--text);
-  font: inherit;
-  font-size: var(--fs-xs);
 }
 
 @media (max-width: 480px) {
   .pending-messages {
     width: calc(100% - 2 * var(--space-2));
   }
+}
 
-  .pending-message-action {
-    min-width: var(--touch-target);
+/* a finger's floor: the glyph buttons grow to the touch target; Send now keeps its height and
+   takes the target through its row */
+@media (pointer: coarse) {
+  .pending-message-action:not(.pending-message-send) {
+    width: var(--touch-target);
+    height: var(--touch-target);
+  }
+
+  .pending-message-meta {
     min-height: var(--touch-target);
   }
 }

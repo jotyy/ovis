@@ -4,6 +4,7 @@ import { FolderSearch, X } from "../lib/icons.ts";
 import "./FilesDialog.css";
 import { DirectoryBrowser } from "./DirectoryBrowser.tsx";
 import { RepoChanges } from "./RepoChanges.tsx";
+import { Button, DialogBody, DialogHeader, IconButton, Tabs, TabsContent, TabsList, TabsTrigger, TooltipProvider } from "./ui/index.ts";
 import type { RepoDiffFile } from "../../shared/protocol.ts";
 import { useT } from "../lib/i18n.ts";
 import type { RepoComparison } from "../lib/repoDiff.ts";
@@ -56,22 +57,28 @@ export function FilesDialog({ start, paneId, viewing, onOpenFile, onOpenDiff, on
   const browseFolders = (): void => onBrowseFolders(folder.current?.pane === paneId ? folder.current.path : (start || "~"));
   return (
     <div className="modal-scrim" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section ref={surface} className="modal files-dialog" role="dialog" aria-modal="true" aria-labelledby="files-dialog-title" tabIndex={-1}>
-        <header className="modal-header">
-          <h2 className="modal-title" id="files-dialog-title">{t("Files")}</h2>
-          <div className="segmented files-dialog-tabs" role="group" aria-label={t("Show")}>
-            <button type="button" aria-pressed={tab === "browse"} onClick={() => show("browse")}>{t("Browse")}</button>
-            <button type="button" aria-pressed={tab === "changes"} onClick={() => show("changes")}>{t("Changes")}</button>
-          </div>
-          {!phone && <button type="button" className="icon-button" aria-label={t("Browse folders in the palette")} title={t("Browse folders in the palette")} onClick={browseFolders}><FolderSearch aria-hidden="true" /></button>}
-          <button type="button" className="icon-button" aria-label={t("Close files")} onClick={onClose}><X aria-hidden="true" /></button>
-        </header>
-        <div className="modal-body">
-          {/* the dialog stays open across a pane switch (Next pane): the browser starts over on the new
-              pane's folder, as Changes reads the new pane, instead of listing the pane it was opened on */}
-          <div hidden={tab !== "browse"}><DirectoryBrowser key={paneId} start={start} onOpenFile={onOpenFile} onFolder={(path) => { folder.current = { pane: paneId, path }; }} /></div>
-          {changesVisited && <div hidden={tab !== "changes"}><RepoChanges paneId={paneId} directory={start} onOpenDiff={onOpenDiff} /></div>}
-        </div>
+      <section ref={surface} className="modal files-dialog relative" role="dialog" aria-modal="true" aria-labelledby="files-dialog-title" tabIndex={-1}>
+        <TooltipProvider>
+          <Tabs value={tab} onValueChange={(value) => show(value as Tab)} className="flex min-h-0 flex-1 flex-col">
+            <DialogHeader className="flex-row items-center gap-3 pr-24">
+              <h2 className="min-w-0 flex-1 truncate text-lg font-medium text-strong text-engraved" id="files-dialog-title">{t("Files")}</h2>
+              <TabsList className="files-dialog-tabs shrink-0" aria-label={t("Show")}>
+                <TabsTrigger value="browse">{t("Browse")}</TabsTrigger>
+                <TabsTrigger value="changes">{t("Changes")}</TabsTrigger>
+              </TabsList>
+              <span className="absolute top-3 right-3 flex items-center gap-1">
+                {!phone && <IconButton label={t("Browse folders in the palette")} onClick={browseFolders}><FolderSearch aria-hidden="true" /></IconButton>}
+                <Button variant="ghost" size="icon" className="text-dim" aria-label={t("Close files")} onClick={onClose}><X aria-hidden="true" /></Button>
+              </span>
+            </DialogHeader>
+            <DialogBody>
+              {/* the dialog stays open across a pane switch (Next pane): the browser starts over on the new
+                  pane's folder, as Changes reads the new pane, instead of listing the pane it was opened on */}
+              <TabsContent value="browse" forceMount><DirectoryBrowser key={paneId} start={start} onOpenFile={onOpenFile} onFolder={(path) => { folder.current = { pane: paneId, path }; }} /></TabsContent>
+              <TabsContent value="changes" forceMount>{changesVisited && <RepoChanges paneId={paneId} directory={start} onOpenDiff={onOpenDiff} />}</TabsContent>
+            </DialogBody>
+          </Tabs>
+        </TooltipProvider>
       </section>
     </div>
   );

@@ -1,12 +1,14 @@
 /**
- * The ⋯ menu of a sidebar row. On a desktop it is a popover under its button, drawn through a
- * portal at fixed coordinates: the roster scrolls, and a menu inside it would be cut off at the
- * list's edge. At phone width it is the modal primitive, which is already a bottom sheet there.
- * The system Back closes the sheet (lib/sheetHistory.ts).
+ * The ⋯ menu of a sidebar row. On a desktop it is a Radix dropdown (components/ui/dropdown-menu)
+ * placed by a trigger nobody sees: a fixed box standing where the button is, or at the pointer
+ * for a right-click, since the roster scrolls and a menu inside it would be cut off at the list's
+ * edge. At phone width it is the modal primitive, which is already a bottom sheet there, with the
+ * swipe-down and the drop of lib/sheets.ts. The system Back closes the sheet (lib/sheetHistory.ts).
  * Escape, a press outside, focus leaving it (the palette opening over it, a Tab out) and, on a
- * desktop, a scroll of what holds the button or a resize close it. Focus goes back to the button when the menu goes,
- * unless what an item mounted (a rename field, a confirm) takes it first: the button is focused
- * in a layout cleanup, before a new field's autoFocus and a dialog's own focus.
+ * desktop, a scroll of what holds the button or a resize close it. Focus goes back to the button
+ * when the menu goes, unless what an item mounted (a rename field, a confirm) takes it first: the
+ * button is focused in a layout cleanup, before a new field's autoFocus and a dialog's own focus,
+ * and Radix's own return of focus is waved off.
  */
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -14,10 +16,13 @@ import { Check, type IconComponent } from "../lib/icons.ts";
 
 import "./RowMenu.css";
 
+import { cn } from "../lib/cn.ts";
 import { useT } from "../lib/i18n.ts";
 import { useMediaQuery } from "../lib/useMediaQuery.ts";
 import { SHEET_QUERY, useSheetSwipe } from "../lib/sheets.ts";
 import { useSheetHistory } from "../lib/sheetHistory.ts";
+import { Button } from "./ui/button.tsx";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu.tsx";
 
 export interface RowMenuItem {
   id: string;
@@ -74,8 +79,12 @@ export function RowMenu({ anchor, point, restoreFocusTo, title, subtitle, detail
   useSheetSwipe(surface, sheet ? onClose : null);
   // Back closes the sheet, not the pane under it
   useSheetHistory(sheet, onClose);
-  const [place, setPlace] = useState<{ top: number; left: number; maxHeight: number } | null>(null);
-  // where the button was when the menu was placed: a scroll that leaves it there is not a reason to close
+  // where the button was when the menu opened: the trigger stands there, and a scroll that moves
+  // the button away from it closes the menu rather than having it follow
+  const [box] = useState(() => {
+    const rect = anchor.getBoundingClientRect();
+    return point ? { top: point.y, left: point.x, width: 0, height: 0 } : { top: rect.top, left: rect.left, width: rect.width, height: rect.height };
+  });
   const placedAt = useRef<{ top: number; left: number } | null>(null);
 
   useLayoutEffect(() => () => {
@@ -83,33 +92,12 @@ export function RowMenu({ anchor, point, restoreFocusTo, title, subtitle, detail
     if (target?.isConnected) target.focus({ preventScroll: true });
   }, [anchor, restoreFocusTo]);
 
-  // under the button, right edges aligned (left ones for a tab); above it when the screen ends
-  // first. The height is capped to the room on that side, and only to that: a tab's menu lists
-  // its panes and herdr's layout operations and is tall, so it scrolls, as AgentPicker's list
-  // does, only on a screen too short for it. An item below the fold must not be reachable by
-  // keyboard while the pointer cannot see it
   useLayoutEffect(() => {
     if (sheet) return;
-    const menu = surface.current;
-    if (!menu || !anchor.isConnected) { onClose(); return; }
+    if (!anchor.isConnected) { onClose(); return; }
     const rect = anchor.getBoundingClientRect();
     placedAt.current = { top: rect.top, left: rect.left };
-    if (point) {
-      setPlace({
-        left: Math.max(EDGE, Math.min(point.x, window.innerWidth - menu.offsetWidth - EDGE)),
-        top: Math.max(EDGE, Math.min(point.y, window.innerHeight - menu.offsetHeight - EDGE)),
-        maxHeight: window.innerHeight - EDGE * 2,
-      });
-      return;
-    }
-    const left = Math.max(EDGE, Math.min(align === "start" ? rect.left : rect.right - menu.offsetWidth, window.innerWidth - menu.offsetWidth - EDGE));
-    const below = rect.bottom + GAP;
-    const roomBelow = window.innerHeight - below - EDGE;
-    const roomAbove = rect.top - GAP - EDGE;
-    const up = below + menu.offsetHeight + EDGE > window.innerHeight && roomAbove > roomBelow;
-    const top = up ? Math.max(EDGE, rect.top - GAP - menu.offsetHeight) : below;
-    setPlace({ top, left, maxHeight: Math.max(EDGE, up ? roomAbove : roomBelow) });
-  }, [align, anchor, onClose, point, sheet]);
+  }, [anchor, onClose, sheet]);
 
   useEffect(() => {
     const first = surface.current?.querySelector<HTMLElement>(sheet ? SHEET_ITEMS : POPOVER_ITEMS);
@@ -117,16 +105,12 @@ export function RowMenu({ anchor, point, restoreFocusTo, title, subtitle, detail
   }, [sheet]);
 
   useEffect(() => {
+    // before Radix's own document listener, and stopped there: the dialog or drawer under the
+    // menu must not close with it
     const onKey = (event: KeyboardEvent): void => {
       if (event.key !== "Escape") return;
       event.stopPropagation();
       event.preventDefault();
-      onClose();
-    };
-    // the button's own click toggles the menu, so a press on it is not "outside"
-    const onPointer = (event: PointerEvent): void => {
-      const target = event.target as Node;
-      if (surface.current?.contains(target) || (!point && anchor.contains(target))) return;
       onClose();
     };
     // only a scroll that moves the button out from under the menu: a terminal printing in the
@@ -139,42 +123,39 @@ export function RowMenu({ anchor, point, restoreFocusTo, title, subtitle, detail
       onClose();
     };
     window.addEventListener("keydown", onKey, true);
-    window.addEventListener("pointerdown", onPointer, true);
     if (!sheet) {
       window.addEventListener("scroll", onScroll, true);
       window.addEventListener("resize", onClose);
     }
     return () => {
       window.removeEventListener("keydown", onKey, true);
-      window.removeEventListener("pointerdown", onPointer, true);
       window.removeEventListener("scroll", onScroll, true);
       window.removeEventListener("resize", onClose);
     };
-  }, [anchor, onClose, point, sheet]);
+  }, [anchor, onClose, sheet]);
 
-  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>): void => {
-    const buttons = [...(surface.current?.querySelectorAll<HTMLElement>(sheet ? SHEET_ITEMS : POPOVER_ITEMS) ?? [])];
+  // the sheet's own keyboard: arrows and Home/End over its stops, Tab kept inside, since it is modal
+  const onSheetKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>): void => {
+    const buttons = [...(surface.current?.querySelectorAll<HTMLElement>(SHEET_ITEMS) ?? [])];
     const index = buttons.indexOf(document.activeElement as HTMLElement);
     const move = (next: number): void => {
       event.preventDefault();
-      buttons[point ? Math.max(0, Math.min(buttons.length - 1, next)) : (next + buttons.length) % buttons.length]?.focus();
+      buttons[(next + buttons.length) % buttons.length]?.focus();
     };
     if (event.key === "ArrowDown") move(index + 1);
     else if (event.key === "ArrowUp") move(index - 1);
     else if (event.key === "Home") move(0);
     else if (event.key === "End") move(buttons.length - 1);
-    // Tab stays inside the sheet, which is modal; it leaves the popover, which then goes
-    else if (event.key === "Tab" && sheet) move(index + (event.shiftKey ? -1 : 1));
-    else if (event.key === "Tab") { event.preventDefault(); onClose(); }
+    else if (event.key === "Tab") move(index + (event.shiftKey ? -1 : 1));
   };
 
-  const onBlur = (event: FocusEvent<HTMLDivElement>): void => {
+  const onSheetBlur = (event: FocusEvent<HTMLDivElement>): void => {
     const next = event.relatedTarget as Node | null;
     if (next && (surface.current?.contains(next) || anchor.contains(next))) return;
     onClose();
   };
   // Safari on a Mac does not focus a clicked button, so the press would blur the focused item
-  // with no relatedTarget, close the menu, and the click would land on nothing: the press keeps
+  // with no relatedTarget, close the sheet, and the click would land on nothing: the press keeps
   // the focus where it is, and the click still comes
   const keepFocus = (event: ReactMouseEvent<HTMLButtonElement>): void => event.preventDefault();
 
@@ -187,7 +168,7 @@ export function RowMenu({ anchor, point, restoreFocusTo, title, subtitle, detail
   if (sheet) {
     return createPortal(
       <div className="modal-scrim">
-        <div ref={surface} className="modal row-sheet" role="dialog" aria-modal="true" aria-label={title} onKeyDown={onKeyDown} onBlur={onBlur}>
+        <div ref={surface} className="modal row-sheet" role="dialog" aria-modal="true" aria-label={title} onKeyDown={onSheetKeyDown} onBlur={onSheetBlur}>
           <span className="row-sheet-grip" aria-hidden="true" />
           {header ? <div className="row-sheet-head">{header}</div> : (
             <div className="row-sheet-head">
@@ -199,7 +180,7 @@ export function RowMenu({ anchor, point, restoreFocusTo, title, subtitle, detail
           {/* the items scroll between the head and Cancel: a tab's menu is taller than a short phone, and `.modal` hides its overflow */}
           <div className="row-sheet-items">
             {items.map((item) => (
-              <button key={item.id} type="button" className={`row-sheet-item${item.danger ? " is-danger" : ""}${item.divider ? " has-divider" : ""}${item.disabled ? " is-disabled" : ""}`} aria-current={item.current ? "true" : undefined} aria-pressed={item.checked} aria-disabled={item.disabled || undefined} title={item.title} onMouseDown={keepFocus} onMouseEnter={point ? (event) => event.currentTarget.focus({ preventScroll: true }) : undefined} onClick={() => run(item)}>
+              <button key={item.id} type="button" className={`row-sheet-item${item.danger ? " is-danger" : ""}${item.divider ? " has-divider" : ""}${item.disabled ? " is-disabled" : ""}`} aria-current={item.current ? "true" : undefined} aria-pressed={item.checked} aria-disabled={item.disabled || undefined} title={item.title} onMouseDown={keepFocus} onClick={() => run(item)}>
                 {item.glyph ?? <item.icon aria-hidden="true" />}
                 <span className="row-sheet-label">{item.label}</span>
                 {item.hint && <span className="row-sheet-hint">{item.hint}</span>}
@@ -207,28 +188,63 @@ export function RowMenu({ anchor, point, restoreFocusTo, title, subtitle, detail
               </button>
             ))}
           </div>
-          <button type="button" className="btn row-sheet-cancel" onMouseDown={keepFocus} onClick={onClose}>{t("Cancel")}</button>
+          <Button variant="field" size="md" className="row-sheet-cancel" onMouseDown={keepFocus} onClick={onClose}>{t("Cancel")}</Button>
         </div>
       </div>,
       document.body,
     );
   }
 
-  return createPortal(
-    <div ref={surface} className={`menu row-menu${anchor.closest('[aria-modal="true"]') ? " is-over-modal" : ""}${variant === "paths" ? " row-menu-paths" : ""}`} role="menu" aria-label={title} style={place ?? { visibility: "hidden" }} onKeyDown={onKeyDown} onBlur={onBlur}>
-      {header && <div className="row-menu-header" role="presentation">{header}</div>}
-      {items.map((item) => (
-        <Fragment key={item.id}>
-          {item.divider && <span className="row-menu-divider" role="separator" />}
-          <button type="button" role={item.checked === undefined ? "menuitem" : "menuitemcheckbox"} aria-checked={item.checked} className={`menu-item${item.danger ? " is-danger" : ""}${item.disabled ? " is-disabled" : ""}`} aria-current={item.current ? "true" : undefined} aria-disabled={item.disabled || undefined} title={item.title} onMouseDown={keepFocus} onMouseEnter={point ? (event) => event.currentTarget.focus({ preventScroll: true }) : undefined} onClick={() => run(item)}>
-            {item.glyph ?? <item.icon aria-hidden="true" />}
-            <span className="menu-item-main">{item.label}</span>
-            {item.hint && <span className="menu-item-hint">{item.hint}</span>}
-            {item.checked && <Check className="menu-item-check" aria-hidden="true" />}
-          </button>
-        </Fragment>
-      ))}
-    </div>,
-    document.body,
+  // a disabled item is not Radix-disabled: it stays in the arrow order, and its press is waved off
+  const select = (event: Event, item: RowMenuItem): void => {
+    if (item.disabled) { event.preventDefault(); return; }
+    run(item);
+  };
+  // not styles.css's .menu-item: that primitive's colour would paint over the destructive variant's
+  const itemClass = (item: RowMenuItem): string => cn(item.disabled && "is-disabled", item.current && "font-semibold text-strong");
+  const body = (item: RowMenuItem) => <>
+    {item.glyph ?? <item.icon aria-hidden="true" />}
+    <span className="menu-item-main">{item.label}</span>
+    {item.hint && <span className="menu-item-hint">{item.hint}</span>}
+  </>;
+
+  return (
+    <DropdownMenu open modal={false} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DropdownMenuTrigger asChild>
+        <span aria-hidden="true" tabIndex={-1} style={{ position: "fixed", top: box.top, left: box.left, width: box.width, height: box.height, pointerEvents: "none" }} />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        ref={surface}
+        className={cn("row-menu", anchor.closest('[aria-modal="true"]') && "is-over-modal", variant === "paths" && "row-menu-paths")}
+        aria-label={title}
+        side="bottom"
+        align={align}
+        sideOffset={GAP}
+        collisionPadding={EDGE}
+        loop={!point}
+        // the button's own click toggles the menu, so a press on it is not "outside"
+        onPointerDownOutside={(event) => { if (!point && anchor.contains(event.target as Node)) event.preventDefault(); }}
+        // Tab leaves the popover, which then goes (the sheet keeps it inside, above)
+        onKeyDown={(event) => { if (event.key === "Tab") { event.preventDefault(); onClose(); } }}
+        // the layout cleanup above hands the focus back, before anything an item mounts takes it
+        onCloseAutoFocus={(event) => event.preventDefault()}
+      >
+        {header && <div className="row-menu-header" role="presentation">{header}</div>}
+        {items.map((item) => (
+          <Fragment key={item.id}>
+            {item.divider && <DropdownMenuSeparator />}
+            {item.checked === undefined ? (
+              <DropdownMenuItem variant={item.danger ? "destructive" : "default"} className={itemClass(item)} aria-current={item.current ? "true" : undefined} aria-disabled={item.disabled || undefined} title={item.title} onSelect={(event) => select(event, item)}>
+                {body(item)}
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuCheckboxItem checked={item.checked} className={itemClass(item)} aria-current={item.current ? "true" : undefined} aria-disabled={item.disabled || undefined} title={item.title} onSelect={(event) => select(event, item)}>
+                {body(item)}
+              </DropdownMenuCheckboxItem>
+            )}
+          </Fragment>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

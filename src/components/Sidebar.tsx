@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type AnimationEvent, type DragEvent, type KeyboardEvent, type MouseEvent } from "react";
+import { Fragment, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type AnimationEvent, type ComponentProps, type DragEvent, type KeyboardEvent, type MouseEvent } from "react";
 import { ChevronDown, ChevronRight, Ellipsis, Folder, FolderOpen, GitBranch, History, Layers, ListChecks, Pencil, Pin, PinOff, Plus, Terminal, Trash2, TriangleAlert, X } from "../lib/icons.ts";
 
 import "./Sidebar.css";
@@ -8,7 +8,7 @@ import { paneTitle } from "../../shared/notify-policy.ts";
 import { MAX_LABEL_CHARS } from "../../shared/labels.ts";
 import { useMachineApi, useMachineId, useReorderCoordinator } from "../lib/machineContext.tsx";
 import type { AppActions } from "../lib/actions.ts";
-import { indicatorGlyph, knownStatus, rollupStatus, STATUS_WORD } from "../lib/status.ts";
+import { indicatorGlyph, knownStatus, rollupStatus, STATUS_WORD, type KnownStatus } from "../lib/status.ts";
 import { AgentMark } from "./AgentMark.tsx";
 import { WorkspaceFavicon } from "./WorkspaceFavicon.tsx";
 import { ConfirmDialog } from "./ConfirmDialog.tsx";
@@ -70,7 +70,7 @@ export function RestoreErrorBadge({ reason }: { reason: string }) {
   const t = useT();
   const label = t("NOT RESTORED");
   return (
-    <span className="badge badge-restore-error sidebar-status" data-status="restore-error" role="status" aria-label={label} title={`${label} — ${reason}`}>
+    <span className="sidebar-status" data-status="restore-error" role="status" aria-label={label} title={`${label} — ${reason}`}>
       <TriangleAlert aria-hidden="true" />
       <span className="visually-hidden">{label}</span>
     </span>
@@ -83,12 +83,21 @@ function alignBreath(event: AnimationEvent<HTMLSpanElement>) {
   for (const animation of event.currentTarget.getAnimations()) animation.startTime = 0;
 }
 
+/** the Badge tone of each state: waiting is the working colour's, unknown has none of its own */
+const STATUS_TONE: Readonly<Record<KnownStatus, ComponentProps<typeof Badge>["tone"]>> = { idle: "idle", working: "working", blocked: "blocked", done: "done", waiting: "working", unknown: "neutral" };
+
+/**
+ * An agent's state: as a word, a Badge in the state's tone (the palette's rows); compact, the
+ * sidebar's status cell, which draws only the state's own mark and nothing where there is none
+ * to draw. The label and the tooltip stay with the cell for every state.
+ */
 export function StatusBadge({ status, compact = false }: { status?: AgentStatus; compact?: boolean }) {
   const t = useT();
   const { settings } = useSettings();
   const value = knownStatus(status);
   const label = t(STATUS_WORD[value]);
   const description = value === "waiting" ? t("Agent waiting on background work") : t("Agent {status}", { status: label });
+  if (!compact) return <Badge tone={STATUS_TONE[value]} data-status={value} title={description}>{label}</Badge>;
   // classic (the default): a compact cell draws only the states that ask for a look: a red question
   // mark while the agent waits for an answer, a green dot once it has finished and was not looked
   // at, a working-coloured dot that breathes while it runs, a working-coloured ring held still while
@@ -97,17 +106,11 @@ export function StatusBadge({ status, compact = false }: { status?: AgentStatus;
   const indicators = settings.statusIndicators;
   const dot = value === "working" || value === "done" || value === "waiting";
   return (
-    <span
-      className={`badge badge-${value}${compact ? " sidebar-status" : ""}`}
-      data-status={value}
-      role={compact ? "status" : undefined}
-      aria-label={compact ? description : undefined}
-      title={description}
-    >
-      {compact && indicators !== "classic" && <span className="sidebar-status-glyph" aria-hidden="true" onAnimationStart={value === "working" ? alignBreath : undefined}>{indicatorGlyph(value, indicators)}</span>}
-      {compact && indicators === "classic" && value === "blocked" && <span className="sidebar-status-mark" aria-hidden="true">?</span>}
-      {compact && indicators === "classic" && dot && <span className="sidebar-status-dot" aria-hidden="true" onAnimationStart={value === "working" ? alignBreath : undefined} />}
-      <span className={compact ? "visually-hidden" : undefined}>{label}</span>
+    <span className="sidebar-status" data-status={value} role="status" aria-label={description} title={description}>
+      {indicators !== "classic" && <span className="sidebar-status-glyph" aria-hidden="true" onAnimationStart={value === "working" ? alignBreath : undefined}>{indicatorGlyph(value, indicators)}</span>}
+      {indicators === "classic" && value === "blocked" && <span className="sidebar-status-mark" aria-hidden="true">?</span>}
+      {indicators === "classic" && dot && <span className="sidebar-status-dot" aria-hidden="true" onAnimationStart={value === "working" ? alignBreath : undefined} />}
+      <span className="visually-hidden">{label}</span>
     </span>
   );
 }
@@ -688,15 +691,17 @@ export function Sidebar({ snapshot, online, selectedPaneId, actions, watching = 
         onContextMenu={(event) => onRowContextMenu(event, toggleMenu)}>
         {/* a workspace leads with its own face, the project's icon or else a folder; when linked
             worktrees sit under it, that face is also the fold, and turns to an open or closed folder under a pointer */}
-        {nested ? null : children.length > 0 && repoKey !== undefined ? <button
-          type="button"
-          className="sidebar-row-action workspace-toggle"
-          aria-label={collapsed ? t("Expand worktrees of {name}", { name: workspace.label }) : t("Collapse worktrees of {name}", { name: workspace.label })}
-          title={collapsed ? t("Expand worktrees of {name}", { name: workspace.label }) : t("Collapse worktrees of {name}", { name: workspace.label })}
-          aria-expanded={!collapsed}
-          aria-controls={contentsId}
-          onClick={() => toggleWorktrees(repoKey, collapsed)}
-        >{face}<span className="workspace-toggle-fold" aria-hidden="true">{collapsed ? <Folder /> : <FolderOpen />}</span></button> : face}
+        {nested ? null : children.length > 0 && repoKey !== undefined ? <Tooltip>
+          <TooltipTrigger asChild><button
+            type="button"
+            className="sidebar-row-action workspace-toggle"
+            aria-label={collapsed ? t("Expand worktrees of {name}", { name: workspace.label }) : t("Collapse worktrees of {name}", { name: workspace.label })}
+            aria-expanded={!collapsed}
+            aria-controls={contentsId}
+            onClick={() => toggleWorktrees(repoKey, collapsed)}
+          >{face}<span className="workspace-toggle-fold" aria-hidden="true">{collapsed ? <Folder /> : <FolderOpen />}</span></button></TooltipTrigger>
+          <TooltipContent side="right">{collapsed ? t("Expand worktrees of {name}", { name: workspace.label }) : t("Collapse worktrees of {name}", { name: workspace.label })}</TooltipContent>
+        </Tooltip> : face}
         <div
           className="pane-select workspace-select"
           role="button"
@@ -719,8 +724,8 @@ export function Sidebar({ snapshot, online, selectedPaneId, actions, watching = 
           }}
         >
           {rowMark(pane, workspace.worktree?.is_linked_worktree === true)}
-          {editingWorkspace ? <input
-            className="input workspace-rename-input"
+          {editingWorkspace ? <Input
+            className="workspace-rename-input"
             aria-label={t("Workspace name")}
             autoFocus
             maxLength={MAX_LABEL_CHARS}
@@ -798,11 +803,11 @@ export function Sidebar({ snapshot, online, selectedPaneId, actions, watching = 
           {snapshot && snapshot.workspaces.length === 0 && (
             <div className="tree-state-empty">
               <p className="tree-state" role="status">{t("No workspaces yet")}</p>
-              <button type="button" className="btn" onClick={actions.openNewSession}><Plus aria-hidden="true" />{t("New workspace")}</button>
+              <Button variant="field" size="field" onClick={actions.openNewSession}><Plus aria-hidden="true" /><span className="pr-1">{t("New workspace")}</span></Button>
             </div>
           )}
           {visibleGroups.pinned.some(({ workspace }) => roster.some((pane) => pane.workspace_id === workspace.workspace_id)) && <>
-            <p className="sidebar-pinned-label" aria-hidden="true"><span><Pin />{t("Pinned")}</span></p>
+            <p className="sidebar-pinned-label" aria-hidden="true">{t("Pinned")}</p>
             <ul className="workspace-list workspace-list-pinned sidebar-pinned" aria-label={t("Pinned")}>{visibleGroups.pinned.map(renderGroup)}</ul>
           </>}
           <ul className="workspace-list">{visibleGroups.rest.map(renderGroup)}</ul>

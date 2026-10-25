@@ -49,7 +49,7 @@ interface AgentRowBodyProps {
 function AgentRowBody({ mark, markKind, title, name, context, tokens, backgroundTasks, plan, status, note = null, muted }: AgentRowBodyProps) {
   const t = useT();
   return <>
-    <span className="sidebar-mark" aria-hidden="true">{mark !== null ? <AgentMark agent={mark} size={18} /> : <Terminal />}</span>
+    <span className="sidebar-mark" aria-hidden="true">{mark !== null ? <AgentMark agent={mark} size={16} /> : <Terminal />}</span>
     <span className="agent-copy">
       {markKind && <span className="visually-hidden">{markKind}: </span>}
       <span className="agent-main">
@@ -247,7 +247,7 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
       <p className={shownEmpty === null ? "visually-hidden" : "agent-empty"} role="status">{shownEmpty}</p>
       {rows.length > 0 && <>
         {split.pinned.length > 0 && <>
-          <p className="sidebar-pinned-label" aria-hidden="true"><span><Pin />{t("Pinned")}</span></p>
+          <p className="sidebar-pinned-label" aria-hidden="true">{t("Pinned")}</p>
           <ul className="agent-list agent-list-pinned sidebar-pinned" aria-label={t("Pinned")}>{split.pinned.map(agentItem)}</ul>
         </>}
         {split.rest.length > 0 && <ul className="agent-list">{split.rest.map(agentItem)}</ul>}

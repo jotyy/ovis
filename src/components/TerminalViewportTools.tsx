@@ -8,6 +8,7 @@ import { ApiError } from "../lib/api.ts";
 import { useT } from "../lib/i18n.ts";
 import { PAGE_OVERLAP_ROWS, pageScrollDistance } from "../lib/pageScroll.ts";
 import { scrollPollDelay, validScroll, visibleFindRects, type FindCellRect } from "../lib/terminalViewport.ts";
+import { IconButton, TooltipProvider } from "./ui/index.ts";
 import "./TerminalViewportTools.css";
 
 export interface TerminalSearchState { query: string; result: PaneFindResponse }
@@ -260,8 +261,10 @@ export function TerminalViewportTools({ viewportIntent, terminal, paneId, pageSc
   return <div ref={layer} className="terminal-viewport-tools" aria-hidden={!enabled || undefined}>
     {enabled && search && box && hits.map((hit, index) => <span key={index} className={`terminal-find-hit${hit.current ? " is-current" : ""}`} aria-hidden="true"
       style={{ left: box.left + hit.col * box.width / box.cols, top: box.top + hit.row * box.height / box.rows, width: hit.width * box.width / box.cols, height: box.height / box.rows }} />)}
-    {enabled && interactive && box && validScroll(scroll) && scroll.offset_from_bottom > 0 && <button type="button" className="btn terminal-jump-bottom"
-      aria-label={t("Jump to bottom")} title={t("Jump to bottom")} style={{ left: box.anchorX, top: box.anchorY }}
-      onPointerDown={(event) => event.preventDefault()} onClick={() => writeRef.current(0)}><ArrowDown aria-hidden="true" /></button>}
+    {enabled && interactive && box && validScroll(scroll) && scroll.offset_from_bottom > 0 && <TooltipProvider>
+      <IconButton variant="field" side="left" className="terminal-jump-bottom"
+        label={t("Jump to bottom")} style={{ left: box.anchorX, top: box.anchorY }}
+        onPointerDown={(event) => event.preventDefault()} onClick={() => writeRef.current(0)}><ArrowDown aria-hidden="true" /></IconButton>
+    </TooltipProvider>}
   </div>;
 }

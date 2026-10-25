@@ -96,13 +96,14 @@
   }
 }
 
+/* a section title set into the surface (the editor's empty state), the where-line dim under it */
 .composer-greeting-title {
   margin: 0;
   color: var(--text-strong);
-  font-size: var(--fs-display);
-  font-weight: var(--fw-semibold);
-  letter-spacing: var(--tracking-display);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-medium);
   line-height: var(--lh-tight);
+  text-shadow: var(--text-shadow-engraved);
 }
 
 .composer-greeting-where {
@@ -237,7 +238,7 @@
   height: var(--control-h);
   padding: 0 var(--space-3);
   border-radius: var(--radius-pill);
-  background: var(--bg-hover);
+  background: var(--fill-2);
   overflow: hidden;
 }
 
@@ -355,14 +356,9 @@
   stroke-width: 2.5;
 }
 
+/* the track is a fill of light, so it reads on the pill and on the bare row alike */
 .composer-context-track {
-  stroke: var(--border);
-}
-
-/* on the pill's fill --border would be the fill itself in two palettes: the track stays a ring.
-   Only on the fill: a ring left bare by a label that stepped out has the bare ring's track */
-.composer-status:not([data-model="out"]) .composer-pill:not(.is-bare) .composer-context-track {
-  stroke: var(--border-strong);
+  stroke: var(--fill-4);
 }
 
 .composer-context-used {
@@ -378,26 +374,14 @@
   cursor: default;
 }
 
-/* Compact context: beside the opened number, desktop only (the mobile ring is inert) */
+/* Compact context: a ghost glyph beside the opened number, desktop only (the mobile ring is inert) */
 .composer-compact {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
   color: var(--text-dim);
-  cursor: pointer;
 }
 
 .composer-compact svg {
   width: 14px;
   height: 14px;
-}
-
-.composer-compact:hover,
-.composer-compact:focus-visible {
-  color: var(--text);
 }
 
 .composer-usage {
@@ -451,7 +435,9 @@
    task chip | the status content | the one round Send/Stop button. The attachment strip is its own
    row above both. The three cells of the last row stretch and centre what they hold, so the
    controls and the model share one centre line. The card stands over the strip tucked under it (below), so
-   it is raised; its popovers go with it and still rise over the transcript, which comes first */
+   it is raised; its popovers go with it and still rise over the transcript, which comes first.
+   The card is the editor's field (components/ui/input.tsx fieldSurface): a shallow well with a ring of
+   shadow, the textarea bare inside it */
 .composer-surface {
   position: relative;
   z-index: 1;
@@ -461,25 +447,20 @@
     "attachments attachments attachments"
     "text text text"
     "left status right";
-  background: var(--bg-elevated);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-card);
+  background: var(--bg-input);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-surface);
   transition:
-    border-color var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-in-out),
+    box-shadow var(--dur-fast) var(--ease-in-out);
 }
 
-/* focus is the surface's: the accent border on the rounded box, not a rectangle on the
-   textarea inside it (the global :focus-visible ring is suppressed below) */
-.composer-surface:focus-within {
-  border-color: var(--accent);
-  box-shadow: var(--shadow-card), 0 0 0 var(--hairline) var(--accent-tint);
-}
-
+/* focus is the frame's: the accent inside the edge and its halo outside, not a rectangle on the
+   textarea inside it (the global :focus-visible ring is suppressed below); a file dragged over
+   the card lights the same ring */
+.composer-surface:focus-within,
 .composer-surface.is-dragging {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 var(--hairline) var(--accent);
+  box-shadow: var(--shadow-focus);
 }
 
 .composer-text,
@@ -574,89 +555,22 @@
   padding: var(--space-1) var(--space-3) var(--space-3) 0;
 }
 
-.composer-controls .icon-button,
 .composer-action,
-.composer-attachment button {
+.composer-attachment-remove {
   flex: none;
-  cursor: pointer;
 }
 
-.composer-controls .icon-button {
-  color: var(--text-dim);
-  border-radius: var(--radius-pill);
+/* the one square button at the row's end: Send is the card's accent action (components/ui/button.tsx),
+   Stop a field face in the same place at the same size with the filled stop glyph, so only the
+   face changes when the agent starts and ends a turn. Both keep their colour while busy or off:
+   a sending arrow and a Stop that cannot stop (offline) fade as any disabled control does */
+.composer-stop svg {
+  color: var(--text-strong);
+  transition: color var(--dur-fast) var(--ease-in-out);
 }
 
-.composer-action {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--space-8);
-  height: var(--space-8);
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--primary-text);
-}
-
-.composer-action::before {
-  content: "";
-  box-sizing: border-box;
-  position: absolute;
-  inset: 50% auto auto 50%;
-  width: var(--space-8);
-  height: var(--space-8);
-  transform: translate(-50%, -50%);
-  border: var(--hairline) solid var(--composer-action-fill);
-  border-radius: inherit;
-  background: var(--composer-action-fill);
-  pointer-events: none;
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
-}
-
-.composer-action svg {
-  position: relative;
-  width: var(--space-4);
-  height: var(--space-4);
-}
-
-.composer-attachment button svg {
-  width: var(--icon-size);
-  height: var(--icon-size);
-}
-
-.composer-send {
-  --composer-action-fill: var(--primary);
-}
-
-/* the one round button: Stop is Send's circle in the text colour, in the same place at the same
-   size, so only the glyph changes when the agent starts and ends a turn */
-.composer-stop {
-  --composer-action-fill: var(--text-strong);
-  color: var(--bg);
-}
-
-.composer-stop:focus-visible:not(:disabled) {
-  --composer-action-fill: var(--status-blocked);
-}
-
-/* not connected, it stops nothing: it must not read as live */
-.composer-stop:disabled {
-  --composer-action-fill: transparent;
-  color: var(--text-dim);
-}
-
-.composer-stop:disabled::before {
-  border-color: var(--border-strong);
-}
-
-.composer-action:disabled,
-.composer-controls .icon-button:disabled {
-  opacity: 0.7;
-  cursor: default;
+.composer-stop:is(:hover, :focus-visible):not(:disabled) svg {
+  color: var(--status-blocked);
 }
 
 .composer-send[aria-busy="true"] {
@@ -671,26 +585,12 @@
   to { transform: rotate(360deg); }
 }
 
-@media (hover: hover) {
-  .composer-send:hover:not(:disabled) {
-    --composer-action-fill: var(--primary-hover);
-  }
-
-  .composer-stop:hover:not(:disabled) {
-    --composer-action-fill: var(--status-blocked);
-  }
-
-  .composer-controls .icon-button:hover:not(:disabled) {
-    background: var(--bg-hover);
-  }
-}
-
-/* The strip tucked under the card, as t3code's composer context strip: the card's own surface,
+/* The strip tucked under the card, as t3code's composer context strip: a quieter surface than the card,
    inset on each side by the card's radius (never less than --space-5, for a sharp palette), so it
    stays under the card's straight bottom edge; its top --space-4 under the card, where the card's
-   hairline and shadow part the two (the seam), and only its bottom corners rounded. It names the
+   ring and shadow part the two (the seam), and only its bottom corners rounded. It names the
    pane's working folder (the whole path in its title) at its start and the branch at its end,
-   each a glyph and a name in --text-dim at --fs-xs, and nothing in it is pressed. Composer.tsx
+   each a filled glyph and a crumb word in --text-dim at --fs-xs, and nothing in it is pressed. Composer.tsx
    draws it only with a folder or a branch to name; a name that does not fit is cut short */
 .composer-strip {
   --composer-strip-inset: max(var(--radius-2xl), var(--space-5));
@@ -702,12 +602,13 @@
   width: calc(min(100%, var(--chat-w)) - 2 * var(--composer-strip-inset));
   margin: calc(-1 * var(--space-4)) auto 0;
   padding: var(--space-5) var(--space-3) var(--space-1);
-  border: var(--hairline) solid var(--border);
-  border-top: 0;
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   background: var(--bg-elevated);
+  box-shadow: var(--shadow-panel);
   color: var(--text-dim);
   font-size: var(--fs-xs);
+  font-weight: var(--fw-regular);
+  text-shadow: var(--text-shadow-engraved);
 }
 
 .composer-strip-item {
@@ -723,8 +624,9 @@
 .composer-strip-kind {
   flex: none;
   padding: 0 var(--space-1);
-  border: var(--hairline) solid var(--border);
   border-radius: var(--radius-sm);
+  background: var(--fill-2);
+  box-shadow: 0 0 0 1px var(--ink-1);
 }
 
 .composer-strip-branch {
@@ -772,47 +674,24 @@
   flex-direction: column;
 }
 
-/* the menu's close, in its top corner over whatever row scrolls under it; the first row (or group
-   heading) leaves it room, so at rest it covers nothing */
+/* the menu's close (a ghost icon button), in its top corner over whatever row scrolls under it; the
+   first row (or group heading) leaves it room, so at rest it covers nothing. On the menu's own
+   surface, so the row under it never shows through */
 .composer-menu-close {
   position: sticky;
   top: 0;
   z-index: 1;
-  flex: none;
   align-self: flex-end;
-  display: inline-grid;
-  place-items: center;
   width: var(--control-h);
   height: var(--control-h);
   margin-bottom: calc(-1 * var(--control-h));
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-md);
-  background: var(--bg-panel);
+  background: var(--bg-elevated);
   color: var(--text-dim);
-  cursor: pointer;
-}
-
-.composer-menu-close svg {
-  width: var(--fs-md);
-  height: var(--fs-md);
 }
 
 .composer-menu-list > .composer-menu-group:first-child > :first-child,
 .composer-menu-close + .composer-menu-group > :first-child {
   padding-inline-end: calc(var(--control-h) + var(--space-1));
-}
-
-@media (hover: hover) {
-  .composer-menu-close:hover {
-    background: var(--bg-hover);
-    color: var(--text);
-  }
-}
-
-.composer-menu-close:focus-visible {
-  outline: var(--ring);
-  outline-offset: calc(-1 * var(--ring-offset));
 }
 
 @media (pointer: coarse) {
@@ -856,12 +735,10 @@
   max-width: 100%;
 }
 
-/* a command that runs in the terminal: the badge primitive (styles.css) in the quiet register, after
-   the name, never shrunk; the description beside it gives way as it does for any row */
+/* a command that runs in the terminal: a Badge in the idle tone after the name, never shrunk; the
+   description beside it gives way as it does for any row */
 .composer-menu-badge {
   flex: none;
-  color: var(--text-dim);
-  background: var(--bg-elevated);
 }
 
 .composer-menu .menu-item-hint {
@@ -884,15 +761,16 @@
   overflow-x: auto;
 }
 
+/* a tile per file: a raised chip's surface, its thumbnail (or glyph and name) inside the ring */
 .composer-attachment {
   position: relative;
   flex: 0 0 auto;
   width: calc(var(--control-h) * 2);
   height: calc(var(--control-h) * 2);
   overflow: visible;
-  border: var(--hairline) solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
+  box-shadow: var(--shadow-chip);
 }
 
 .composer-attachment img {
@@ -919,7 +797,7 @@
 
 .composer-attachment.is-error,
 .composer-attachment.is-no-room {
-  border-color: var(--status-blocked);
+  box-shadow: 0 0 0 1px var(--status-blocked), var(--shadow-chip);
 }
 
 /* a path with no room or a failed upload: the badge is a warning glyph alone (its words are for
@@ -942,56 +820,49 @@
   height: var(--fs-xs);
 }
 
-.composer-attachment button {
+/* the X on the tile's top trailing corner: a ghost icon button on its own small disc, so it reads
+   over a thumbnail of any colour */
+.composer-attachment-remove {
   position: absolute;
   top: calc(-1 * var(--space-2));
   right: calc(-1 * var(--space-2));
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: var(--chip-h);
   height: var(--chip-h);
-  padding: 0;
-  background: var(--bg-panel);
-  border: var(--hairline) solid var(--border-strong);
   border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-chip);
   color: var(--text-strong);
 }
 
+.composer-attachment-remove svg {
+  width: var(--fs-sm);
+  height: var(--fs-sm);
+}
+
 /* a mouse's floor: the X keeps its --chip-h circle and takes a --pointer-target hit area through an
-   invisible expander around it, past its hairline edge (a finger's --touch-target size is set
-   below) */
+   invisible expander around it (a finger's --touch-target size is set below) */
 @media (pointer: fine) {
-  .composer-attachment button::before {
+  .composer-attachment-remove::before {
     content: "";
     position: absolute;
-    inset: calc((var(--chip-h) - var(--pointer-target)) / 2 - var(--hairline));
+    inset: calc((var(--chip-h) - var(--pointer-target)) / 2);
   }
 }
 
-/* why the message did not go: a band on the box's top edge, the box's own width, so it reads as
-   the box's; a note with its one way on (send over the terminal's draft) keeps the button at its
-   end, or under the reason when the row is too short for both */
+/* why the message did not go: an Alert in the danger tone on the box's top edge, the box's own
+   width, so it reads as the box's; a note with its one way on (send over the terminal's draft)
+   keeps the button at its end, or under the reason when the row is too short for both */
 .composer-note {
-  display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1) var(--space-2);
   margin-bottom: var(--space-2);
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
-  background: var(--danger-tint);
-  border: var(--hairline) solid color-mix(in srgb, var(--status-blocked) 35%, transparent);
-  border-radius: var(--radius-lg);
-  color: var(--text);
-  font-size: var(--fs-sm);
   line-height: var(--lh-base);
 }
 
 .composer-note-icon {
-  flex: none;
-  width: 16px;
-  height: 16px;
-  color: var(--status-blocked);
+  margin-top: 0;
 }
 
 .composer-note-text {
@@ -1036,20 +907,9 @@
   margin-left: auto;
 }
 
-.composer-note-action {
-  min-height: var(--control-h);
-  padding: 0 var(--space-3);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-elevated);
-  color: var(--text);
-  font: inherit;
-  font-weight: var(--fw-medium);
-}
-
 @media (pointer: coarse) {
   .composer-note-action {
-    min-height: var(--touch-target);
+    height: var(--touch-target);
   }
 }
 
@@ -1117,18 +977,18 @@
 }
 
 @media (pointer: coarse) {
-  .composer-controls .icon-button,
-  .composer-attachment button {
+  .composer-attach,
+  .composer-new-session,
+  .composer-attachment-remove {
     min-width: var(--touch-target);
     min-height: calc(var(--touch-target) + var(--space-1));
   }
 
-  /* Keep the compact circle, with a larger transparent target for touch. */
+  /* a finger's size for the one action at the row's end */
   .composer-action {
     width: var(--touch-target);
     height: var(--touch-target);
   }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1137,7 +997,7 @@
   }
 
   .composer-surface,
-  .composer-action::before {
+  .composer-stop svg {
     transition: none;
   }
 }
@@ -1151,7 +1011,8 @@
   display: flex;
   flex-direction: column;
   padding-top: var(--space-2);
-  border-top: var(--hairline) solid var(--border);
+  /* the rule above the group is etched, not drawn (the divider token, as the divider-t utility) */
+  background: var(--divider) top / 100% var(--divider-h) no-repeat;
 }
 
 /* The list is a sibling of the composer, not a child: it has no gutter of its own, so it takes
@@ -1207,7 +1068,7 @@
 }
 
 .composer-queue-toggle:focus-visible {
-  outline: var(--hairline) solid var(--accent);
+  outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
   outline-offset: var(--space-1);
   border-radius: var(--radius-sm);
 }
@@ -1230,18 +1091,14 @@
 }
 
 /* The agent is ready: the list now asks for the user's own action, so the accent goes on that
-   action and on the clock (the sentence changes with it). The rule above stays a hairline. */
+   action (Send now becomes the accent button, PaneTerminal.tsx) and on the clock (the sentence
+   changes with it). The rule above stays etched. */
 .composer-queue.is-ready .composer-queue-heading {
   color: var(--text);
 }
 
 .composer-queue.is-ready .composer-queue-mark {
   color: var(--accent);
-}
-
-.composer-queue.is-ready .composer-queue-send {
-  border-color: var(--accent);
-  color: var(--text-strong);
 }
 
 /* The list, not the group, has the height limit: two and a half rows, so a third message shows
@@ -1277,7 +1134,7 @@
 }
 
 .composer-queue-item + .composer-queue-item {
-  border-top: var(--hairline) solid var(--border);
+  background: var(--divider) top / 100% var(--divider-h) no-repeat;
 }
 
 /* the message is still a box to edit: it shows as one only while it is being edited. It is as
@@ -1288,12 +1145,15 @@
   field-sizing: content;
   padding: var(--space-1) 0;
   resize: none;
-  border: var(--hairline) solid transparent;
-  border-radius: var(--radius-sm);
+  border: 0;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--text-strong);
   font: inherit;
   font-size: var(--fs-sm);
+  transition:
+    box-shadow var(--dur-fast) var(--ease-in-out),
+    background-color var(--dur-fast) var(--ease-in-out);
 }
 
 /* without field-sizing the box has rows= alone, which counts line breaks and not wrapped
@@ -1304,10 +1164,11 @@
   }
 }
 
+/* being edited, the message is a field: the well with the focus ring */
 .composer-queue-text:focus-visible {
   padding-inline: var(--space-2);
-  border-color: var(--accent);
-  background: var(--bg-panel);
+  background: var(--bg-input);
+  box-shadow: var(--shadow-focus);
   outline: none;
 }
 
@@ -1316,25 +1177,13 @@
   gap: var(--space-2);
 }
 
+/* Send now is a field button (the accent one once the agent is ready); Discard the quiet word beside it */
 .composer-queue-send,
 .composer-queue-discard {
-  min-height: var(--control-h);
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-sm);
-  font: inherit;
   font-size: var(--fs-xs);
-  font-weight: var(--fw-medium);
-}
-
-.composer-queue-send {
-  border: var(--hairline) solid var(--border);
-  background: var(--bg-elevated);
-  color: var(--text);
 }
 
 .composer-queue-discard {
-  background: transparent;
-  border: 0;
   color: var(--text-dim);
 }
 
@@ -1379,14 +1228,14 @@
   }
 
   .composer-queue-send {
-    min-height: var(--touch-target);
+    height: var(--touch-target);
   }
 
   .composer-queue-discard {
     display: inline-grid;
     place-items: center;
     width: var(--touch-target);
-    min-height: var(--touch-target);
+    height: var(--touch-target);
     padding: 0;
   }
 
@@ -1449,43 +1298,25 @@
   display: none;
 }
 
+/* a reply is a field button (components/ui/button.tsx), its words cut short past 16em */
 .composer-quick-reply {
-  flex: 0 0 auto;
+  display: block;
   max-width: 16em;
-  min-height: var(--control-h);
-  padding: 0 var(--space-3);
   overflow: hidden;
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
-  color: var(--text);
-  font: inherit;
-  font-size: var(--fs-sm);
+  line-height: var(--control-h);
   text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
 }
-
-.composer-quick-reply:hover:not(:disabled) {
-  border-color: var(--accent);
-}
-
-.composer-quick-reply:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
 
 @media (pointer: coarse) {
   .composer-quick-reply {
-    min-height: calc(var(--touch-target) + var(--space-1));
+    height: calc(var(--touch-target) + var(--space-1));
+    line-height: calc(var(--touch-target) + var(--space-1));
   }
 }
 
-/* the agent's suggestion: a dashed chip, on touch screens only (a keyboard takes it with Tab) */
+/* the agent's suggestion: the same chip in the dim colour, on touch screens only (a keyboard takes it with Tab) */
 .composer-suggestion {
   max-width: 100%;
-  border-style: dashed;
   color: var(--text-dim);
 }
 

@@ -4,7 +4,9 @@ import { NOTICE_VERSION, type TelemetryStatus } from "../../shared/telemetry.ts"
 import { ApiError, changeTelemetry, fetchTelemetry } from "../lib/api.ts";
 import { telemetrySettingsSnapshot, useSettings } from "../lib/settings.ts";
 import { useT } from "../lib/i18n.ts";
+import { ChartBar } from "../lib/icons.ts";
 import { SettingsGroup, SettingsRow, Toggle } from "./SettingsControls.tsx";
+import { Button } from "./ui/index.ts";
 
 /**
  * The one-time line about anonymous usage counts: the install and update events and the daily
@@ -77,8 +79,8 @@ export function TelemetryNotice({ enabled, onOpen }: { enabled: boolean; onOpen:
   const text = t("Ovis sends anonymous usage counts.");
   return <div className="update-notice is-line" role="status">
     <span title={text}>{text}</span>
-    <button type="button" className="btn btn-ghost" onClick={() => { setClosed(true); onOpen(); }}>{t("What is sent")}</button>
-    <button type="button" className="btn btn-ghost" onClick={() => setClosed(true)}>{t("Dismiss")}</button>
+    <Button variant="ghost" onClick={() => { setClosed(true); onOpen(); }}>{t("What is sent")}</Button>
+    <Button variant="ghost" onClick={() => setClosed(true)}>{t("Dismiss")}</Button>
   </div>;
 }
 
@@ -142,14 +144,14 @@ export function TelemetryControls() {
     ).finally(() => setSaving(false));
   };
   return (
-    <SettingsGroup title={t("Anonymous usage counts")} className="settings-telemetry" section="telemetry">
+    <SettingsGroup title={t("Anonymous usage counts")} icon={<ChartBar />} className="settings-telemetry" section="telemetry">
       {status.blocked_by_env
         ? <p className="settings-item settings-hint">{t("Turned off on this PC by OVIS_TELEMETRY=0, DO_NOT_TRACK or a CI environment.")}</p>
         : <SettingsRow label={t("Send anonymous usage counts")} description={t("Once on install and once per update, with the last browser's app settings, and once a day you open the app, with the kinds of coding agents running in herdr (such as claude or codex). Custom fonts, shortcuts and replies are reported only as customization flags or counts, never their text. Account identifiers, terminal content and files are excluded. The receiver stores the country, not the IP address.")}>
           <Toggle label={t("Send anonymous usage counts")} checked={status.enabled} onChange={toggle} disabled={saving} />
         </SettingsRow>}
       {error && <p className="settings-item settings-hint" role="alert">{error}</p>}
-      <details className="settings-item">
+      <details className="settings-item settings-details">
         <summary>{t("What is sent")}</summary>
         {status.next
           ? <pre className="update-output">{JSON.stringify(status.next, null, 2)}</pre>

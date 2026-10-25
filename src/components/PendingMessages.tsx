@@ -4,6 +4,7 @@ import type { PendingMessageView } from "../lib/pendingMessages.ts";
 import { copyText } from "../lib/clipboard.ts";
 import { submitNote } from "../lib/compose.ts";
 import { useT } from "../lib/i18n.ts";
+import { Badge, Button, IconButton, TooltipProvider } from "./ui/index.ts";
 import "./PendingMessages.css";
 
 interface Props {
@@ -34,7 +35,11 @@ export function pendingStatus(message: Pick<PendingMessageView, "state" | "error
   return t("Held message — review and send");
 }
 
-/** Pending text is separate from the transcript; Send now acts on its ID, never on its text. */
+/**
+ * Pending text is separate from the transcript; Send now acts on its ID, never on its text. Each
+ * held message is a card as the user's sent turns are, its state a Badge in the meta row under it
+ * with the glyph actions beside it.
+ */
 export function PendingMessages({ messages, active = true, connected, agent, blocked, inert = false, unsaved, isBusy, onSendNow, onDiscard }: Props) {
   const t = useT();
   const activeRef = useRef(active);
@@ -48,37 +53,39 @@ export function PendingMessages({ messages, active = true, connected, agent, blo
       ?? stack.querySelector<HTMLTextAreaElement>(".composer-text");
     next?.focus({ preventScroll: true });
   };
-  return <ol ref={rootRef} className="pending-messages" aria-label={t("Queued messages")} inert={inert || undefined}>
+  return <TooltipProvider><ol ref={rootRef} className="pending-messages" aria-label={t("Queued messages")} inert={inert || undefined}>
     {unsaved && <li className="pending-message-note" role="status">{t("Queue could not be saved. Keep this tab open or copy the messages before reloading.")}</li>}
     {messages.map((message) => {
       const busy = isBusy(message.id) || message.state === "sending";
       const uncertain = message.state === "uncertain";
       const status = pendingStatus(message, busy, t);
+      // the state's tone: on its way or next in line is work, a copy to check is a block, a held one waits
+      const tone = busy ? "working" : uncertain ? "blocked" : message.state === "queued" ? "working" : "idle";
       return <li key={message.id} className="pending-message" data-state={message.state}>
         <div className="pending-message-bubble" aria-busy={busy || undefined}>{message.text}</div>
         <div className="pending-message-meta">
-          <span className="pending-message-note" role="status">{status}</span>
-          {!uncertain && <button type="button" className="icon-button pending-message-action pending-message-send"
+          <Badge tone={tone} className="pending-message-note pending-message-status" role="status">{status}</Badge>
+          {!uncertain && <Button variant="field" size="xs" className="pending-message-action pending-message-send"
             aria-label={`${t("Send now")}: ${message.text}`} aria-busy={busy || undefined} title={t("Send now")}
             disabled={!connected || blocked || busy} onClick={(event) => {
               const target = event.currentTarget, keyboard = event.detail === 0, stack = target.closest(".terminal-stack"), owner = stack?.getAttribute("data-pane-owner") ?? null;
               void onSendNow(message.id).finally(() => restoreFocus(keyboard, target, stack, owner));
-            }}><ArrowUp aria-hidden="true" /><span>{t("Send now")}</span></button>}
-          {uncertain && <button type="button" className="icon-button pending-message-action" aria-label={copied === message.id ? t("Copied") : t("Copy message")}
-            title={t("Copy message")} onClick={(event) => {
+            }}><ArrowUp aria-hidden="true" /><span>{t("Send now")}</span></Button>}
+          {uncertain && <IconButton size="icon-sm" className="pending-message-action" label={copied === message.id ? t("Copied") : t("Copy message")}
+            onClick={(event) => {
               const text = event.currentTarget.closest(".pending-message")?.querySelector<HTMLElement>(".pending-message-bubble");
               void copyText(message.text, text).then((ok) => { if (ok) setCopied(message.id); });
-            }}><Copy aria-hidden="true" /></button>}
-          <button type="button" className="icon-button pending-message-action" aria-label={uncertain ? t("Discard saved copy") : t("Discard")}
-            title={uncertain ? t("Discard saved copy") : t("Discard")} disabled={busy || message.serverOwned && !connected}
+            }}><Copy aria-hidden="true" /></IconButton>}
+          <IconButton size="icon-sm" className="pending-message-action" label={uncertain ? t("Discard saved copy") : t("Discard")}
+            disabled={busy || message.serverOwned && !connected}
             onClick={(event) => {
               const target = event.currentTarget, keyboard = event.detail === 0, stack = target.closest(".terminal-stack"), owner = stack?.getAttribute("data-pane-owner") ?? null;
               void onDiscard(message.id).finally(() => restoreFocus(keyboard, target, stack, owner));
-            }}><X aria-hidden="true" /></button>
+            }}><X aria-hidden="true" /></IconButton>
         </div>
         {message.error && !uncertain && <p className="pending-message-note" role="status">{message.error.code === "still_open" ? message.error.message
           : (message.error.code === "input_draft" || message.error.code === "held_input" || message.error.code === "not_transmitted" || message.error.code === "capabilities_unknown" || message.error.code === "rewind_dialog_open" || message.error.code === "first_message_unattended") ? submitNote(message.error.code, message.error.message, agent) : t("Not sent: {message}", { message: message.error.message })}</p>}
       </li>;
     })}
-  </ol>;
+  </ol></TooltipProvider>;
 }

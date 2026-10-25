@@ -12,6 +12,7 @@ import { useSettings, wantsVoiceInput } from "../lib/settings.ts";
 import { isMacPlatform, isVoiceShortcut } from "../lib/shortcuts.ts";
 import { applyDictation, useVoiceInput, type InsertedSpan, type VoiceError, type VoiceInput, type VoiceText, type VoiceUnavailable } from "../lib/voice.ts";
 import { VOICE_MAX_SECONDS, type VoiceMode } from "../../shared/voice.ts";
+import { Button, Tooltip, TooltipContent, TooltipTrigger } from "./ui/index.ts";
 
 // literal t() calls, so the i18n test finds every key
 function errorNote(t: Translate, error: VoiceError | VoiceUnavailable): string | null {
@@ -243,8 +244,13 @@ export function MicButton({ dictation, className = "" }: { dictation: Dictation;
   return (
     <span className={`voice-mic-wrap ${className}`} data-state={voice.state}>
       <span className="voice-mic-ring" ref={voice.bindRing} aria-hidden="true" />
-      <button
-        type="button"
+      {/* a recording's pulse, on the button's corner */}
+      <span className="voice-mic-dot" aria-hidden="true" />
+      <Tooltip>
+      <TooltipTrigger asChild>
+      <Button
+        variant="ghost"
+        size="icon"
         className="voice-mic"
         aria-label={label}
         aria-pressed={recording}
@@ -262,7 +268,10 @@ export function MicButton({ dictation, className = "" }: { dictation: Dictation;
         onClick={() => { if (performance.now() - pointerUpAt.current > 500) press(); }}
       >
         {recording ? <Square aria-hidden="true" /> : <Mic aria-hidden="true" />}
-      </button>
+      </Button>
+      </TooltipTrigger>
+      <TooltipContent>{reason ?? label}</TooltipContent>
+      </Tooltip>
     </span>
   );
 }
@@ -288,10 +297,10 @@ export function VoiceRecordingPill({ dictation, align }: { dictation: Dictation;
     : t("Recording");
   return (
     <div className={`voice-pill${open ? " is-open" : ""}`} data-state={state} data-align={align} aria-hidden={!open}>
-      <button type="button" className="voice-pill-button voice-cancel" aria-label={t("Cancel dictation")} title={t("Cancel dictation")}
+      <Button variant="ghost" size="icon-sm" className="voice-pill-button voice-cancel" aria-label={t("Cancel dictation")} title={t("Cancel dictation")}
         tabIndex={open ? 0 : -1} onPointerDown={(event) => event.preventDefault()} onClick={() => voice.cancel()}>
         <X aria-hidden="true" />
-      </button>
+      </Button>
       <span className="voice-pill-dot" aria-hidden="true" />
       <span className="voice-pill-label" role="status" aria-live="polite">{open ? label : ""}</span>
       {partial !== "" && <span className="voice-pill-partial" title={partial}>{partial}</span>}
@@ -302,10 +311,10 @@ export function VoiceRecordingPill({ dictation, align }: { dictation: Dictation;
       <span className={`voice-timer${state === "recording" && left <= 10 ? " is-ending" : ""}`} aria-hidden="true">
         {clock(state === "recording" && left <= 10 ? Math.max(0, left) : seconds)}
       </span>
-      <button type="button" className="voice-pill-button voice-done" aria-label={t("Insert dictation")} title={t("Insert dictation")}
+      <Button variant="accent" size="icon-sm" className="voice-pill-button voice-done" aria-label={t("Insert dictation")} title={t("Insert dictation")}
         tabIndex={open ? 0 : -1} disabled={state === "transcribing"} onPointerDown={(event) => event.preventDefault()} onClick={() => voice.finish()}>
         <Check aria-hidden="true" />
-      </button>
+      </Button>
     </div>
   );
 }

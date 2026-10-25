@@ -44,6 +44,8 @@
   padding: 0 var(--side-gutter);
 }
 
+/* the PC's name is set a step above its rows and the section heads: the row's size, semibold and
+   tight, in the strong text, so the head of a group reads as one at a glance */
 .machine-title {
   display: flex;
   align-items: center;
@@ -51,10 +53,13 @@
   min-width: 0;
   min-height: var(--side-row);
   color: var(--text-strong);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-tight);
   line-height: var(--lh-tight);
 }
+
+.machine-mark { position: relative; }
 
 .machine-name {
   min-width: 0;
@@ -63,21 +68,31 @@
   white-space: nowrap;
 }
 
+/* Host: a small-caps tag in a hairline ring, as the filter's Selected note (Sidebar.css) */
 .machine-kind {
   flex: none;
   margin-left: var(--space-2);
+  padding: 0 var(--space-1);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-sm);
   color: var(--text-dim);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-regular);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-caps);
+  line-height: calc(var(--fs-2xs) + var(--space-1));
+  text-transform: uppercase;
 }
 
+/* the state on the monitor's lower corner, cut out of the panel by a ring of it */
 .machine-dot {
-  flex: none;
+  position: absolute;
+  right: calc((var(--side-box) - var(--icon-size)) / 2 - var(--hairline) * 2);
+  bottom: calc((var(--side-box) - var(--icon-size)) / 2 - var(--hairline) * 2);
   width: var(--dot-size);
   height: var(--dot-size);
-  margin-left: var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--status-idle);
+  box-shadow: 0 0 0 calc(var(--hairline) * 2) var(--bg-panel);
 }
 
 .machine-dot.is-connected { background: var(--status-done); }

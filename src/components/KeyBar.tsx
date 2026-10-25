@@ -99,6 +99,8 @@ function Key({ dataKey, label, pressed, onPress, children, disabled, repeatable,
       disabled={disabled}
       className={`key${pressed ? " is-armed" : ""}`}
       data-key={dataKey}
+      // a toggle's state as the segmented controls say it (KeyBar.css lights data-state=on)
+      data-state={pressed === undefined ? undefined : pressed ? "on" : "off"}
       aria-label={label}
       aria-pressed={pressed}
       tabIndex={-1}

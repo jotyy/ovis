@@ -6,25 +6,40 @@ value. When a component needs a value that is not here, add it to both first.
 
 ## 1. Atmosphere & Identity
 
-The herdr look (amber) is a warm terminal: an amber-phosphor console on lamp-lit graphite (dark) or ledger paper (light),
-with chat-app clarity. Tonal surfaces and hairlines keep the chrome out of the way. There is ONE
-chrome color, amber: focus, the chosen lens, the terminal cursor and the user's own action (Send, primary
-buttons). Agent states carry the remaining saturated colors and none of them is amber. The user's
-chat turns are neutral raised cards, so a long thread never turns into a wall of color. Dark is the
-default, light follows the same hierarchy, and comfortable or compact density changes scale without
-changing information architecture. A new browser starts on the Codex theme (dark and light), which
-draws this hierarchy in Codex's neutral surfaces and blue accent; amber, charcoal, Catppuccin and
-herdr's built-in themes are picked in Settings → Appearance → Dark theme and Light theme. Amber
-stays the base every theme block overrides and the look a browser keeps when it saved a theme
-while amber was the default; the saved theme, not amber, is the page's first frame (see Rules). Settings are saved on a user's first
-change, so a browser that never changed one moves to Codex with everyone new.
+The Studio look is a workflow editor's: near-black neutrals with no tint, the chrome (sidebar,
+header, tab strip) a step darker than the content it frames, which sits inset in it as a rounded
+card on a wide screen, and one accent, violet, for focus, the chosen item, the terminal cursor and
+the user's own action (Send, the one primary button of a surface). It follows Kargul Studio's
+[workflow editor](https://github.com/kargulstudio/workflow-editor) (MIT; credited in
+`THIRD_PARTY_NOTICES.md`), whose component recipes are rewritten here against the tokens of
+`src/styles.css` and drawn by shadcn components (`src/components/ui/`, Radix UI with Tailwind
+bound to the same tokens). Edges are never drawn lines: a surface is a ring of shadow outside it
+and a pixel of light inside its top edge, dividers are etched, and depth is a stack of translucent
+layers over whatever surface a palette gives (§7). Agent states carry the remaining saturated
+colors (cyan working, red blocked, green done, amber for a notice) and none of them is violet.
+The user's chat turns are neutral raised cards, so a long thread never turns into a wall of color.
+Dark is the default, light follows the same hierarchy in shadcn's neutral scale, and comfortable
+or compact density changes scale without changing information architecture. A new browser starts
+on the Studio theme (dark and light); amber, charcoal, Codex, Catppuccin and herdr's built-in
+themes are picked in Settings → Appearance → Dark theme and Light theme, and each keeps its own
+colors under the same surfaces, shadows and type. Amber stays the base every theme block
+overrides (its values are frozen by `src/lib/themes.parity.test.ts`); the saved theme, not amber,
+is the page's first frame (see Rules).
+
+The type is Inter: Inter Variable at 500 for everything read (a dark surface thins a face, and 500
+reads there as 400 does on paper), 550 for labels, titles and the chosen item, 600 for emphasis,
+and Inter Display at 500 for the few large figures; the whole interface is tracked -0.01em.
+Every glyph is a Tabler icon through `src/lib/icons.ts`, stroked at 1.75; a glyph that names a
+state or an identity (an alert, a done or failed step, a pinned row, a folder, a PC, a Settings
+page) takes the filled face, an action or a toggle stays outlined.
 
 The sidebar is one grid: a leading cell that says who or what a row is (the coding agent's brand
 mark, else the place's own glyph), a title, and a trailing cell that says how it is. Workspaces
 and Agents are independent lists, as in herdr's Spaces and Agents panels; tab and pane navigation
 stays over the terminal and in the palette. Sections are parted by space and a dim head, never by
 a rule; the Agents list's workspace cards are an edge around rows, not a line between sections.
-Hover and selection are one neutral fill at two strengths. Brand marks are the only color
+Hover is the quiet fill of light every surface takes under the pointer; the selected row is the
+surface language's chosen nav row, a raised face lit from above in a ring of ink. Brand marks are the only color
 there that is not a state, and a ready row draws no state at all. Amber connects focus, the chosen
 lens glyph and the terminal cursor.
 
@@ -157,13 +172,14 @@ paper, not UI, and the viewer (`.file-viewer-pdf`) must not tint it for the them
 
 ### Themes
 
-`settings.darkTheme` and `settings.lightTheme` (both `codex` by default) name the theme each mode
+`settings.darkTheme` and `settings.lightTheme` (both `studio` by default) name the theme each mode
 draws. The resolved entry is written as `data-theme` (its mode) and `data-palette` (its id). Any
 theme can be picked on either side. Picking one half of a herdr pair also sets the other side to
-its sibling, but only while that side still holds `codex` (the default, even if picked by hand),
-`amber` (the default before it) or the sibling of the previous pick; any other value is kept. A
+its sibling, but only while that side still holds `studio` (the default, even if picked by hand),
+`codex` or `amber` (the defaults before it) or the sibling of the previous pick; any other value is kept. A
 dark theme picked for light mode still draws dark.
-The themes are amber, charcoal, codex and catppuccin plus herdr's built-ins; herdr's `terminal` theme is
+The themes are studio (the default: the editor's neutrals and violet, in dark and light), amber,
+charcoal, codex and catppuccin plus herdr's built-ins; herdr's `terminal` theme is
 not offered. The tables above are amber, the base blocks; every other theme overrides them in a
 `[data-theme][data-palette]` block of `src/styles.css`.
 
@@ -530,17 +546,19 @@ The values are the ones in `src/styles.css`. Every token but `--fs-input` is `ca
 ### Faces
 - The app ships its typefaces (`src/fonts/`, licenses in `THIRD_PARTY_NOTICES.md`) and loads
   nothing from another host: it is served from the user's PC, often with no internet route.
-  Both are `font-display: swap`.
-- Pretendard Variable, the first name in `--font-ui`, is upstream's dynamic subset: 92 chunks
-  split by `unicode-range`, so the browser fetches only those whose characters a page draws
-  (measured on the demo's chat: three chunks, 90 KB, in English; eight more, 200 KB, with the
-  interface and an answer in Korean). The service worker precaches none and keeps each one once
-  fetched.
-- What the chunks cover (their `unicode-range`s): Latin, all 11,172 Hangul syllables, hiragana
-  and katakana, and 435 CJK ideographs. The type is therefore the same on every device for
-  Latin and Korean only. Kanji and Chinese text fall through `--font-ui` to the device's sans-serif,
-  so a Japanese line is kana in Pretendard beside kanji in the device's face, and Chinese is
-  the device's face almost throughout. The app ships no Japanese or Chinese face.
+  All are `font-display: swap`.
+- Inter Variable (`src/fonts/inter/`), the first name in `--font-ui`, is one file for every weight
+  the app sets (500, 550, 600, 700), so a weight step costs no request; it covers Latin, Greek and
+  Cyrillic. Inter Display Medium is `--font-display`, for large figures only (a pairing code, a
+  meter's number), as the editor sets its stat cards.
+- Pretendard Variable follows Inter in the stack for Hangul: its Latin is cut to Inter's metrics,
+  so a mixed line keeps one rhythm. It is upstream's dynamic subset: 92 chunks split by
+  `unicode-range`, so the browser fetches only those whose characters a page draws. The service
+  worker precaches none and keeps each one once fetched.
+- What the chunks cover (their `unicode-range`s): all 11,172 Hangul syllables, hiragana and
+  katakana, and 435 CJK ideographs. Kanji and Chinese text fall through `--font-ui` to the
+  device's sans-serif, so a Japanese line is kana in Pretendard beside kanji in the device's face,
+  and Chinese is the device's face almost throughout. The app ships no Japanese or Chinese face.
 - JetBrains Mono regular is the code face of the chat and the chrome, loaded under the family
   name `"JetBrains Mono Web"`. The name is the app's own so that the terminal never takes it:
   xterm's stack (`src/lib/fontFamily.ts`) names `"JetBrains Mono"`, sizes every cell from the
@@ -980,10 +998,11 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   apps keep it; the roster has only the label filter below, which the maintainer approved in #1043
   and which differs from the palette-only design on purpose: it narrows the lists in place, by the
   words the rows show, and holds no state.
-- **Filter workspaces and agents** (`.sidebar-filter`, MachineSidebar.tsx) is its word, **Filter**
-  (`.sidebar-filter-label`, in `--text-dim` at the size of the field's text, in view whatever is typed), then one
+- **Filter workspaces and agents** (`.sidebar-filter`, MachineSidebar.tsx) is one
   `.input` the height of a row (`--side-row`, so a finger's `--touch-target` on a phone) in the rows'
-  gutter above the lists, its placeholder naming the scope (**Workspaces and agents**) and its
+  gutter above the lists, a magnifier in its leading cell (`.sidebar-filter-glyph`, `--text-dim`,
+  `--text` while the field has the focus), its word **Filter** for screen readers alone
+  (`.sidebar-filter-label`, visually hidden), its placeholder naming the whole (**Filter workspaces and agents**) and its
   suggestions the names the rows show (a `<datalist>`, rebuilt from the roster, nothing typed kept),
   with its clear (`.sidebar-filter-clear`, the same square, inside the field's trailing
   cell) only while there is text; the browser's own search cancel glyph is off, so there is one. The
@@ -1017,9 +1036,16 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   a `--control-h` leading cell, the title, and a `--control-h` trailing status cell, the same two
   columns as the header zone's buttons above the list. One-line rows and section heads are
   `--control-h` tall, two-line agent rows `--control-h` + `--space-3`; fills use `--radius-md`.
-  Hover is `color-mix(in srgb, var(--bg-hover) 50%, var(--bg-panel))`, only where a pointer hovers;
-  selection is `--bg-hover`; keyboard focus draws the ring inside the row and no fill. No rule
-  separates sections: `--space-4` and a dim `--fs-sm` head do.
+  Hover is `--fill-2`, only where a pointer hovers; selection is a raised face, `--bg-elevated`
+  under `--raised-face` and `--shadow-raised` (`--side-selected`, `--side-selected-face`,
+  `--side-selected-edge`), and rows keep `--side-row-gap` (two hairlines) between them so a face
+  never touches its neighbour's fill; keyboard focus draws the ring inside the row and no fill. A
+  worktree hangs from its repository on a `--border-strong` hairline branch: an elbow with a
+  `--radius-sm` corner into each row, and the trunk on down past every row but the last. A
+  compact state's dot sits in a halo of its own colour at 16%. Sidebar glyphs are one step under
+  the app's `--icon-size`: `--space-4` (16px), set on `.sidebar-shell`. No rule separates
+  sections: `--space-4` and a dim small-caps head (`--fs-2xs` semibold, `--tracking-caps`, as
+  the pinned card's caption) do.
 - The PC/workspace list and the lower Agents list scroll independently above the fixed footer.
   Agents takes the height of its rows, at most half the sidebar, docked above the footer; the
   workspace list has the rest. The Agents heading stays outside its scroll area and shows its
@@ -1028,7 +1054,10 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   (`max-width: 768px`) the list starts folded. Until the PCs are in and every connected PC's
   panes have come, an empty list says **Loading agents…**, never "No agents running".
 - A PC's header is the head of its workspaces, and the caret beside its `+` is the one fold over
-  them. The roster has no label or fold of its own.
+  them. The roster has no label or fold of its own. The name is set a step above the rows
+  (`--fs-md` semibold, `--tracking-tight`, `--text-strong`); the PC's state is a presence dot on
+  the lower corner of its monitor, cut out by a ring of `--bg-panel` (`.machine-dot`), and the host
+  PC's **Host** is a small-caps tag in a hairline ring (`.machine-kind`, as `.sidebar-filter-note`).
 - A repository's parent row keeps `workspace.label`; its opened linked
   worktree rows show their actual checkout branches. Each row's compact status
   glyph rolls up all of the workspace's panes as herdr does (blocked, then done, then working,
@@ -1379,7 +1408,7 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   rendered.
 - In a mouse-driven window wider than 640px (the composer's own `(max-width: 640px), (pointer:
   coarse)` query) the chat's composer can show a **New tab with an agent…** icon button
-  (lucide `MessageSquarePlus`, beside Attach) that opens this dialog as New tab on the pane's
+  (Tabler `MessageSquarePlus`, beside Attach) that opens this dialog as New tab on the pane's
   workspace, as the tab menu does. It is off until this device turns it on (Settings → Chat →
   Composer, **New tab button**, the device setting `composerNewTabButton`): the composer's row stays
   minimal, as the Codex and Claude apps keep theirs (attach and the mic; a new thread starts from the
@@ -1492,7 +1521,7 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
 - The browser demo answers the same list/create/open/remove worktree APIs with fictional
   checkout records, so its branch rows and dialogs work without a filesystem or live herdr.
 ### Session history (`.session-modal`)
-- From a workspace row's menu, **Earlier sessions…** (lucide `History`, beside Rename workspace),
+- From a workspace row's menu, **Earlier sessions…** (Tabler `History`, beside Rename workspace),
   and from the chat: picking `/resume` in the `/` menu's Terminal commands opens it at once, and the
   same command typed and sent opens the list without sending anything. The
   dialog is the worktree dialog's anatomy: **Agent** is the New workspace dialog's picker
@@ -1761,7 +1790,7 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   transcript's edge cannot be tapped). With a mouse the copy and format buttons keep their `--chip-h`
   look and take a `--pointer-target` hit area through an invisible `::before` expander.
 - A user turn of Claude Code, grok or agy carries one more glyph button beside its copy, the same
-  `.chat-copy` look (`.chat-rewind`, lucide Undo2): **Rewind in terminal** sends nothing and
+  `.chat-copy` look (`.chat-rewind`, Tabler Undo2): **Rewind in terminal** sends nothing and
   opens the pane's terminal with a dismissible, one-line `.terminal-banner-rewind` hint to run
   the agent's own `/rewind`. Drafts stay intact. Chat follows the native transcript's active
   branch once the agent records it; it never guesses a restore from a dialog's wording. The
@@ -2118,7 +2147,7 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   with a mouse, reaching `--pointer-target` through an invisible `::before` expander; under a
   coarse pointer the button itself grows to `--touch-target` wide and `--touch-target` plus
   `--space-1` tall), then ONE row of controls under it:
-  on the left the add button (lucide `Plus`, named "Attach files"), the mic when voice input
+  on the left the add button (Tabler `Plus`, named "Attach files"), the mic when voice input
   shows it (see Voice input), and the background-task chip; on the right the status content and ONE round Send/Stop button.
   The message's text starts `--space-4` in (`--space-3` on a phone, `480px` and below).
 - The strip (`.composer-strip`) tucked under the card, as t3code's composer context strip: the
@@ -2127,10 +2156,10 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   its top `--space-4` under the card, where the card's hairline and `--shadow-card` part the two,
   and only its bottom corners rounded (`--radius-xl`); `--space-5` top padding (so `--space-1`
   shows under the card), `--space-3` at the sides, `--space-1` under. It names the pane's
-  working folder at its start (lucide `Folder`, the folder's last name, the whole path in its
-  `title`) and the branch at its end (lucide `GitBranch`), each a glyph the text's size and a
+  working folder at its start (Tabler `Folder`, the folder's last name, the whole path in its
+  `title`) and the branch at its end (Tabler `GitBranch`), each a glyph the text's size and a
   name in `--text-dim` at `--fs-xs`, `--chip-h` tall; a name that does not fit is cut short.
-  A linked worktree's folder takes lucide `FolderGit2` and the word Worktree after its name, in
+  A linked worktree's folder takes Tabler `FolderGit2` and the word Worktree after its name, in
   a `--border` hairline box with `--radius-sm` corners.
   Nothing in it is pressed. `composerStrip` (`src/lib/composerStrip.ts`) decides what it draws from
   the composer's optional `cwd` and `branch`: a blank one is absent, and with neither there is no
@@ -2155,7 +2184,7 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   a tap or drag on it reaches the chat under it, which puts the keyboard away.
 - The round button (`.composer-action`, a `--space-8` / `32px` circle with a `--space-4` glyph) is
   Send or Stop in the same place at the same size, so only the glyph changes: Send is `--primary`
-  with lucide `ArrowUp`; Stop is `--text-strong` with a `--bg` square, and turns
+  with Tabler `ArrowUp`; Stop is `--text-strong` with a `--bg` square, and turns
   `--status-blocked` on hover and focus. Not connected, Stop is disabled and loses its fill
   (`--border-strong` outline, `--text-dim` glyph). A coarse pointer keeps that compact visible
   circle inside a transparent `--touch-target` / `44px` button, so tapping remains easy.
@@ -2893,18 +2922,50 @@ The values are the ones in `src/styles.css`.
 
 ### Strategy
 
-**Tonal shift + hairline, with shadow reserved for overlays.** Resting shell surfaces have no shadow.
+**Layers of light and shadow over the palette's surface, never a drawn line.** Every control and
+card is a surface: a ring of shadow just outside it, a pixel of light inside its top edge, and a
+fill the colour of light where the pointer rests. The tokens are white and black at an alpha in
+`:root` and ink in the light block, so every palette reads the same way under them; a palette
+changes only the surfaces the layers sit on. Resting shell surfaces still have no shadow of their
+own: the pane is a card by its ring, the sidebar by its darker panel.
 
-| Type | Value | Usage |
-|------|-------|-------|
-| Hairline | `var(--hairline) solid var(--border)` | Shell, fields, controls |
-| Strong edge | `var(--border-strong)` | Hover/focus separation |
-| Dashed edge | `var(--hairline) dashed var(--border)` | Unknown/empty states |
-| Tonal lift | `--bg-elevated` on `--bg-panel` | Selection, chips, tracks |
-| Tinted lift | Named tint over an opaque surface | Primary and agent states |
-| Drawer shadow | `--shadow-drawer` | Mobile drawer |
-| Overlay shadow | `--shadow-pop` | Menus, palette and modal cards |
-| Card shadow | `--shadow-card` | The composer's input box — the one resting card in chat mode |
+| Token | Dark | Light | Usage |
+|-------|------|-------|-------|
+| `--fill-1` | `rgba(255, 255, 255, 0.02)` | `rgba(0, 0, 0, 0.02)` | A field at rest, a card's row |
+| `--fill-2` | `rgba(255, 255, 255, 0.04)` | `rgba(0, 0, 0, 0.04)` | Hover; a raised control's face |
+| `--fill-3` | `rgba(255, 255, 255, 0.06)` | `rgba(0, 0, 0, 0.06)` | Pressed; the selected item |
+| `--fill-4` | `rgba(255, 255, 255, 0.1)` | `rgba(0, 0, 0, 0.08)` | A mark's disc, a track, the scrollbar |
+| `--ink-1` | `rgba(0, 0, 0, 0.12)` | `rgba(0, 0, 0, 0.08)` | The ring around a control |
+| `--ink-2` | `rgba(0, 0, 0, 0.24)` | `rgba(0, 0, 0, 0.12)` | The ring around a popover; a well |
+| `--ink-3` | `rgba(0, 0, 0, 0.32)` | `rgba(0, 0, 0, 0.16)` | A divider's dark line; a dialog's ring |
+| `--edge-light` | `rgba(255, 255, 255, 0.04)` | `rgba(255, 255, 255, 0.6)` | The light along a top edge |
+| `--edge-light-strong` | `rgba(255, 255, 255, 0.12)` | `rgba(255, 255, 255, 0.9)` | The same on the chosen tab |
+| `--well` | `color-mix(in srgb, var(--bg) 78%, black)` | `color-mix(in srgb, var(--bg) 94%, black)` | A recess: the segmented track |
+| `--divider-h` | `2px` | | An etched divider's height |
+
+| Shadow | Usage |
+|--------|-------|
+| `--shadow-surface` | A control: `.btn`, a field, an outlined glyph button |
+| `--shadow-raised` | A raised face: the chosen nav row (the selected sidebar row), an icon badge |
+| `--shadow-sunken` | A well: the segmented track, a switch's track |
+| `--shadow-tab` | The chosen option of a segmented control |
+| `--shadow-chip` | A tag, a badge, the connection chip |
+| `--shadow-panel` | A card on its panel |
+| `--shadow-popover` | A menu, the palette (with `--popover-blur` behind it) |
+| `--shadow-dialog` | A dialog (over `--scrim` and `--scrim-blur`) |
+| `--shadow-tooltip` | A tooltip |
+| `--shadow-primary` | The accent button: a glow of its own colour |
+| `--shadow-focus` | A focused field: the accent inside its edge, a halo of it outside |
+| `--edge-highlight` | The inner light alone, added to a role shadow (`--shadow-pop`) |
+| `--shadow-drawer` | Mobile drawer (a theme role) |
+| `--shadow-pop` | Overlays drawn by the legacy primitives (a theme role) |
+| `--shadow-card` | The composer's input box (a theme role) |
+
+Also `--divider` (an etched line as a background, `background-size: 100% var(--divider-h)`),
+`--surface-sheen` (down a chip), `--raised-face` (a face lit from above), `--primary-sheen` (over
+the accent button), `--text-shadow-engraved` (words set into a surface; none in light). The
+shadcn components reach these as Tailwind utilities (`src/tailwind.css`): `shadow-surface`,
+`divider-b`, `bg-raised`, `text-engraved` and the rest, each an alias of the token.
 
 ## 8. Accessibility Constraints & Accepted Debt
 

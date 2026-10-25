@@ -77,8 +77,7 @@
   z-index: var(--z-banner);
   transform: translateX(-50%);
   padding: var(--space-1) var(--space-2);
-  border: var(--hairline) solid var(--border-strong);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   background: var(--bg-elevated);
   color: var(--text-strong);
   font-family: var(--font-mono);
@@ -86,7 +85,7 @@
   font-weight: var(--fw-medium);
   line-height: var(--lh-base);
   white-space: nowrap;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-popover);
   pointer-events: none;
 }
 
@@ -191,17 +190,17 @@
   left: 0;
 }
 
+/* a banner is an Alert row (components/ui/alert.tsx: a tinted surface with a ring of its tone)
+   sized to its words, not the column's width: the column keeps it at the pane's top-right */
 .terminal-banner {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  min-height: var(--chip-h);
-  padding: 0 var(--space-2);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
+  gap: var(--space-2);
+  width: auto;
+  min-height: var(--control-h);
+  padding: var(--space-1) var(--space-3);
   font-size: var(--fs-xs);
-  color: var(--text-dim);
+  line-height: var(--lh-base);
   /* a narrow pane (a phone, or a split on a desktop) wraps a banner's sentences instead of letting
      it run past the pane's edge; held input (.draft-held, .draft-text) stays on one line instead */
   white-space: normal;
@@ -220,59 +219,31 @@
   overflow-wrap: normal;
 }
 
-.terminal-banner-warning {
-  border-color: var(--status-working);
-  color: var(--status-working);
-}
-
 /* a banner's own action takes clicks back from the pass-through column */
 .terminal-banner-action {
   pointer-events: auto;
 }
 
-/* not a fault: a lens herdr does not offer on this PC yet */
-/* the selection's quote button: a banner that is a button */
+/* the selection's quote button: a banner that is a field button, in the words' own size */
 .terminal-quote {
-  font-family: inherit;
+  flex-wrap: nowrap;
+  height: var(--control-h);
+  padding: 0 var(--space-3);
   color: var(--text);
-  cursor: pointer;
-  transition:
-    border-color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
 }
 
-.terminal-quote svg {
-  width: var(--icon-size);
-  height: var(--icon-size);
-  flex: none;
-}
-
-.terminal-quote:hover {
-  border-color: var(--accent);
-}
-
-.terminal-quote:focus-visible {
-  outline: var(--ring);
-  outline-offset: var(--ring-offset);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .terminal-quote {
-    transition: none;
-  }
-}
-
+/* not a fault: a lens herdr does not offer on this PC yet, so the accent ring, not a warning's */
 .terminal-banner-soon {
-  border-color: var(--accent);
   color: var(--text);
-  background: linear-gradient(var(--accent-tint), var(--accent-tint)) var(--bg-elevated);
+  background: var(--accent-tint);
+  box-shadow: 0 0 0 1px var(--accent), var(--edge-highlight);
 }
 
 .terminal-banner-output-error {
   max-width: 100%;
   white-space: normal;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-md);
   pointer-events: auto;
 }
 
@@ -291,9 +262,7 @@
    that accepts pointer events. */
 .terminal-banner-draft {
   height: auto;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-2);
-  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
   max-width: 100%;
   pointer-events: auto;
 }
@@ -304,9 +273,7 @@
 .terminal-banner-rewind {
   height: auto;
   flex-wrap: nowrap;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-2);
-  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
   pointer-events: auto;
 }
 
@@ -318,9 +285,7 @@
 /* a terminal command's peek head (PaneTerminal.tsx): what ran, whether the chat comes back by itself,
    and the two ways on. The words take what the pane has; the actions move under them when it is narrow */
 .terminal-banner-command {
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-2);
-  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
   pointer-events: auto;
 }
 
@@ -403,15 +368,12 @@
   gap: var(--space-1);
 }
 
-/* phones: a wrapping box stops being a chip, so it takes padding and --radius-md (the held-input
-   row already does); its lines start at the left as prose does, however the box is anchored */
+/* phones: a wrapping banner's lines start at the left as prose does, however the box is anchored */
 @media (max-width: 480px) {
   .terminal-banner-soon,
   .terminal-banner-warning {
     max-width: min(36ch, 100%);
     text-align: start;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-md);
   }
 }
 

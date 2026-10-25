@@ -10,13 +10,17 @@ import type { UpdatesModel } from "../lib/updates.ts";
 import { lazyChunkFailed, onLazyChunkFailure } from "../lib/lazyChunk.ts";
 import { Markdown } from "./Markdown.tsx";
 import { RenderBoundary } from "./RenderBoundary.tsx";
+import { SettingsGroup } from "./SettingsControls.tsx";
+import { Badge, Button, Progress } from "./ui/index.ts";
+import { Download, Terminal } from "../lib/icons.ts";
 import "./Machines.css";
 import "./UpdateControls.css";
 import { useLocale, useT } from "../lib/i18n.ts";
 
 declare const __APP_VERSION__: string;
 
-const CHANGELOG = "https://github.com/devswha/ovis/blob/main/CHANGELOG.md";
+export const CHANGELOG_URL = "https://github.com/devswha/ovis/blob/main/CHANGELOG.md";
+const CHANGELOG = CHANGELOG_URL;
 /** the restart commands for a plugin and a source install */
 const RESTART_HELP = "https://github.com/devswha/ovis/blob/main/docs/guide.md#updates";
 
@@ -72,9 +76,9 @@ function UpdateProgress({ status, fallback }: { status: UpdateStatus | null; fal
   const label = view ? t(view.label) : fallback;
   return <div className="bridge-progress update-progress">
     <p className="bridge-progress-step"><span>{label}</span>{view && <span className="bridge-progress-count">{view.step}</span>}</p>
-    <div className="bridge-progress-bar" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} {...(view ? { "aria-valuenow": view.percent } : {})}>
-      <span className={view ? "" : "is-indeterminate"} style={view ? { width: `${view.percent}%` } : undefined} />
-    </div>
+    {view ? <Progress value={view.percent} aria-label={label} /> : <div className="bridge-progress-bar" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100}>
+      <span className="is-indeterminate" />
+    </div>}
   </div>;
 }
 
@@ -88,11 +92,10 @@ export function UpdateControls({ updates, bridgesFollow = false }: { updates: Up
   // the restart line says what the check's own "checkout changed" reason says; other blockers stay
   const blocked = restart && status?.blocked_reason === CHECKOUT_CHANGED_REASON ? null : status?.blocked_reason ?? null;
   // focusable from code only: a button that points here (the header line's) lands on it
-  return <section className="settings-section settings-updates" data-section="updates" tabIndex={-1} aria-labelledby="settings-updates-title">
-    <h3 id="settings-updates-title">{t("Updates")}</h3>
-    <div className="settings-card"><div className="settings-item">
-    {/* always a version: the sidebar no longer carries one */}
-    <p className="settings-hint">{t("Running {version}", { version: runningAppVersion(status, __APP_VERSION__) })}</p>
+  return <SettingsGroup title={t("Updates")} icon={<Download />} className="settings-updates" section="updates" aria-label={t("Updates")}
+    /* always a version: the sidebar no longer carries one */
+    action={<Badge tone="neutral">{runningAppVersion(status, __APP_VERSION__)}</Badge>}>
+    <div className="settings-item">
     {tabVersion && reload !== "restart" && <p className="settings-hint">{t("This tab still runs {version} until it is reloaded.", { version: tabVersion })}</p>}
     {installing && !error ? <div role="status"><UpdateProgress status={status} fallback={t(status?.phase === "building" ? "Installing dependencies and building…" : "Restarting the bridge…")} /></div> : <p className="settings-hint" role="status">
       {(failure === "offer-changed" ? t("A newer release was published after you chose this update, so nothing was installed. Check again to review it.") : null) ?? error ?? status?.error ?? (restart ? <><span>{t("Ovis was updated on this PC. Restart it there to load the update.")}</span> <a className="settings-link" href={RESTART_HELP} target="_blank" rel="noreferrer">{t("How to restart")}</a></> : null) ?? blocked ?? (busy ? t("Checking for updates…") :
@@ -106,16 +109,16 @@ export function UpdateControls({ updates, bridgesFollow = false }: { updates: Up
     {status?.managed && <>
       <p className="settings-hint">{t("Checks for new releases every 5 minutes.")} {t(status.auto_update ? "Automatic installation is enabled." : "Install when you are ready; the bridge briefly reconnects and herdr sessions keep running.")}{bridgesFollow ? ` ${t("Remote PCs' bridges are updated afterwards when the new version needs it.")}` : ""}</p>
       <div className="update-actions">
-        <button type="button" className="btn" disabled={busy} onClick={() => void request({ command: "check" })}>{t("Check for updates")}</button>
-        <button type="button" className="btn btn-primary" disabled={busy || offered === null || failure !== null} onClick={() => { if (offered) void request({ command: "install", expected_revision: offered }); }}>{t("Update and restart")}</button>
+        <Button variant="field" disabled={busy} onClick={() => void request({ command: "check" })}>{t("Check for updates")}</Button>
+        <Button variant="accent" disabled={busy || offered === null || failure !== null} onClick={() => { if (offered) void request({ command: "install", expected_revision: offered }); }}>{t("Update and restart")}</Button>
         {/* the way forward when this server cannot install by revision: a control of the row, not a word in the sentence */}
-        {!installing && failure === "restart" && <a className="btn" href={RESTART_HELP} target="_blank" rel="noreferrer">{t("How to restart")}</a>}
+        {!installing && failure === "restart" && <Button variant="field" asChild><a href={RESTART_HELP} target="_blank" rel="noreferrer">{t("How to restart")}</a></Button>}
       </div>
     </>}
     {status?.checked_at && <p className="settings-hint">{t("Last checked {when}", { when: new Date(status.checked_at).toLocaleString(locale) })}</p>}
-    {needsReload && reload !== "restart" && <p className="settings-hint">{reload === "updated" ? t("The server was updated. Save any unsent drafts, then") : t("Part of the app could not load. Save unsent drafts, then reload.")} <button type="button" className="btn" onClick={() => window.location.reload()}>{t("Reload app")}</button></p>}
-    </div></div>
-  </section>;
+    {needsReload && reload !== "restart" && <p className="settings-hint update-reload">{reload === "updated" ? t("The server was updated. Save any unsent drafts, then") : t("Part of the app could not load. Save unsent drafts, then reload.")} <Button variant="field" onClick={() => window.location.reload()}>{t("Reload app")}</Button></p>}
+    </div>
+  </SettingsGroup>;
 }
 
 /**
@@ -129,26 +132,24 @@ export function HerdrUpdateControls({ enabled, herdrVersion }: { enabled: boolea
   // Windows, an older server, a herdr that does not answer: nothing to offer, and the version
   // the health check reported is still read here, since the sidebar no longer carries it
   if (!status?.supported) {
-    return version ? <section className="settings-section settings-herdr-update">
-      <h3>herdr</h3>
-      <div className="settings-card"><p className="settings-item settings-hint">{t("Running herdr {version}", { version })}</p></div>
-    </section> : null;
+    return version ? <SettingsGroup title="herdr" icon={<Terminal />} className="settings-herdr-update" action={<Badge tone="neutral">{version}</Badge>}>
+      <p className="settings-item settings-hint">{t("Running herdr {version}", { version })}</p>
+    </SettingsGroup> : null;
   }
   const stale = status.stale && !!status.binary_version && !!status.server_version;
-  return <section className="settings-section settings-herdr-update">
-    <h3>herdr</h3>
-    <div className="settings-card"><div className="settings-item">
+  return <SettingsGroup title="herdr" icon={<Terminal />} className="settings-herdr-update" action={version ? <Badge tone="neutral">{version}</Badge> : undefined}>
+    <div className="settings-item">
     {version && <p className="settings-hint">{t("Running herdr {version}", { version })}</p>}
     {stale && <p className="settings-hint">{t("herdr {installed} is installed, but the running server is {running}. Updating moves your panes onto the installed version.", { installed: status.binary_version ?? "", running: status.server_version ?? "" })}</p>}
     <p className="settings-hint">{t("Installs the newest herdr on the PC this app runs on and moves its running panes onto it. Panes and agents keep running, and open terminals reconnect.")}</p>
     <div className="update-actions">
-      <button type="button" className={stale ? "btn btn-primary" : "btn"} disabled={busy} onClick={() => void request()}>{t("Update herdr")}</button>
+      <Button variant={stale ? "accent" : "field"} disabled={busy} onClick={() => void request()}>{t("Update herdr")}</Button>
     </div>
     {(error || busy) && <p className="settings-hint" role="status">{error ?? t("Updating herdr…")}</p>}
     {/* herdr's own words: what it installed, or why it did not */}
     {!busy && status.output && <pre className="update-output" data-failed={status.phase === "error" || undefined}>{status.output}</pre>}
-    </div></div>
-  </section>;
+    </div>
+  </SettingsGroup>;
 }
 
 /**
@@ -182,8 +183,8 @@ export function UpdateNotice({ updates, onOpen }: { updates: UpdatesModel; onOpe
     const text = t("Ovis was updated to v{version}.", { version });
     return <div className="update-notice is-line" role="status">
       <span title={text}>{text}</span>
-      {installed.releases.length > 0 && <button type="button" className="btn btn-ghost" onClick={() => { close(); onOpen(); }}>{t("What's new")}</button>}
-      <button type="button" className="icon-button update-notice-dismiss" aria-label={t("Dismiss")} title={t("Dismiss")} onClick={close}><X /></button>
+      {installed.releases.length > 0 && <Button variant="ghost" onClick={() => { close(); onOpen(); }}>{t("What's new")}</Button>}
+      <Button variant="ghost" size="icon" className="update-notice-dismiss text-dim" aria-label={t("Dismiss")} title={t("Dismiss")} onClick={close}><X /></Button>
     </div>;
   }
   if (installing || started || looking) {
@@ -195,19 +196,19 @@ export function UpdateNotice({ updates, onOpen }: { updates: UpdatesModel; onOpe
     // a reload cannot help here: the line only tells what to do, and goes when the server restarts
     if (reload === "restart") return <div className="update-notice is-line is-warning" role="status">
       <span>{t("Ovis was updated on this PC. Restart it there to load the update.")}</span>
-      <a className="btn" href={RESTART_HELP} target="_blank" rel="noreferrer">{t("How to restart")}</a>
+      <Button variant="field" asChild><a href={RESTART_HELP} target="_blank" rel="noreferrer">{t("How to restart")}</a></Button>
     </div>;
     // a warning before a step that loses unsent drafts: read in full, so this line alone may wrap
     const text = reload === "updated" ? t("App updated. Save unsent drafts before reloading.") : t("Part of the app could not load. Save unsent drafts, then reload.");
     return <div className="update-notice is-line is-warning" role="status">
       <span>{text}</span>
-      <button type="button" className="btn" onClick={() => window.location.reload()}>{t("Reload app")}</button>
+      <Button variant="field" onClick={() => window.location.reload()}>{t("Reload app")}</Button>
     </div>;
   }
   // a server that cannot install by revision is sent no install: the line says to restart it
   if (failure === "restart") return <div className="update-notice is-line is-warning" role="status">
     <span>{t("Restart Ovis on this PC to update from here: the server running now cannot install exactly the release shown.")}</span>
-    <a className="btn" href={RESTART_HELP} target="_blank" rel="noreferrer">{t("How to restart")}</a>
+    <Button variant="field" asChild><a href={RESTART_HELP} target="_blank" rel="noreferrer">{t("How to restart")}</a></Button>
   </div>;
   // without a release in reach the server refuses an install: ask it to look again first. A
   // release that replaced the one asked for is looked at again too, never installed from here
@@ -217,12 +218,12 @@ export function UpdateNotice({ updates, onOpen }: { updates: UpdatesModel; onOpe
   const text = changed ? t("A newer release was published after you chose this update, so nothing was installed. Check again to review it.") : failed ? t("The update could not be installed.") : status?.latest_version ? t("Ovis v{version} is available.", { version: status.latest_version }) : t("An Ovis update is available.");
   return <div className={changed ? "update-notice is-line is-warning" : "update-notice is-line"} role="status">
     <span title={text}>{text}</span>
-    {failed ? <button type="button" className="btn btn-ghost" onClick={onOpen}>{t("Details")}</button>
-      : notes && <button type="button" className="btn btn-ghost" onClick={onOpen}>{t("What's new")}</button>}
-    <button type="button" className="btn btn-primary" disabled={busy} onClick={() => {
+    {failed ? <Button variant="ghost" onClick={onOpen}>{t("Details")}</Button>
+      : notes && <Button variant="ghost" onClick={onOpen}>{t("What's new")}</Button>}
+    <Button variant="accent" disabled={busy} onClick={() => {
       setAttempted(true); setStarted(install !== null);
       void request(install !== null ? { command: "install", expected_revision: install } : { command: "check" });
-    }}>{t(failed ? "Try again" : "Update")}</button>
+    }}>{t(failed ? "Try again" : "Update")}</Button>
   </div>;
 }
 
@@ -239,6 +240,6 @@ export function ChunkFailureNotice() {
   if (!failed) return null;
   return <div className="update-notice is-line is-warning" role="status">
     <span>{t("Part of the app could not load. Save unsent drafts, then reload.")}</span>
-    <button type="button" className="btn" onClick={() => window.location.reload()}>{t("Reload app")}</button>
+    <Button variant="field" onClick={() => window.location.reload()}>{t("Reload app")}</Button>
   </div>;
 }

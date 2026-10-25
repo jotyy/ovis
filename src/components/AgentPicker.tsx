@@ -3,6 +3,8 @@ import { ChevronDown, Terminal } from "../lib/icons.ts";
 
 import type { AgentKind } from "../../shared/protocol.ts";
 import { AgentMark } from "./AgentMark.tsx";
+import { cn } from "../lib/cn.ts";
+import { fieldSurface } from "./ui/index.ts";
 import "./AgentPicker.css";
 
 /** The shell entry is a program name like the agents beside it, so it stays in English. */
@@ -151,8 +153,9 @@ export const AgentPicker = forwardRef<HTMLButtonElement, AgentPickerProps>(funct
       <button
         ref={ref}
         type="button"
-        className="select agent-picker-trigger"
+        className={cn(fieldSurface, "agent-picker-trigger")}
         role="combobox"
+        data-state={open ? "open" : "closed"}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}

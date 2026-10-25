@@ -88,9 +88,10 @@
   position: relative;
   display: flex;
   align-items: center;
+  margin-block: calc(var(--side-row-gap) / 2);
   padding-right: var(--side-box);
   border-radius: var(--radius-md);
-  transition: background-color var(--dur-fast) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .agent-row {
@@ -113,10 +114,15 @@
 .agent-row:disabled { cursor: default; }
 
 @media (hover: hover) {
-  .agent-item:has(> .agent-row:enabled):hover { background: var(--side-hover); }
+  .agent-item:not(.is-selected):has(> .agent-row:enabled):hover { background: var(--side-hover); }
 }
 
-.agent-item.is-selected { background: var(--side-selected); }
+/* the selected row is a raised face, as a workspace row's is (Sidebar.css --side-selected) */
+.agent-item.is-selected {
+  background: var(--side-selected);
+  background-image: var(--side-selected-face);
+  box-shadow: var(--side-selected-edge);
+}
 
 /* As a workspace row's: the ⋯ takes no room until the row is hovered, focused, selected or its
    menu is open, and stays in the focus order, since the menu hands the focus back to it. */

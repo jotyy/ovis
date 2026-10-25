@@ -2,6 +2,8 @@ import { type CSSProperties, type ReactNode, useCallback, useEffect, useMemo, us
 import { Bell, Ellipsis, FolderOpen, Link, Menu, MessageSquare, PanelLeft, Search, SquareTerminal, X } from "./lib/icons.ts";
 
 import type { HerdrPane } from "../shared/protocol.ts";
+import { cn } from "./lib/cn.ts";
+import { Badge, Button, type ButtonProps, Separator, ToggleGroup, ToggleGroupItem, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/ui/index.ts";
 import { authenticate, createTab, pairDevice, shareSeen, signOut, splitPane, zoomPane } from "./lib/api.ts";
 import { deviceLabel } from "./lib/phone.ts";
 import { displayPaneTitle } from "./components/Sidebar.tsx";
@@ -119,16 +121,40 @@ function ConnectingNote() {
   return <p className={shown === null ? "visually-hidden" : "tree-state"} role="status">{shown}</p>;
 }
 
-/** The header's connection chip. It speaks only while the bridge is not live; live, it stays in the document
-    for a screen reader (and the browser scripts that wait on it), drawn by nothing (styles.css). Its word lands
-    a frame after the chip (lib/useAnnouncedText.ts), as every status line's does. */
-function ConnectionChip({ connected, word, title }: { connected: boolean; word: string; title: string | undefined }) {
+/** The header's connection chip, a Badge in the state's tone. It speaks only while the bridge is not live;
+    live, it stays in the document for a screen reader (and the browser scripts that wait on .conn-live),
+    drawn by nothing (styles.css). Its word lands a frame after the chip (lib/useAnnouncedText.ts), as every
+    status line's does. */
+function ConnectionChip({ connected, state, word, title }: { connected: boolean; state: "connecting" | "reconnecting" | "disconnected"; word: string; title: string | undefined }) {
   const shown = useAnnouncedText(word);
   return (
-    <span className={`conn ${connected ? "conn-live" : "conn-reconnecting"}`} role="status" title={title}>
-      <span className="conn-dot" aria-hidden="true" />
+    <Badge
+      tone={connected ? "done" : state === "disconnected" ? "blocked" : "working"}
+      role="status"
+      title={title}
+      data-state={connected ? "live" : state}
+      // .conn-reconnecting (styles.css) keeps the word's room for the title on a narrow window and
+      // paints the working colour; the blocked state wins it back at a step more specificity
+      className={cn("gap-2", connected ? "conn-live" : "conn-reconnecting", !connected && state === "disconnected" && "[&.conn-reconnecting]:text-blocked")}
+    >
+      <span aria-hidden="true" className={cn("size-(--dot-size) shrink-0 rounded-full bg-current", !connected && "[animation:pulse_var(--dur-pulse)_var(--ease-pulse)_infinite] motion-reduce:[animation:none]")} />
       <span className="conn-text">{shown}</span>
-    </span>
+    </Badge>
+  );
+}
+
+/**
+ * A glyph-only control of the header: a ghost button named by a tooltip (and its aria-label for a
+ * reader), a thumb's size on a phone, where every header control is one (styles.css).
+ */
+function HeaderButton({ tip, className, children, ...props }: ButtonProps & { tip: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon" className={cn("text-dim hover:text-strong aria-expanded:bg-fill-3 aria-expanded:text-strong [@media(max-width:768px)]:size-(--touch-target-header)", className)} {...props}>{children}</Button>
+      </TooltipTrigger>
+      <TooltipContent>{tip}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -520,7 +546,7 @@ export function App() {
   if (locked) return <AccessGate reason={lockReason} initialCode={pairCode} onUnlocked={unlock} />;
 
   return (
-    <MachineSessionsProvider machineIds={machines.map((machine) => machine.id)}><MachineContext.Provider value={selectedMachineId}><div className={`app${sidebarCollapsed ? " sidebar-collapsed" : ""}`} style={sidebarWidth === null && filePanelWidth === null ? undefined : {
+    <TooltipProvider><MachineSessionsProvider machineIds={machines.map((machine) => machine.id)}><MachineContext.Provider value={selectedMachineId}><div className={`app${sidebarCollapsed ? " sidebar-collapsed" : ""}`} style={sidebarWidth === null && filePanelWidth === null ? undefined : {
       ...(sidebarWidth === null ? {} : { "--sidebar-user-w": `${sidebarWidth}px` }),
       ...(filePanelWidth === null ? {} : { "--file-panel-user-w": `${filePanelWidth}px` }),
     } as CSSProperties}>
@@ -529,29 +555,28 @@ export function App() {
             .header-side is the sidebar's own top row from 769px (styles.css); below that its
             buttons sit in the bar */}
         <div className="header-side">
-          <button
-            type="button"
-            className="icon-button drawer-toggle"
+          <HeaderButton
+            className="drawer-toggle"
+            tip={t(drawerOpen ? "Close workspace list" : "Open workspace list")}
             aria-label={t(drawerOpen ? "Close workspace list" : "Open workspace list")}
             aria-expanded={drawerOpen}
             aria-controls="workspace-drawer"
             onClick={() => setDrawerOpen((open) => !open)}
           >
             {drawerOpen ? <X /> : <Menu />}
-          </button>
-          <button
-            type="button"
-            className="icon-button header-desktop-only sidebar-toggle"
+          </HeaderButton>
+          <HeaderButton
+            className="header-desktop-only sidebar-toggle"
+            tip={t("Toggle sidebar (⌘⇧B)")}
             aria-label={t(sidebarCollapsed ? "Show workspace list" : "Hide workspace list")}
             aria-pressed={!sidebarCollapsed}
-            title={t("Toggle sidebar (⌘⇧B)")}
             onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
           >
             <PanelLeft />
-          </button>
-          <button type="button" className="icon-button palette-button" aria-label={t("Command palette")} title={t("Command palette (⌘⇧K)")} onClick={() => openPalette()}>
+          </HeaderButton>
+          <HeaderButton className="palette-button" tip={t("Command palette (⌘⇧K)")} aria-label={t("Command palette")} onClick={() => openPalette()}>
             <Search />
-          </button>
+          </HeaderButton>
         </div>
         <HeaderNote note={note} />
         {note !== null ? null : selectedPane && crumb ? (
@@ -560,7 +585,7 @@ export function App() {
               {selectedAgent && <AgentMark agent={selectedAgent} size={18} />}
               <span className="context-title-text">{selectedTitle}</span>
             </div>
-            <div className="context-sub">
+            <div className="context-sub text-dim">
               {/* one PC needs no name: the sidebar leaves it out too, and More still says it */}
               {crumb.showMachine && <><span className="machine-context-name">{crumb.machine}</span><span className="context-sep" aria-hidden="true">›</span></>}
               <span>{crumb.workspace}</span>
@@ -573,33 +598,40 @@ export function App() {
             </div>
           </div>
         ) : (
-          <><Brand /><span className="machine-context-name">{selectedMachine?.name ?? selectedMachineId}</span></>
+          <><Brand /><span className="machine-context-name text-dim">{selectedMachine?.name ?? selectedMachineId}</span></>
         )}
+        {/* the lens switch, a segmented control. A multiple-choice group whose one value is the lens:
+            its options are plain pressed buttons (aria-pressed), as the browser scripts read them, and
+            each keeps its place in the Tab order. The titles stay: the scripts find the lenses by them. */}
         {selectedPane && (
-          <div className="segmented view-switch" role="group" aria-label="Pane view">
-            <button type="button" aria-pressed={view === "chat"} onClick={() => { setView("chat"); setDrawerOpen(false); }} title={t("Chat transcript (⌘⇧J)")}>
+          <ToggleGroup type="multiple" rovingFocus={false} className="view-switch" aria-label="Pane view" value={[view]} onValueChange={(values) => {
+            const next = values.find((value) => value !== view);
+            if (next === "chat" || next === "terminal") { setView(next); setDrawerOpen(false); }
+          }}>
+            <ToggleGroupItem value="chat" title={t("Chat transcript (⌘⇧J)")}>
               <MessageSquare />
               <span className="header-desktop-only">{t("Chat")}</span>
-            </button>
-            <button type="button" aria-pressed={view === "terminal"} onClick={() => { setView("terminal"); setDrawerOpen(false); }} title={terminalAttach ? t("Live terminal (⌘⇧J)") : t("Live terminal: coming to Windows PCs once herdr can attach there")}>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="terminal" title={terminalAttach ? t("Live terminal (⌘⇧J)") : t("Live terminal: coming to Windows PCs once herdr can attach there")}>
               <SquareTerminal />
               <span className="header-desktop-only">{t("Terminal")}</span>
-              {!terminalAttach && <span className="pill pill-soon">{t("soon")}</span>}
-            </button>
-          </div>
+              {!terminalAttach && <Badge tone="accent" className="pill-soon">{t("soon")}</Badge>}
+            </ToggleGroupItem>
+          </ToggleGroup>
         )}
         {selectedPane && wideScreen && (
           <>
-            {/* opens Files, it is no third lens: set apart from the switch by a hairline */}
-            <span className="header-divider" aria-hidden="true" />
-            <button type="button" className="icon-button header-files-button" aria-label={t("Browse files")} title={t("Browse files")} onClick={() => setFilesOpen(true)}>
+            {/* opens Files, it is no third lens: set apart from the switch by an etched divider */}
+            <Separator orientation="vertical" className="h-chip" />
+            <HeaderButton className="header-files-button" tip={t("Browse files")} aria-label={t("Browse files")} onClick={() => setFilesOpen(true)}>
               <FolderOpen />
-            </button>
+            </HeaderButton>
           </>
         )}
         <div className="header-meta">
           <ConnectionChip
             connected={connected}
+            state={outputStopped ? "disconnected" : connectedBefore ? "reconnecting" : "connecting"}
             word={connWord}
             title={[connected ? null : connWord, shownHerdr ? t("herdr {version} · protocol {protocol}", { version: shownHerdr.version, protocol: shownHerdr.protocol }) : null].filter((part) => part !== null).join(" · ") || undefined}
           />
@@ -607,16 +639,15 @@ export function App() {
           {/* this PC's herdr is told by its health reads: one failed read is unknown, a second unavailable, and
               neither is proof that herdr stopped. Another PC's is told by its bridge (the roster) */}
           {selectedMachineId !== "local"
-            ? !targetHerdr && <span className="pill pill-offline">{t("herdr offline")}</span>
+            ? !targetHerdr && <Badge tone="blocked" className="pill-offline">{t("herdr offline")}</Badge>
             : localFreshness === "unknown"
-              ? <span className="pill pill-stale" title={health ? t("The last health check failed. Last seen: herdr {version} · protocol {protocol}", { version: health.herdr.version, protocol: health.herdr.protocol }) : t("The health check failed")}>{t("Status unknown")}</span>
-              : localFreshness === "unavailable" && <span className="pill pill-offline" title={t("Start herdr on this PC, or check HERDR_SOCKET.")}>{t("herdr unavailable")}</span>}
+              ? <Badge tone="idle" className="pill-stale" title={health ? t("The last health check failed. Last seen: herdr {version} · protocol {protocol}", { version: health.herdr.version, protocol: health.herdr.protocol }) : t("The health check failed")}>{t("Status unknown")}</Badge>
+              : localFreshness === "unavailable" && <Badge tone="blocked" className="pill-offline" title={t("Start herdr on this PC, or check HERDR_SOCKET.")}>{t("herdr unavailable")}</Badge>}
           <span className="header-more">
-            <button
-              type="button"
-              className="icon-button header-more-button"
+            <HeaderButton
+              className="header-more-button"
+              tip={alertsOffDot ? t("More · alerts are off") : t("More")}
               aria-label={alertsOffDot ? t("More · alerts are off") : t("More")}
-              title={alertsOffDot ? t("More · alerts are off") : t("More")}
               aria-haspopup="menu"
               aria-expanded={more !== null}
               onClick={(event) => {
@@ -625,7 +656,7 @@ export function App() {
               }}
             >
               <Ellipsis />
-            </button>
+            </HeaderButton>
             {alertsOffDot && <span className="header-more-dot" aria-hidden="true" />}
           </span>
         </div>
@@ -647,7 +678,7 @@ export function App() {
 
       <div className="app-body">
         <aside id="workspace-drawer" className={`sidebar${drawerOpen ? " is-open" : ""}`}>
-          {error && <div className="error-state" role="alert"><p>{error}</p><button className="btn" onClick={() => void load()}>{t("Retry")}</button></div>}
+          {error && <div className="error-state" role="alert"><p>{error}</p><Button variant="field" onClick={() => void load()}>{t("Retry")}</Button></div>}
           {/* a sidebar that cannot be drawn leaves the panes working */}
           <RenderBoundary resetKey={null} fallback={(retry) => <RegionCrash message={t("The sidebar can't be shown.")} retry={retry} />}>
             <CrashProbe region="sidebar" />
@@ -709,12 +740,18 @@ export function App() {
                 event.dataTransfer.setData(PANE_DRAG_TYPE, paneDragData({ machineId, paneId }));
               }}>
               {machines.length > 1 && <span className="pane-slot-machine">{machine?.name ?? machineId}</span>}
-              {pane && <button type="button" className="icon-button pane-slot-action" aria-label={t(shownView === "chat" ? "Show the terminal" : "Show the chat")} title={t(shownView === "chat" ? "Show the terminal" : "Show the chat")} onClick={toggleSlotView}>
-                {shownView === "chat" ? <SquareTerminal /> : <MessageSquare />}
-              </button>}
-              <button type="button" className="icon-button pane-slot-action" aria-label={t("Close this half")} title={t("Close this half")} onClick={() => closeSlot(slot)}>
-                <X />
-              </button>
+              {pane && <Tooltip>
+                <TooltipTrigger asChild><Button variant="ghost" size="icon-sm" className="pane-slot-action text-dim hover:text-strong" aria-label={t(shownView === "chat" ? "Show the terminal" : "Show the chat")} onClick={toggleSlotView}>
+                  {shownView === "chat" ? <SquareTerminal /> : <MessageSquare />}
+                </Button></TooltipTrigger>
+                <TooltipContent>{t(shownView === "chat" ? "Show the terminal" : "Show the chat")}</TooltipContent>
+              </Tooltip>}
+              <Tooltip>
+                <TooltipTrigger asChild><Button variant="ghost" size="icon-sm" className="pane-slot-action text-dim hover:text-strong" aria-label={t("Close this half")} onClick={() => closeSlot(slot)}>
+                  <X />
+                </Button></TooltipTrigger>
+                <TooltipContent>{t("Close this half")}</TooltipContent>
+              </Tooltip>
             </div> : undefined;
             // a half with no strip to carry its close (its pane gone, or the half crashed) keeps one in a bar of its own
             const slotBar = splitOn ? <div className="pane-slot-bar"><span className="pane-slot-title">{pane ? displayPaneTitle(pane) : t("Pane closed")}</span>{slotEnd}</div> : null;
@@ -896,6 +933,6 @@ export function App() {
       <CommandPalette key={selectedMachineId} machines={machines} onSelect={selectTarget} open={paletteOpen} initialQuery={paletteQuery} onClose={() => setPaletteOpen(false)} snapshot={snapshot} online={selectedMachine?.state === "connected"} selectedPaneId={selectedPaneId}
         // a peek shows the terminal: its toggle says Switch to chat, which ends the peek
         view={terminalPeek !== null ? "terminal" : view} actions={actions} />
-    </div></MachineContext.Provider></MachineSessionsProvider>
+    </div></MachineContext.Provider></MachineSessionsProvider></TooltipProvider>
   );
 }

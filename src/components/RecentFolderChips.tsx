@@ -9,6 +9,8 @@ import { FolderOpen } from "../lib/icons.ts";
 import { useT } from "../lib/i18n.ts";
 import { useMediaQuery } from "../lib/useMediaQuery.ts";
 import { RowMenu } from "./RowMenu.tsx";
+import { cn } from "../lib/cn.ts";
+import { Button, buttonVariants } from "./ui/index.ts";
 
 const SWIPE_QUERY = "(max-width: 640px), (pointer: coarse)";
 
@@ -60,26 +62,28 @@ export function RecentFolderChips({ folders, disabled, labelledBy, basename, onP
 
   const shown = swipe ? folders : folders.slice(0, fit);
   const rest = swipe ? [] : folders.slice(fit);
-  const chip = (path: string) => <button type="button" className="btn new-session-folder-chip" key={path}
+  // the chips are field buttons (components/ui/button.tsx); the measuring copies below wear the same classes
+  const chipClass = cn(buttonVariants({ variant: "field", size: "sm" }), "new-session-folder-chip");
+  const chip = (path: string) => <Button variant="field" size="sm" className="new-session-folder-chip" key={path}
     disabled={disabled} title={path} aria-label={t("Use folder {path}", { path })} onClick={() => onPick(path)}>
     <FolderOpen aria-hidden="true" /><span>{basename(path)}</span>
-  </button>;
+  </Button>;
 
   return <div className="new-session-folder-chips-frame">
     <div ref={row} className="new-session-folder-chips" role="group" aria-labelledby={labelledBy}>
       {shown.map(chip)}
-      {rest.length > 0 && <button type="button" className="btn new-session-folder-chip new-session-folder-more" disabled={disabled}
+      {rest.length > 0 && <Button variant="field" size="sm" className="new-session-folder-chip new-session-folder-more" disabled={disabled}
         aria-haspopup="menu" aria-expanded={menu !== null} aria-label={t("{n} more recent folders", { n: rest.length })}
         onClick={(event) => { const anchor = event.currentTarget; setMenu((open) => open ? null : anchor); }}>
         +{rest.length}
-      </button>}
+      </Button>}
     </div>
     {/* every chip and a "+N" one, drawn where nothing sees them, for their widths: inside a clipped
         box the size of the row, so the long row they make never scrolls the dialog sideways */}
     {!swipe && <div className="new-session-folder-measure-clip" aria-hidden="true">
       <div ref={measure} className="new-session-folder-measure">
-        {folders.map((path) => <span key={path} className="btn new-session-folder-chip"><FolderOpen aria-hidden="true" /><span>{basename(path)}</span></span>)}
-        <span className="btn new-session-folder-chip new-session-folder-more">+{folders.length}</span>
+        {folders.map((path) => <span key={path} className={chipClass}><FolderOpen aria-hidden="true" /><span>{basename(path)}</span></span>)}
+        <span className={cn(chipClass, "new-session-folder-more")}>+{folders.length}</span>
       </div>
     </div>}
     {menu && rest.length > 0 && <RowMenu anchor={menu} title={t("Recent folders")} variant="paths" onClose={() => setMenu(null)}

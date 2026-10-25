@@ -17,7 +17,10 @@
   padding: var(--space-2) var(--space-4);
   color: var(--text-strong);
   background: var(--bg-elevated);
-  border-bottom: var(--hairline) solid var(--border);
+  background-image: var(--divider);
+  background-repeat: no-repeat;
+  background-size: 100% var(--divider-h);
+  background-position: bottom;
   font-size: var(--fs-xs);
 }
 
@@ -89,9 +92,9 @@
   max-height: 14em;
   overflow: auto;
   color: var(--text);
-  background: var(--bg-elevated);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-sm);
+  background: var(--well);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sunken);
   font-family: var(--font-mono);
   font-size: var(--fs-xs);
   white-space: pre-wrap;
@@ -115,9 +118,9 @@
   overscroll-behavior: contain;
   padding: var(--space-3);
   color: var(--text);
-  background: var(--bg-elevated);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-sm);
+  background: var(--fill-1);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 0 1px var(--ink-1), inset 0 0 0 1px var(--edge-light);
 }
 
 .update-notes h4 {
@@ -196,5 +199,13 @@
 }
 
 .update-output[data-failed] {
-  border-color: var(--status-blocked);
+  box-shadow: var(--shadow-sunken), 0 0 0 1px var(--status-blocked);
+}
+
+/* the reload sentence and its button share a line */
+.update-reload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
 }

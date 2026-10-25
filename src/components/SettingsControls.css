@@ -1,43 +1,6 @@
-/* Settings is built from these: a group (caption + card), a row, and the four controls. */
-
-.settings-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-.settings-section h3 {
-  margin: 0;
-  padding: 0 var(--space-1);
-  color: var(--text-dim);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-}
-
-.settings-note {
-  margin: 0;
-  padding: 0 var(--space-1);
-}
-
-/* one surface per group: its rows are parted by hairlines, never by boxes of their own */
-.settings-card {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  background: var(--bg-elevated);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-lg);
-}
-
-.settings-card > .settings-row,
-.settings-card > .settings-item {
-  padding: var(--space-3) var(--space-4);
-}
-
-.settings-card > * + * {
-  border-top: var(--hairline) solid var(--border);
-}
+/* Settings is built from the shadcn Card, CardRow, Switch, Select and ToggleGroup
+   (SettingsControls.tsx). What stays here is layout: the rows other components still write by
+   hand (PushTestControls, PortalPanel), the text roles, and how a wide row stacks on a phone. */
 
 /* a block that is not label + control: a list, a form, a panel of its own */
 .settings-item {
@@ -48,16 +11,20 @@
   margin: 0;
 }
 
-.settings-row {
+/* a row written by hand takes the CardRow's surface (ui/card.tsx), so the card reads as one list */
+.settings-row:not([data-slot]) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-6);
   min-width: 0;
-  min-height: var(--control-h);
+  padding: var(--space-3) var(--space-4);
+  background: var(--fill-1);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 0 1px var(--ink-1), inset 0 0 0 1px var(--edge-light);
 }
 
-.settings-row > * {
+.settings-row:not([data-slot]) > * {
   flex: 0 0 auto;
 }
 
@@ -65,14 +32,13 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 2px;
   min-width: 0;
 }
 
 .settings-label {
   margin: 0;
   color: var(--text-strong);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   font-weight: var(--fw-medium);
 }
 
@@ -80,13 +46,20 @@
 .settings-hint {
   margin: 0;
   color: var(--text-dim);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-regular);
 }
 
 /* a sentence under a label stays a column of text, not a line as wide as the card */
+[data-slot="card-row"] > label > span,
 .settings-row-text > .settings-description,
 .settings-row-text > .settings-hint {
   max-width: 54ch;
+}
+
+/* a note over a group's rows */
+.settings-note {
+  padding: 0 var(--space-1);
 }
 
 /* a condition that applies right now, on its own line under the sentence */
@@ -104,7 +77,7 @@
 .settings-details > summary {
   width: fit-content;
   color: var(--text-dim);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   list-style: none;
   cursor: pointer;
 }
@@ -127,8 +100,8 @@
   margin-bottom: var(--space-1);
 }
 
-/* fingers: the line keeps its height; an invisible expander reaches the target's height, as the
-   segmented options do (styles.css). The opened text is positioned so its link stays on top. */
+/* fingers: the line keeps its height; an invisible expander reaches the target's height. The
+   opened text is positioned so its link stays on top. */
 @media (pointer: coarse) {
   .settings-details > summary {
     position: relative;
@@ -137,7 +110,7 @@
   .settings-details > summary::after {
     content: "";
     position: absolute;
-    inset: calc((var(--fs-xs) * var(--lh-base) - var(--touch-target)) / 2) 0;
+    inset: calc((var(--fs-sm) * var(--lh-base) - var(--touch-target)) / 2) 0;
   }
 
   .settings-details > summary + * {
@@ -151,116 +124,18 @@
   gap: var(--space-2);
 }
 
-/* the controls sit in wells of the input color, so a card reads as one surface with holes */
-.settings-segmented {
-  background: var(--bg-input);
-}
-
-.settings-stepper {
-  display: inline-flex;
-  align-items: center;
-  background: var(--bg-input);
-  border: var(--hairline) solid var(--border);
-  border-radius: var(--radius-md);
-}
-
-.settings-stepper output {
-  min-width: 3.5em;
-  color: var(--text-strong);
-  font-family: var(--font-mono);
+.settings-link {
+  color: var(--accent);
   font-size: var(--fs-sm);
-  text-align: center;
+  overflow-wrap: anywhere;
 }
 
-.settings-select-wrap {
-  position: relative;
-  display: inline-flex;
-  max-width: 100%;
-}
-
-.settings-select {
-  appearance: none;
-  width: 100%;
-  min-width: 0;
-  padding-inline-end: calc(var(--space-3) + var(--space-4) + var(--space-2));
-}
-
-.settings-select-wrap > svg {
-  position: absolute;
-  inset-inline-end: var(--space-3);
-  top: 50%;
-  width: var(--space-4);
-  height: var(--space-4);
-  transform: translateY(-50%);
-  color: var(--text-strong);
-  pointer-events: none;
-}
-
-@media (forced-colors: active) {
-  .settings-select {
-    appearance: auto;
-    padding-inline-end: var(--space-3);
-  }
-
-  .settings-select-wrap > svg {
-    display: none;
-  }
-}
-
-/* fingers: a select is a finger-sized target, like the file viewer's controls */
+/* fingers: a select and the stepper are finger-sized targets, like the file viewer's controls */
 @media (pointer: coarse) {
-  .settings-select {
+  .settings-select-trigger,
+  .settings-stepper {
     height: max(44px, var(--touch-target));
   }
-}
-
-.settings-font-input {
-  flex: 0 1 16rem;
-  min-width: 0;
-}
-
-/* the switch keeps a finger-sized box; the negative margin keeps that box from growing its row */
-.settings-toggle {
-  position: relative;
-  width: calc(var(--touch-target) + var(--space-2));
-  height: var(--touch-target);
-  margin-block: calc(var(--space-1) * -1);
-  padding: var(--space-2) var(--space-1);
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-}
-
-.settings-toggle::before {
-  position: absolute;
-  inset: var(--space-3) var(--space-1);
-  content: "";
-  background: var(--bg-input);
-  border: var(--hairline) solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
-}
-
-/* the thumb sits 2px inside the track's edge, off and on */
-.settings-toggle-thumb {
-  position: absolute;
-  top: calc(var(--space-3) + 2px);
-  left: calc(var(--space-1) + 2px);
-  width: var(--space-4);
-  height: var(--space-4);
-  background: var(--text-dim);
-  border-radius: var(--radius-pill);
-  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
-}
-
-.settings-toggle[aria-checked="true"]::before {
-  background: var(--primary-tint);
-  border-color: var(--primary);
-}
-
-.settings-toggle[aria-checked="true"] .settings-toggle-thumb {
-  background: var(--primary);
-  transform: translateX(var(--space-6));
 }
 
 @media (max-width: 640px) {
@@ -271,24 +146,20 @@
     gap: var(--space-2);
   }
 
-  .settings-row.is-wide > .settings-segmented {
+  .settings-row.is-wide > div {
     display: flex;
-  }
-
-  .settings-row.is-wide > .settings-segmented > button {
-    flex: 1 1 0;
-    justify-content: center;
+    width: 100%;
     min-width: 0;
   }
 
-  .settings-row.is-wide > .settings-font-input {
-    flex: 0 0 auto;
+  .settings-row.is-wide > div > * {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .settings-toggle::before,
-  .settings-toggle-thumb {
-    transition: none;
+  .settings-row.is-wide [data-slot="toggle-group"] > * {
+    flex: 1 1 0;
+    min-width: 0;
   }
 }

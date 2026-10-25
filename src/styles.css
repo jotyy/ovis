@@ -2340,6 +2340,11 @@ button {
   stroke-width: 1.75;
 }
 
+/* the one Reicon glyph (lib/icons.ts) sits as the Tabler ones do; its stroke is drawn, not set */
+.reicon {
+  flex: 0 0 auto;
+}
+
 /* a glyph button: no box at rest, a fill of light under the pointer, pressed a step more */
 .icon-button {
   display: inline-flex;

@@ -24,14 +24,37 @@ import {
   IconMessagePlus, IconMicrophone, IconMicrophoneFilled, IconMinus, IconNetwork, IconPackage, IconPalette, IconPaletteFilled, IconPencil,
   IconPhoto, IconPhotoOff, IconPinFilled, IconPinnedOff, IconPlug, IconPlugConnectedX, IconPlus, IconPuzzle, IconPuzzleFilled, IconQuote,
   IconRefresh, IconRobot, IconRotateClockwise, IconScan, IconSearch, IconSelector, IconSend, IconSend2, IconSettingsFilled, IconSitemap,
-  IconSquareFilled, IconStack2, IconStarFilled, IconSunMoon, IconTarget, IconTerminal, IconTerminal2, IconTrash, IconUser, IconVideo,
-  IconWorld, IconX,
+  IconSquareFilled, IconStack2, IconStarFilled, IconSunMoon, IconTarget, IconTerminal, IconTrash, IconUser, IconVideo,
+  IconWorld, IconX, IconChartBar, IconTypography, IconKey,
 } from "@tabler/icons-react";
+import { TerminalSquare as ReiconTerminalSquare } from "reicon-react";
+import { createElement, forwardRef, type ComponentProps, type ComponentRef } from "react";
+import type { Icon, IconProps } from "@tabler/icons-react";
+
+/**
+ * The boxed terminal glyph is Reicon's (reicon.dev, MIT; THIRD_PARTY_NOTICES.md): a prompt in a
+ * rounded frame whose filled face reads as a mark beside the other filled page icons, which
+ * Tabler's terminal has no filled cut for. Reicon draws an outline as expanded paths, so it keeps
+ * its own 1.5 stroke and takes colour and size as the Tabler icons do.
+ */
+type ReiconWeight = ComponentProps<typeof ReiconTerminalSquare>["weight"];
+function reicon(weight: ReiconWeight, name: string): Icon {
+  // the Tabler props a caller may pass (stroke, title) have no Reicon meaning: stroke is dropped, the rest go through
+  const Glyph = forwardRef<ComponentRef<typeof ReiconTerminalSquare>, IconProps>(({ stroke: _stroke, size, title, ...rest }, ref) =>
+    createElement(ReiconTerminalSquare, { ...(rest as object), ref, weight, size, ...(title ? { "aria-label": title } : {}) }));
+  Glyph.displayName = name;
+  return Glyph as unknown as Icon;
+}
+export const SquareTerminal = reicon("Outline", "SquareTerminal");
+export const SquareTerminalFilled = reicon("Filled", "SquareTerminalFilled");
 
 export type { Icon as IconComponent, IconProps } from "@tabler/icons-react";
 
 export {
   IconAdjustmentsHorizontal as SlidersHorizontal,
+  IconChartBar as ChartBar,
+  IconTypography as Typography,
+  IconKey as Key,
   IconAlertCircleFilled as CircleAlert,
   IconAlertTriangleFilled as TriangleAlert,
   IconArrowBackUp as Undo2,
@@ -156,7 +179,6 @@ export {
   IconSunMoon as SunMoon,
   IconTarget as Target,
   IconTerminal as Terminal,
-  IconTerminal2 as SquareTerminal,
   IconTrash as Trash2,
   IconUser as UserRound,
   IconVideo as FileVideo,

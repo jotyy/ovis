@@ -1,11 +1,14 @@
-/* herdr's tab row, over the pane: quiet names on a hairline, the open one underlined in amber */
+/* herdr's tab row, over the pane: quiet names on a hairline, the open one a raised pill, the chosen
+   tab of the surface language (styles.css --shadow-tab, --raised-face), never an underline */
 .tab-strip {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: var(--space-1);
   flex: 0 0 auto;
   min-height: var(--control-h);
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-2);
+  /* a tab's pill: the row less a breath above and below it */
+  --tab-h: calc(var(--control-h) - var(--space-2));
   /* the strip's surface, which the + that covers the scrolling tabs paints too */
   --strip-bg: var(--bg-panel);
   background: var(--strip-bg);
@@ -45,36 +48,51 @@
   font-size: var(--fs-xs);
 }
 
+/* the pill is the item's, so the touch ⋯ beside the open tab's name sits inside it */
 .tab-strip-item {
   position: relative;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   flex: 0 0 auto;
+  height: var(--tab-h);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
 
-/* the underline spans the name and the optional touch menu */
 .tab-strip-item.is-active {
-  box-shadow: inset 0 -2px 0 var(--accent);
+  background: var(--bg-elevated);
+  background-image: var(--raised-face);
+  box-shadow: var(--shadow-tab);
+}
+
+/* under the pointer a closed tab takes the fill of light every surface does; the open one is lit already */
+@media (hover: hover) {
+  .tab-strip-item:not(.is-active):hover { background: var(--fill-2); }
 }
 
 .tab-strip-tab {
   display: inline-flex;
   align-items: center;
+  align-self: stretch;
   gap: var(--space-2);
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-2);
   background: transparent;
   border: 0;
+  border-radius: var(--radius-sm);
   color: var(--text-dim);
   font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
   white-space: nowrap;
   cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .tab-strip-tab:hover,
 .tab-strip-tab:focus-visible {
-  color: var(--text-strong);
+  color: var(--text);
 }
+
+.tab-strip-tab:focus-visible { outline-offset: calc(var(--ring-offset) * -1); }
 
 .tab-strip-tab[aria-selected="true"] {
   color: var(--text-strong);
@@ -138,6 +156,13 @@
   border-radius: var(--radius-sm);
   color: var(--text-dim);
   cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+/* the ⋯ sits inside the open tab's pill, as tall as it */
+.tab-strip-menu {
+  width: var(--tab-h);
+  height: var(--tab-h);
 }
 
 /* Touch and narrow layouts keep the ellipsis in view; a mouse on a wide screen draws it on the
@@ -166,14 +191,14 @@
 /* over the shared hover below: the hover tint sits on the strip's colour, never on a tab */
 .tab-strip .tab-strip-add:hover,
 .tab-strip .tab-strip-add:focus-visible {
-  background: linear-gradient(var(--bg-hover), var(--bg-hover)) var(--strip-bg);
+  background: linear-gradient(var(--fill-2), var(--fill-2)) var(--strip-bg);
 }
 
 .tab-strip-menu:hover,
 .tab-strip-menu:focus-visible,
 .tab-strip-add:hover,
 .tab-strip-add:focus-visible {
-  background: var(--bg-hover);
+  background: var(--fill-2);
   color: var(--text-strong);
 }
 
@@ -190,7 +215,9 @@
     height: var(--touch-target);
   }
 
-  /* a one- or two-character name (탭 1) is still a finger's width; the ⋯ beside it is its own */
+  /* a one- or two-character name (탭 1) is still a finger's width; the ⋯ beside it is its own.
+     The pill grows to the finger's height with them. */
+  .tab-strip { --tab-h: var(--touch-target); }
   .tab-strip-tab {
     min-width: var(--touch-target);
     min-height: var(--touch-target);
@@ -200,8 +227,8 @@
 }
 
 /* A mouse keeps its right-click and the keyboard its menu key; the ellipsis is the route in
-   plain sight. It holds its place at rest, hidden, so the strip never reflows under the pointer:
-   the pointer over the strip, the tab's keyboard focus, its own, or its open menu fade it in.
+   plain sight. At rest it takes no room, so the open pill is the name alone: the pointer over the
+   strip, the tab's keyboard focus, its own, or its open menu open it to its square and fade it in.
    Hidden with visibility too: a Shift+Tab from the + lands on the tab, not on something unseen,
    and nothing invisible takes a press. Between the tab's focus and the button's there is an
    instant in which neither has it while the item still has it within, and a hidden button cannot
@@ -210,9 +237,12 @@
 @media (hover: hover) and (pointer: fine) and (min-width: 769px) {
   .tab-strip-menu {
     display: inline-flex;
+    width: 0;
+    overflow: hidden;
     opacity: 0;
     visibility: hidden;
     transition:
+      width var(--dur-fast) var(--ease-out),
       opacity var(--dur-fast) var(--ease-out),
       visibility 0s linear var(--dur-fast);
   }
@@ -222,12 +252,11 @@
   .tab-strip-item:focus-within:not(:has(:focus)) .tab-strip-menu,
   .tab-strip-menu:focus-visible,
   .tab-strip-menu[aria-expanded="true"] {
+    width: var(--tab-h);
     opacity: 1;
     visibility: visible;
     transition-delay: 0s;
   }
-
-  .tab-strip-item.is-active .tab-strip-tab { padding-right: var(--space-1); }
 }
 
 @media (prefers-reduced-motion: reduce) {

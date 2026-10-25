@@ -18,3 +18,4 @@ export * from "./progress.tsx";
 export * from "./radio-group.tsx";
 export * from "./scroll-area.tsx";
 export * from "./toggle-group.tsx";
+export * from "./icon-button.tsx";

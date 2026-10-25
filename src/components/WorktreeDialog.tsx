@@ -8,7 +8,7 @@
  */
 import { useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
-import { GitBranch, X } from "../lib/icons.ts";
+import { ChevronRight, GitBranch, X } from "../lib/icons.ts";
 
 import "./WorktreeDialog.css";
 
@@ -16,6 +16,7 @@ import type { AgentKind, WorkspaceInfo, WorktreeEntry, WorktreeOpened } from "..
 import { MAX_LABEL_CHARS } from "../../shared/labels.ts";
 import { ApiError } from "../lib/api.ts";
 import { AgentPicker, rememberAgent, rememberedAgent } from "./AgentPicker.tsx";
+import { Alert, AlertDescription, Badge, Button, DialogBody, DialogFooter, DialogHeader, Field, Input, Label } from "./ui/index.ts";
 import { useMachineApi } from "../lib/machineContext.tsx";
 import { useT } from "../lib/i18n.ts";
 import { useSettings } from "../lib/settings.ts";
@@ -65,7 +66,7 @@ export function WorktreeDialog({ mode, workspace, onClose, onOpened }: Props) {
   }, []);
   useEffect(() => {
     window.requestAnimationFrame(() => {
-      (first.current ?? surface.current?.querySelector<HTMLElement>(".worktree-row, .btn"))?.focus();
+      (first.current ?? surface.current?.querySelector<HTMLElement>(".worktree-row, button"))?.focus();
       // the suggested branch is selected, so typing a branch replaces it
       first.current?.select();
     });
@@ -163,64 +164,60 @@ export function WorktreeDialog({ mode, workspace, onClose, onOpened }: Props) {
 
   return createPortal(
     <div className="modal-scrim" onMouseDown={closeFromScrim}>
-      <form ref={surface} className="modal worktree-modal" role="dialog" aria-modal="true" aria-labelledby={`${id}-title`} onSubmit={submit} onKeyDown={onKeyDown}>
-        <header className="modal-header">
-          <h2 className="modal-title" id={`${id}-title`}>{title}</h2>
-          <button type="button" className="icon-button" aria-label={t("Close worktree dialog")} disabled={pending !== null} onClick={onClose}>
+      <form ref={surface} className="modal worktree-modal relative" role="dialog" aria-modal="true" aria-labelledby={`${id}-title`} onSubmit={submit} onKeyDown={onKeyDown}>
+        <DialogHeader>
+          <h2 className="text-lg font-medium text-strong text-engraved text-balance" id={`${id}-title`}>{title}</h2>
+          {mode === "create" && <p className="text-sm text-dim">{t("A git worktree of this repository, checked out under herdr's worktree folder and opened as a workspace next to this one.")}</p>}
+          <Button variant="ghost" size="icon" className="absolute top-3 right-3 text-dim" aria-label={t("Close worktree dialog")} disabled={pending !== null} onClick={onClose}>
             <X aria-hidden="true" />
-          </button>
-        </header>
-        <div className="modal-body">
+          </Button>
+        </DialogHeader>
+        <DialogBody className="flex flex-col gap-4">
           {mode === "create" ? (
             <>
-              <p className="worktree-lead">{t("A git worktree of this repository, checked out under herdr's worktree folder and opened as a workspace next to this one.")}</p>
-              <label className="field">
-                <span className="field-label">{t("Branch")}</span>
-                <input ref={first} className="input" value={branch} disabled={locked} required autoComplete="off" spellCheck={false} onChange={(event) => setBranch(event.target.value)} />
-                <span className="field-hint">{t("A new branch, or an existing one to check out")}</span>
-              </label>
-              <label className="field">
-                <span className="field-label">{t("Start from")}</span>
-                <input className="input" value={base} disabled={locked} autoComplete="off" spellCheck={false} placeholder="HEAD" onChange={(event) => setBase(event.target.value)} />
-                <span className="field-hint">{t("A branch, tag or commit; HEAD when empty. Ignored when the branch exists.")}</span>
-              </label>
-              <label className="field">
-                <span className="field-label">{t("Name")}</span>
-                <input className="input" value={label} maxLength={MAX_LABEL_CHARS} disabled={locked} autoComplete="off" onChange={(event) => setTypedLabel(event.target.value)} />
-                <span className="field-hint">{t("Workspace label; follows the branch until you change it")}</span>
-              </label>
-              <div className="field">
-                <span className="field-label" id={`${id}-agent`}>{t("Agent")}</span>
+              <Field label={t("Branch")} htmlFor={`${id}-branch`} hint={t("A new branch, or an existing one to check out")}>
+                <Input ref={first} id={`${id}-branch`} className="coarse:h-touch" value={branch} disabled={locked} required autoComplete="off" spellCheck={false} onChange={(event) => setBranch(event.target.value)} />
+              </Field>
+              <Field label={t("Start from")} htmlFor={`${id}-base`} hint={t("A branch, tag or commit; HEAD when empty. Ignored when the branch exists.")}>
+                <Input id={`${id}-base`} className="coarse:h-touch" value={base} disabled={locked} autoComplete="off" spellCheck={false} placeholder="HEAD" onChange={(event) => setBase(event.target.value)} />
+              </Field>
+              <Field label={t("Name")} htmlFor={`${id}-name`} hint={t("Workspace label; follows the branch until you change it")}>
+                <Input id={`${id}-name`} className="coarse:h-touch" value={label} maxLength={MAX_LABEL_CHARS} disabled={locked} autoComplete="off" onChange={(event) => setTypedLabel(event.target.value)} />
+              </Field>
+              <div className="flex flex-col gap-1">
+                <Label className="flex h-6 items-center" id={`${id}-agent`}>{t("Agent")}</Label>
                 <AgentPicker agents={agents} value={agentKind} disabled={locked} labelledBy={`${id}-agent`} onChange={setAgentKind} />
               </div>
             </>
           ) : others === null && !error ? (
-            <p className="field-hint" role="status">{t("Reading worktrees…")}</p>
+            <p className="m-0 text-sm text-dim" role="status">{t("Reading worktrees…")}</p>
           ) : others && others.length === 0 ? (
-            <p className="field-hint worktree-empty">{t("No other worktrees of this repository.")}</p>
+            <p className="worktree-empty m-0 text-sm text-dim">{t("No other worktrees of this repository.")}</p>
           ) : others && (
-            <ul className="worktree-list">
+            <ul className="worktree-list m-0 flex list-none flex-col gap-1 p-0">
               {others.map((entry) => (
                 <li key={entry.path}>
-                  <button type="button" className="worktree-row" disabled={pending !== null || entry.is_prunable} onClick={() => open(entry)}>
-                    <GitBranch aria-hidden="true" />
-                    <span className="worktree-copy">
-                      <span className="worktree-branch">{entry.branch ?? (entry.is_detached ? t("Detached HEAD") : entry.label)}</span>
-                      <span className="worktree-path">{entry.path}</span>
+                  {/* a row: the branch glyph, the branch over its path, what stands in the way as a tag, and the way in */}
+                  <button type="button" className="worktree-row group flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left text-text outline-none transition-[background-color,box-shadow] duration-150 ease-in-out hover:bg-fill-2 hover:shadow-surface focus-visible:bg-fill-2 focus-visible:ring-2 focus-visible:ring-accent/60 disabled:cursor-default disabled:opacity-60 coarse:min-h-touch" disabled={pending !== null || entry.is_prunable} onClick={() => open(entry)}>
+                    <GitBranch aria-hidden="true" className="size-[18px] shrink-0 text-accent" />
+                    <span className="worktree-copy flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="worktree-branch truncate text-sm font-medium text-strong">{entry.branch ?? (entry.is_detached ? t("Detached HEAD") : entry.label)}</span>
+                      <span className="worktree-path truncate font-mono text-xs text-dim">{entry.path}</span>
                     </span>
-                    {entry.open_workspace_id ? <span className="pill">{t("Already open")}</span> : entry.is_prunable && <span className="pill">{t("Checkout missing")}</span>}
+                    {entry.open_workspace_id ? <Badge tone="idle">{t("Already open")}</Badge> : entry.is_prunable ? <Badge tone="blocked">{t("Checkout missing")}</Badge>
+                      : <ChevronRight aria-hidden="true" className="size-4 shrink-0 text-dim opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 coarse:opacity-100" />}
                   </button>
                 </li>
               ))}
             </ul>
           )}
-          {pending && <p className="field-hint" role="status">{pending}</p>}
-          {error && <p className="field-hint worktree-error" role="alert">{error}</p>}
-        </div>
-        <footer className="modal-footer">
-          <button type="button" className="btn btn-ghost" disabled={pending !== null} onClick={onClose}>{t("Cancel")}</button>
-          {mode === "create" && <button type="submit" className="btn btn-primary" disabled={pending !== null || (!made && !branch.trim())}>{t(made ? "Open" : "Create worktree")}</button>}
-        </footer>
+          {pending && <p className="m-0 text-sm text-dim" role="status">{pending}</p>}
+          {error && <Alert tone="danger" className="worktree-error [overflow-wrap:anywhere]"><AlertDescription className="text-danger-text">{error}</AlertDescription></Alert>}
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="field" size="sm" className="coarse:h-touch" disabled={pending !== null} onClick={onClose}>{t("Cancel")}</Button>
+          {mode === "create" && <Button type="submit" variant="accent" size="sm" className="coarse:h-touch" disabled={pending !== null || (!made && !branch.trim())}>{t(made ? "Open" : "Create worktree")}</Button>}
+        </DialogFooter>
       </form>
     </div>,
     document.body,

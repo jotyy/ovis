@@ -1,4 +1,5 @@
-/* the agent picker: a select whose rows show each agent's mark (New workspace, New worktree, Earlier sessions) */
+/* the agent picker: a select on the field surface (components/ui/input.tsx fieldSurface) whose rows
+   show each agent's mark (New workspace, New worktree, Earlier sessions); its list is the menu surface */
 .agent-picker {
   position: relative;
 }
@@ -8,13 +9,20 @@
   align-items: center;
   gap: var(--space-2);
   width: 100%;
+  height: var(--input-h);
+  padding: 0 var(--space-3);
+  font-size: var(--fs-input);
   text-align: left;
   cursor: pointer;
 }
 
+.agent-picker-trigger[data-state="open"] {
+  box-shadow: var(--shadow-focus);
+}
+
 .agent-picker-trigger:disabled {
   cursor: default;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .agent-picker-label {
@@ -25,11 +33,17 @@
   white-space: nowrap;
 }
 
+/* the chevron turns while the list is open, as the Select's does */
 .agent-picker-chevron {
   width: 16px;
   height: 16px;
   flex: none;
   color: var(--text-dim);
+  transition: transform var(--dur-base) var(--ease-in-out);
+}
+
+.agent-picker-trigger[data-state="open"] .agent-picker-chevron {
+  transform: rotate(180deg);
 }
 
 .agent-picker .agent-mark,
@@ -60,16 +74,32 @@
 }
 
 .agent-picker-menu .menu-item[data-active] {
-  background: var(--bg-hover);
+  background: var(--fill-3);
   color: var(--text-strong);
 }
 
 .agent-picker-menu .menu-item[aria-selected="true"] .menu-item-main {
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
 }
 
 @media (pointer: coarse) {
   .agent-picker-menu .menu-item {
     height: var(--touch-target);
+  }
+
+  .agent-picker-trigger {
+    height: var(--touch-target);
+  }
+}
+
+@media (min-width: 641px) {
+  .agent-picker-trigger {
+    font-size: var(--fs-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-picker-chevron {
+    transition: none;
   }
 }

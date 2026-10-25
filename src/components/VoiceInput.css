@@ -1,6 +1,7 @@
 /* dictation (VoiceInput.tsx): the mic button and the pill shown above the input while it
-   listens. Accent only: red would read as an error. The level meters are painted by
-   useVoiceInput per frame, so only transform/opacity move and nothing here transitions them */
+   listens. The mic is a ghost icon button; a recording is the filled stop glyph in the blocked
+   colour with a pulsing dot (a state, as the Square glyph is everywhere); the level meters are
+   painted by useVoiceInput per frame, so only transform/opacity move and nothing here transitions them */
 
 .voice-mic-wrap {
   position: relative;
@@ -8,12 +9,12 @@
   flex: none;
 }
 
-/* breathes with the voice level behind the filled button while it listens */
+/* breathes with the voice level behind the button while it listens */
 .voice-mic-ring {
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-pill);
-  background: var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--status-blocked);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--dur-fast) var(--ease-out);
@@ -21,27 +22,33 @@
 
 .voice-mic-wrap[data-state="starting"] .voice-mic-ring,
 .voice-mic-wrap[data-state="recording"] .voice-mic-ring {
-  opacity: 0.25;
+  opacity: 0.2;
+}
+
+/* the pulse on the button's top trailing corner, only while it records */
+.voice-mic-dot {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  z-index: 1;
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: var(--radius-pill);
+  background: var(--status-blocked);
+  box-shadow: 0 0 6px var(--status-blocked);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.voice-mic-wrap[data-state="recording"] .voice-mic-dot {
+  opacity: 1;
+  animation: pulse var(--dur-pulse) var(--ease-pulse) infinite;
 }
 
 .voice-mic {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--control-h);
-  height: var(--control-h);
-  padding: 0;
-  border: var(--hairline) solid transparent;
-  border-radius: var(--radius-pill);
-  background: transparent;
   color: var(--text-dim);
-  cursor: pointer;
   touch-action: manipulation;
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
 }
 
 .voice-mic svg {
@@ -49,25 +56,14 @@
   height: var(--icon-size);
 }
 
-.voice-mic:disabled {
-  opacity: 0.7;
-  cursor: default;
-}
-
+/* recording: the filled stop glyph in the blocked colour on the pressed fill */
 .voice-mic[aria-pressed="true"] {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--bg);
-}
-
-@media (hover: hover) {
-  .voice-mic:hover:not(:disabled):not([aria-pressed="true"]) {
-    background: var(--bg-hover);
-  }
+  background: var(--fill-3);
+  color: var(--status-blocked);
 }
 
 /* always mounted: a transition (not keyframes) so a cancel mid-entrance reverses smoothly;
-   visibility waits for the exit to finish */
+   visibility waits for the exit to finish. The menu surface: glass under a deep shadow */
 .voice-pill {
   position: absolute;
   bottom: calc(100% + var(--space-2));
@@ -78,10 +74,11 @@
   max-width: calc(100% - var(--space-4));
   height: calc(var(--control-h) + var(--space-1));
   padding: 0 var(--space-1);
-  border: var(--hairline) solid var(--border);
   border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow-pop);
+  background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+  -webkit-backdrop-filter: var(--popover-blur);
+  backdrop-filter: var(--popover-blur);
+  box-shadow: var(--shadow-popover);
   color: var(--text-strong);
   font-size: var(--fs-sm);
   white-space: nowrap;
@@ -111,47 +108,21 @@
   visibility: visible;
   pointer-events: auto;
   transition:
-    opacity var(--dur-base) var(--ease-spring),
-    transform var(--dur-base) var(--ease-spring),
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out),
     visibility 0s;
 }
 
+/* the pill's two ends: Cancel a ghost glyph, Insert the accent one, both round in the pill */
 .voice-pill-button {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
   width: calc(var(--control-h) - var(--space-1));
   height: calc(var(--control-h) - var(--space-1));
-  padding: 0;
-  border: 0;
   border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--text-dim);
-  cursor: pointer;
   touch-action: manipulation;
 }
 
-.voice-pill-button svg {
-  width: var(--icon-size);
-  height: var(--icon-size);
-}
-
-.voice-done {
-  background: var(--accent);
-  color: var(--bg);
-}
-
-.voice-pill-button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-@media (hover: hover) {
-  .voice-cancel:hover {
-    background: var(--bg-hover);
-    color: var(--text-strong);
-  }
+.voice-cancel {
+  color: var(--text-dim);
 }
 
 .voice-pill-dot {
@@ -159,7 +130,8 @@
   width: var(--dot-size);
   height: var(--dot-size);
   border-radius: var(--radius-pill);
-  background: var(--accent);
+  background: var(--status-blocked);
+  box-shadow: 0 0 6px var(--status-blocked);
   transition: opacity var(--dur-fast) var(--ease-out);
 }
 
@@ -168,12 +140,14 @@
 }
 
 .voice-pill[data-state="transcribing"] .voice-pill-dot {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
   animation: pulse var(--dur-pulse) var(--ease-pulse) infinite;
 }
 
 .voice-pill-label {
   flex: none;
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
 }
 
 /* the live transcript, one line */
@@ -194,7 +168,7 @@
   height: 20px;
   transform-origin: center;
   transition:
-    transform var(--dur-base) var(--ease-spring),
+    transform var(--dur-base) var(--ease-out),
     opacity var(--dur-base) var(--ease-out);
 }
 
@@ -245,14 +219,13 @@
 }
 
 .voice-timer.is-ending {
-  color: var(--accent);
-  font-weight: 600;
+  color: var(--status-blocked);
+  font-weight: var(--fw-semibold);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .voice-pill,
   .voice-pill.is-open,
-  .voice-mic,
   .voice-bars {
     transition: none;
   }
@@ -271,6 +244,7 @@
     display: block;
   }
 
+  .voice-mic-wrap[data-state="recording"] .voice-mic-dot,
   .voice-pill[data-state="transcribing"] .voice-pill-dot {
     animation: none;
   }
