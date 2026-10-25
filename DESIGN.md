@@ -40,7 +40,7 @@ stays over the terminal and in the palette. Sections are parted by space and a d
 a rule; the Agents list's workspace cards are an edge around rows, not a line between sections.
 Hover is the quiet fill of light every surface takes under the pointer; the selected row is the
 surface language's chosen nav row, a raised face lit from above in a ring of ink. Brand marks are the only color
-there that is not a state, and a ready row draws no state at all. Amber connects focus, the chosen
+there that is not a state, and a ready row draws no state at all. The accent connects focus, the chosen
 lens glyph and the terminal cursor.
 
 Messages say only what the person needs now, not everything the app knows:
@@ -168,7 +168,13 @@ The glass tokens are expressions over the palette above, not colors of their own
 
 `--pdf-page` is the one color with the same value in both columns, on purpose: a PDF page is
 paper, not UI, and the viewer (`.file-viewer-pdf`) must not tint it for the theme. It is named in
-`src/styles.css` under the same note and no theme or palette block overrides it.
+`src/styles.css` under the same note and no theme or palette block overrides it. Two more are
+fixed the same way, for the same reason (a thing that is white or black in the world stays so):
+
+| Role | Token | Value | Usage |
+|------|-------|-------|-------|
+| Thumb | `--thumb` | `#ffffff` | A switch's thumb (`bg-thumb`), white in either mode |
+| QR module | `--qr-module` | `#000000` | The dark modules of a QR code on its white field, so any phone camera reads it on any theme |
 
 ### Themes
 
@@ -484,9 +490,11 @@ blocks of `src/styles.css`.
   `src/styles.css`.
 
 ### Rules
-- Amber is the one chrome color. Accent (selected, focused, informational) and primary (the user's
-  action: Send, primary buttons) are both amber; in light, accent is the darker text-safe ochre and
-  primary the brighter fill carrying ink text. Agent states never use amber.
+- The accent is the one chrome color: violet in Studio, amber in the amber base, each theme's own
+  in its block. Accent (selected, focused, informational: `--accent`, `text-accent`) and primary
+  (the user's action: Send, the one `<Button variant="accent">` of a surface: `--primary`) are the
+  same hue; in light, accent is the darker text-safe cut and primary the fill carrying
+  `--primary-text`. Agent states never use the accent hue.
 - Agent state has a written label as well as color. The sidebar's compact glyphs keep their labels
   in tooltips and screen-reader text; other surfaces draw the words. In the sidebar ready and
   unknown draw no glyph and keep their label for assistive tech; elsewhere unknown uses dim text
@@ -501,7 +509,7 @@ blocks of `src/styles.css`.
   writes the row's `data-theme`, `data-palette`, `color-scheme`, `theme-color` and its `--bg` as the
   root background, which covers a frame painted before the stylesheet. `applyToDocument` removes that
   background, so the theme blocks own it from then on. This is a boot-correctness fix and follows no
-  other app's behavior: the appearance is the one documented above (Codex by default), now shown from
+  other app's behavior: the appearance is the one documented above (Studio by default), now shown from
   the first frame instead of after amber until the app starts.
 
 ## 3. Typography
@@ -530,9 +538,10 @@ The values are the ones in `src/styles.css`. Every token but `--fs-input` is `ca
 |-------|-------|-------|
 | `--ui-scale` | `1`; Settings → Appearance → Interface font size over the density's body size, written on `<html>` | Multiplies every `--fs-*` token but `--fs-input` |
 | `--font-ui` | `"Inter Variable", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif` | Chrome and chat prose |
+| `--font-display` | `"Inter Display", var(--font-ui)` | The display cut, for the few large figures: the pairing code, a meter's number (`font-display`) |
 | `--font-mono` | `"Symbols Nerd Font Mono", "JetBrains Mono Web", ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "D2Coding", monospace` | Code, paths, keys, terminal-adjacent metadata |
 | `--lh-tight` | `1.2` | Titles |
-| `--lh-base` | `1.5` comfortable / `1.45` compact | Body copy |
+| `--lh-base` | `1.45` | Body copy (`1.4` compact) |
 | `--lh-code` | `1.6` | Code blocks; the message box with a mouse |
 | `--lh-prose` | `1.65` | Chat prose and the user's bubble |
 | `--fw-regular` | `500` | Body |
@@ -596,9 +605,9 @@ The values are the ones in `src/styles.css`. Every token but `--fs-input` is `ca
   The hidden measuring copy (`.composer-measure`) also takes the live textarea's
   `::-webkit-scrollbar` rules, so both reserve the same scrollbar width. Design precedent: none in
   the UI; the hidden measuring copy now matches the live textarea, with no visible change.
-- `text-wrap: balance` on `.modal-title`, `.composer-greeting-title` and a Settings group's
-  caption (`.settings-section h3`): a title that wraps takes even lines, never a full line over a
-  one-word stub.
+- `text-wrap: balance` on a dialog's title (`DialogTitle` is `text-balance`; `.modal-title` where a
+  shell still writes its own) and `.composer-greeting-title`: a title that wraps takes even lines,
+  never a full line over a one-word stub.
 
 ### Settings
 - `theme`: `dark`, `light`, or `system`; default `dark`.
@@ -697,9 +706,9 @@ All spacing derives from a 4px base.
 |-------|-------|-------|
 | `--radius-sm` | `6px` | Chips and inner controls |
 | `--radius-md` | `8px` | Buttons, inputs, selected rows |
-| `--radius-lg` | `12px` | Menus and chat surfaces |
-| `--radius-xl` | `16px` | Modals and bottom sheets |
-| `--radius-2xl` | `20px` | The composer's input card |
+| `--radius-lg` | `12px` | Menus, card rows, chat surfaces, the composer's input card |
+| `--radius-xl` | `16px` | Dialogs and cards |
+| `--radius-2xl` | `20px` | A phone sheet's top corners (`rounded-t-2xl`); the composer strip's inset |
 | `--radius-pill` | `999px` | Pills and dots |
 
 ### Sizes
@@ -711,8 +720,9 @@ Comfortable values are `:root`; the final column is the complete compact overrid
 | `--header-h` | `52px` | `46px` | App header below `769px` |
 | `--header-h-wide` | `52px` | — | App header from `769px`, in either density (`--header-h` takes this value there) |
 | `--sidebar-w` | `288px` | `272px` | Sidebar/drawer; the default while the user has not dragged the sidebar's edge |
-| `--control-h` | `32px` | `30px` | Buttons and fields |
-| `--segmented-inset` | `2px` | — | What the segmented track takes from `--control-h` above and below an option (its `2px` padding and the hairline, both sides): an option is `--control-h` less this, and its touch expander grows from that height to `--touch-target` |
+| `--control-h` | `32px` | `30px` | Buttons (`h-control`, `size-control`), menu items, the segmented track |
+| `--input-h` | `36px` | `34px` | A text field, a select, the stepper's well (`h-input`): a step taller than a button, so its text has air above and below; also the sidebar's row (`--side-row`) |
+| `--segmented-inset` | `2px` | — | What the segmented well takes from `--control-h` above and below an option (its `1px` padding and the ring, both sides): a `TabsTrigger` / `ToggleGroupItem` is `--control-h` less this, and its touch expander (`coarse:before:`) grows from that height to `--touch-target` |
 | `--touch-target` | `44px` | — | Coarse-pointer minimum: every control a finger can reach is at least this in both dimensions |
 | `--pointer-target` | `24px` | — | Fine-pointer minimum hit area: a glyph button under `--control-h` (the chat's copy and format buttons, an attachment tile's X) keeps its look and reaches it through an invisible `::before` expander |
 | `--touch-target-header` | `44px` | — | The phone header's controls (`<=768px`) |
@@ -724,7 +734,7 @@ Comfortable values are `:root`; the final column is the complete compact overrid
 | `--avatar-size` | `32px` | `26px` | Command-palette mark box |
 | `--dot-size` | `7px` | — | Connection dot |
 | `--rail-w` | `3px` | — | Device and quoted-content rails |
-| `--hairline` | `1px` | — | Borders |
+| `--hairline` | `1px` | — | The few drawn lines left: a pane boundary, the docked file panel's edge, a tree's branch; a surface's edge is a ring of `--ink-*` in its shadow (§7) |
 | `--content-w` | `820px` | — | Settings and dialog content |
 | `--pending-max-h` | `min(20dvh, 12rem)` | — | Pending-message stack ceiling |
 | `--chat-w` | `--content-w`, then the pane's lane as one length | — | Chat lane: transcript, composer column, held list. Settings → Chat width: Narrow `--content-w`; Default follows the pane (min 820px, max `60rem` = 960px, 71% of the pane between; the px floor wins where 60rem is under it); Wide `72rem` (1152px); Full `100%` |
@@ -737,7 +747,7 @@ Comfortable values are `:root`; the final column is the complete compact overrid
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--ring` | `2px solid var(--accent)` | Global `:focus-visible` outline |
+| `--ring` | `2px solid var(--accent)` | Global `:focus-visible` outline, for an element with no box of its own (a row, a link, a legacy control); a shadcn control draws its own `focus-visible:ring-2 ring-accent/60` inside the same rule, and a boxed field shows focus on its own edge (`shadow-focus`) |
 | `--ring-offset` | `2px` | Outline offset |
 | `--z-header` | `4` | A phone's glass header, over the transcript that scrolls under it |
 | `--z-banner` | `5` | Terminal banners |
@@ -771,10 +781,11 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   iPhone home screen app reports a visual viewport shorter than the screen without a keyboard.
 - The header is one line at every width. Anatomy, left to right: mobile drawer toggle / desktop
   sidebar toggle and the command palette (`.header-side`); the flexible context, agent mark and
-  title then the PC › workspace › folder crumb; segmented Chat/Terminal switch; from `769px` a
-  hairline and the Files button (`.header-files-button`); the connection
-  chip while the bridge is not live (herdr version in its tooltip), the offline pill, sign out and
-  the More menu (`⋯`). Theme lives in Settings and the palette; the herdr version is also read
+  title then the PC › workspace › folder crumb; the Chat/Terminal switch (a `<ToggleGroup>`); from
+  `769px` an etched `<Separator orientation="vertical">` and the Files button
+  (`.header-files-button`, a ghost icon button: Files is an action, not a third lens); the
+  connection chip while the bridge is not live (a `<Badge>` in the state's tone, herdr version in
+  its tooltip), the offline `<Badge tone="blocked">`, sign out and the More menu (`⋯`). Theme lives in Settings and the palette; the herdr version is also read
   in Settings.
 - From `769px` the header is two zones. Over the sidebar, `.header-side` is the sidebar's own top
   row (toggle at its start, palette at its end) on `--bg-panel`, as wide as `--sidebar-w`, and the
@@ -816,30 +827,80 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
 
 ## 5. Components
 
-### Button (`.btn`, `.icon-button`)
-- `.btn` is a medium text control. Variants: neutral, `.btn-primary`, `.btn-danger`, `.btn-ghost`.
-  Primary uses `--primary`; danger uses danger tint plus blocked border; ghost removes fill/edge.
-  A destructive action that asks twice (Settings → Phone & devices, Revoke) is a neutral
-  `.icon-button` (the trash glyph, named "Revoke {name}") at rest and becomes `.btn-danger` with
-  its "Revoke?" label only while it asks to confirm; the same element through both steps, so focus
-  stays on it. A trust decision (the SSH host key) shows the fingerprint to compare
-  (`.machine-fingerprint`: `--font-mono`, `--fs-md`, `--text-strong`, under a dim "Fingerprint of
-  {host}" label) over one sentence, "Trust it only if it matches the fingerprint shown on the PC.";
-  ssh's own words wait behind a Show SSH output fold, and no status box sits above the question.
-- `.icon-button` is a square unlabeled visual control with mandatory `aria-label`; `.is-outlined`
-  adds the border. Both families use `--control-h`, `--radius-md`, focus ring, hover and disabled.
-- Coarse pointers grow controls to `--touch-target`.
+Every control is one of the shadcn components in `src/components/ui/` (Radix UI through the
+`radix-ui` package, Tailwind v4 utilities bound to the tokens in `src/tailwind.css`, variants by
+`class-variance-authority`, classes joined by `cn()` in `src/lib/cn.ts`: clsx plus a tailwind-merge
+taught the token colours, so a caller's `className` wins over a variant's without knocking out a
+legacy colour class). Their recipes are the workflow editor's
+([Kargul Studio, MIT](https://github.com/kargulstudio/workflow-editor): `components/_ui/button.tsx`,
+`segmented-tabs.tsx`, `tag.tsx`, `field.tsx`, `divider.tsx`, `icon-badge.tsx`, `select-field.tsx`,
+`shadcn/*.tsx` and `home/editor/settings/settings-section.tsx`), rewritten against the tokens and
+the a11y rules below; its literal colours (`white/50`, `#111`) never appear in a class. Every
+`ui/*` element carries `data-slot`, which the base layer of `tailwind.css` uses to strip the
+browser's own control chrome (no preflight: the app's reset stands and the legacy stylesheets dress
+their own elements). Icons are Tabler through `src/lib/icons.ts` (role names, never the package in a
+component; `.tabler-icon` sets the one stroke, `1.75`); a glyph inside a button is sized by the
+button's size variant, not by the icon. Glyph-only buttons carry a `<Tooltip>` (400ms delay, 300ms
+skip between neighbours) through `<IconButton>`, under one `<TooltipProvider>` per surface.
 
-### Segmented control (`.segmented`)
-- One `aria-pressed="true"` option receives hover fill and strong text; the group itself is an
-  elevated, bordered `--radius-md` track.
-- Used for Chat/Terminal, theme and density. It is not a generic tab list.
+### Button (`<Button variant size>`, `ui/button.tsx`)
+- A button is a surface (§7): a ring of shadow outside, a pixel of light inside its top edge, its
+  words set into it (`text-engraved`), `rounded-md`, `font-medium`, 150ms `ease-in-out` on colour
+  and shadow. Always pass a variant; the default (`field`, `sm`) is the editor's toolbar button.
+- Variants: **field** (a toolbar or secondary action: `bg-elevated` with `shadow-surface`, the glyph
+  dim until hovered; Cancel, Retry, Try again, Reconnect, Rename, Copy, Resume, the folder and skill
+  chips); **accent** (the one primary action of a surface: `--primary` under `bg-primary-sheen`,
+  lit from above, `shadow-primary` a glow of its own colour; Send, Start, Create worktree, Compare,
+  Unlock, Add PC, Install app, Confirm); **ghost** (no box at rest, `bg-fill-2` under the pointer,
+  `bg-fill-3` pressed; every glyph in a bar, the stepper's steps, Keep Terminal, Restore defaults);
+  **crumb** (a quiet word in a path or a text link in the chat: the directory browser's breadcrumb,
+  Show full message, Plain text, Dismiss); **danger** (its tint and a `--status-blocked` ring at
+  rest, the ring doubled inside under the pointer, never the neutral hover fill: the confirm's
+  action, Remove PC, Sign out everywhere); **raised** (a face in the `bg-raised` gradient under
+  `shadow-raised`, the chosen nav row's own); **primary** / **secondary** (the editor's pill buttons,
+  bold words; unused in the app's chrome); **bare**.
+- Sizes: `xs` (24px, `text-xs`), `sm` (`h-control`), `md` (`h-input`, beside a field), `lg` (40px),
+  `icon` (a `size-control` square), `icon-sm` (24px, an invisible `::before` expander to the finger's
+  target), `icon-lg` (36px), `field` (`h-control`, a glyph with a word, tighter on the glyph's side:
+  New workspace, Add reply, Star on GitHub) and `block` (`h-input`, full width: the footer's Install
+  app). Every size but `xs`, `icon-sm` and `bare` is `--touch-target` tall (and `icon` wide) on a
+  coarse pointer (`coarse:h-touch`); `aria-pressed` and `aria-expanded` take `bg-fill-3`.
+- `asChild` renders a link or a menu trigger with the button's classes (Star on GitHub, Reconnect
+  with a `?machine=` href, a `DropdownMenuTrigger`). `buttonVariants()` is exported for a class
+  string where no element can be wrapped (`RecentFolderChips` measures one).
+- A destructive action that asks twice (Settings → Remote PCs, Remove PC; Phone & devices, Revoke)
+  is the same element through both steps, so focus stays on it: `variant="danger"` throughout for
+  PC removal (its red stays visible before and after the first click arms the second, §1), the
+  neutral glyph button at rest for Revoke, becoming the danger word only while it asks to confirm.
+  A trust decision (the SSH host key) shows the fingerprint to compare (`.machine-fingerprint`:
+  `--font-mono`, `--fs-md`, `--text-strong`, under a dim "Fingerprint of {host}" label) over one
+  sentence, "Trust it only if it matches the fingerprint shown on the PC."; ssh's own words wait
+  behind a Show SSH output fold, and no status box sits above the question.
+- `<IconButton label>` (`ui/icon-button.tsx`) is the glyph-only control of a bar: a ghost `icon`
+  Button (another variant or size by prop: the terminal's jump-to-bottom is `variant="field"`, the
+  held input's Send is `accent`) under a `<Tooltip>` that says its name; the name stays on the button
+  as `aria-label` and the native `title` is left off, or a hover would show two tooltips. Pressed
+  (`aria-pressed`) it takes `bg-fill-3` and the accent on its glyph. Needs a `TooltipProvider` above.
+
+### Segmented control (`<Tabs>` and `<ToggleGroup>`, `ui/tabs.tsx`, `ui/toggle-group.tsx`)
+- The editor's `segmented-tabs`: a sunken well (`bg-well`, `shadow-sunken`, `--radius-md` + 1px, `p-px`)
+  holding quiet dim words at `font-medium`; the chosen one is a raised face (`bg-elevated` under
+  `bg-raised`, `shadow-tab`, `font-semibold`, `text-strong` with a glow of `--edge-light-strong`
+  under the words, its glyph in the accent). `<Tabs>` where the choice shows a panel (the Files
+  dialog's **Browse** | **Changes**, with `TabsContent`); `<ToggleGroup type="single">` where it is
+  a value (density, theme side, Unified | Split, the diff scopes, the file viewer's Preview | Source,
+  the palette's status filter), the onValueChange guard keeping a choice until another is made (a
+  press on the chosen option would clear a Radix group). `tabTrigger` and `toggleItem` are the item
+  class strings for a hand-rolled tab list that must look the same.
 - An option is `--control-h` less `--segmented-inset` tall, so the track is `--control-h`. On a coarse
-  pointer the track keeps its height; each option is at least `--touch-target` wide, so neighbours
-  never share a tap, and reaches `--touch-target` tall through an invisible `::before` expander sized
-  from that same difference, as the palette's filter chips do.
-- The header's Chat/Terminal switch from `769px` drops the track and the glyphs: two words, the
-  chosen one on the hover fill. At `<=768px` it keeps the track; at `<=560px` it is glyphs only.
+  pointer the track keeps its height; each option is at least `--touch-target` wide
+  (`coarse:min-w-touch`), so neighbours never share a tap, and reaches `--touch-target` tall through
+  an invisible `coarse:before:` expander sized from that same difference, as the palette's filter
+  chips do.
+- The header's Chat/Terminal switch (`.view-switch`, App.tsx) is a `<ToggleGroup type="multiple">`
+  holding one value, so pressing the chosen lens again changes nothing and both items keep their
+  place in the Tab order (`rovingFocus` off); the items keep their `title`s, which the scripts find
+  the lenses by. At `<=560px` it is glyphs only (`.header-desktop-only` hides the words).
   On a phone (`<=768px`) its options draw at the density's option height (`--control-h` less
   `--segmented-inset`: `28px` in a `34px` track, `26px` in a `32px` track when compact), so the
   track stands at least `6px` clear of the bar above and below in either density (the compact bar
@@ -848,23 +909,54 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   in a `44pt` bar and takes taps beyond its drawn edge); the Codex and Claude phone apps have no
   view switch in their bar to follow.
 
-### Keyboard hint (`.kbd`)
-- An inline mono keycap: `18px` high, strong bottom edge, `--radius-sm`, `--fs-2xs`.
+### Keyboard hint (`<Kbd>`, `ui/kbd.tsx`)
+- An inline mono keycap: `18px` high, `rounded-sm`, `text-2xs`, `bg-fill-2`, a ring of `--ink-2` with
+  its bottom edge a shade deeper and a pixel of light on top. The palette's shortcuts and footer
+  hints, the prompt card's option numbers, the Shortcuts page (there `h-6 text-xs`, a step larger,
+  since the keys are the content). `.kbd` in styles.css is the same recipe for markup that is text
+  (a translated sentence with a key in it).
 - `Mod` resolves to `⌘` on Apple platforms and `Ctrl` elsewhere.
 
-### Modal (`.modal*`)
-- `.modal-scrim` centers an `aria-modal` dialog at `--z-modal`; `.modal` is a capped scrollable
-  column with header, body and footer and `--shadow-pop`.
-- At `<=640px`, it becomes a bottom sheet with top `--radius-xl` corners and safe-area padding.
-  Every surface on a `.modal-scrim` (dialogs, the palette, the row sheet) rises from the bottom
+### Dialog (`<Dialog>`, `ui/dialog.tsx`; the `.modal-scrim` shells)
+- `DialogContent variant="modal"`: a `bg-elevated` card centred under a `bg-scrim` overlay with
+  `backdrop-scrim` (`blur(3px)`), `rounded-xl`, `shadow-dialog` (a ring of `--ink-3` and the inner
+  light), at most 560px wide and `100dvh − 64px` tall, arriving as a popover does (`animate-pop-in`:
+  a fade and a breath of scale, `animate-fade-in` on the scrim; none under reduced motion). Its
+  Close is a ghost icon Button in the top right, named by `closeLabel`. `variant="sheet"` is the
+  phone's bottom sheet (`rounded-t-2xl`, 92dvh at most, the safe-area inset kept under it,
+  `animate-sheet-in` / `animate-sheet-out`); the caller picks by its width (`SHEET_QUERY`,
+  `<=640px`). `DialogHeader` (at least 64px, title and description, an etched `divider-b`),
+  `DialogBody` (the one part that scrolls), `DialogFooter` (actions trailing, `divider-t`),
+  `DialogTitle` (16/550, `text-strong`, engraved, balanced) and `DialogDescription` (13px dim).
+  Radix holds the focus, stacks one dialog under another (a confirm over Settings) and takes the
+  scrim's click; `onInteractOutside` is told that a `.modal-scrim`, a `[role="dialog"]` or a native
+  `<dialog>` opened from inside the dialog is not outside it.
+- On `<Dialog>`: Settings (a grid: its own page list beside the page, below), the session list,
+  the confirm, PC setup, the running background task's detail, the account setup stepper.
+- Still on the `.modal-scrim` / `.modal` shell of styles.css (hand-rolled `role="dialog"
+  aria-modal`, `useFocusTrap`, a ghost icon Close of their own), with `DialogHeader` / `DialogBody` /
+  `DialogFooter`, `<Field>`, `<Input>` and `<Button>` inside: New workspace / New tab, the worktree
+  dialog, Files, the file viewer's popup, the diff viewer, the row sheet and the command palette (a
+  `menuSurface` card at `--palette-top`, under `.modal-scrim.palette-scrim` at `--z-palette`). They
+  stay there because `lib/sheets.ts` drives their phone sheet (it follows the finger and draws the
+  drop of a sheet React has already removed) and `lib/sheetHistory.ts` their Back entry, and because
+  each opens other surfaces inside itself (Browse inside New workspace, a preview over Files) that the
+  shell's own focus trap already orders. The look is the same: `.modal-scrim` is `bg-scrim` with
+  the blur, `.modal` is `--bg-elevated`, `--radius-xl`, `--shadow-dialog`, its zones parted by the
+  etched `--divider`. Moving them onto `<Dialog>` is the exit of the debt in §8.
+- At `<=640px` every dialog is a bottom sheet with top `--radius-xl` corners and safe-area padding.
+  Every sheet (a `DialogContent variant="sheet"`, and every surface still on a `.modal-scrim`: the
+  palette, the row sheet, the shells above) rises from the bottom
   edge as an iPhone's sheet does (`--dur-sheet` on `--ease-spring`, the scrim darkening with it),
   follows a finger dragged down from its head or from a list at its top, and drops
   (`--dur-sheet-out`) however it closes. Let go past `30%` of its height, or flicked down, it
   closes through the same close as its scrim; short of that it springs back. A busy dialog
   (a deed pending) does not follow the finger. A stroke on a sheet or its scrim pans nothing
   behind it (`touch-action: none`); the sheet's own lists still scroll and keep their overscroll.
-  A closed sheet's drop is drawn in a closed shadow root, so no query of the page sees it.
-  lib/sheets.ts.
+  A closed `.modal-scrim` sheet is removed by React at once, so its drop is drawn from its last
+  frame in a closed shadow root, where no query of the page sees it (lib/sheets.ts); a Radix
+  sheet stays mounted for its `animate-sheet-out` and needs no copy. `useSheetSwipe` (the same
+  file) takes the finger on both.
 - While a phone's keyboard is up (`data-keyboard`), the scrim is `--app-height` tall instead of the
   whole screen, so a sheet and its text field sit above the keyboard, and the sheet drops its
   safe-area padding.
@@ -873,16 +965,28 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   cannot leave the first Escape or typed key going to the pane beneath the dialog. A terminal
   command's peek over the chat is no dialog: its Escape is the agent's, in the grid (see the
   composer's terminal commands).
-- A confirm (`.confirm-dialog`, `alertdialog`, 420px) asks before something that cannot be undone:
-  Cancel has the focus, Tab stays between the two buttons, the danger action sits at the right,
+- A confirm (`ConfirmDialog`: a `<Dialog>` whose content is `role="alertdialog"`, `.confirm-dialog`,
+  420px) asks before something that cannot be undone:
+  Cancel (`variant="field"`) has the focus, Tab stays between the two buttons, the
+  `<Button variant="danger">` sits at the right,
   and a failure shows inside it. A no gives the focus back to what opened it. A refusal the owner
   named (git refusing a dirty checkout) turns the action into its escalation (**Delete anyway**),
   with the refusal's words above it. Closing a repository workspace over open worktrees says so
   and closes the group, as herdr's `--group` does.
 
-### Field (`.field`, `.input`, `.select`)
-- Stacked uppercase label, optional hint and `--bg-input` field. Desktop fields use `--fs-sm`;
-  small-screen fields retain `--fs-input` to avoid focus zoom.
+### Field (`<Input>`, `<Textarea>`, `<Field>`, `<Label>`, `fieldSurface`; `ui/input.tsx`)
+- The editor's field: a shallow well with a ring (`bg-input`, `shadow-surface`, `rounded-md`), a
+  breath lighter under the pointer, focused the accent inside its edge and a halo of it outside
+  (`shadow-focus`). `<Input>` is `h-input`, `text-field` (16px, the size iOS Safari does not zoom)
+  until `sm:` where it is `text-sm`, `tabular-nums`; `<Textarea>` is `rounded-lg`, at least 120px,
+  no resize grip. `<Field label htmlFor hint action>` stacks a 12/550 dim label (and an optional
+  control at its end) over the field and a 12px hint under it; `<Label>` is that label alone.
+  `fieldSurface` is the class string for a field that is not an input: the agent picker's trigger
+  (`AgentPicker.css`), the native `<select>` of the New workspace dialog (`nativeSelect`: the OS
+  picker is kept there, since its options are the agent's own documented levels), the Settings
+  stepper's well (`.settings-stepper`: two ghost `icon-sm` steps around a bare number, `h-input`,
+  `focus-within:shadow-focus`). `.input` in styles.css is the same recipe for the few hand-rolled
+  fields left (the sidebar's filter carries both).
 - Focus names the edge with accent; errors use blocked/danger tokens and `role="alert"`. A failure
   leads with a plain sentence (`lib/userError.ts`); what the PC or the browser said follows on a
   second line in the interface face, selectable, never in the mono stack (which has no Hangul and
@@ -890,18 +994,55 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
 - Every placeholder is `--text-dim` at full opacity (at least 4.5:1 on every field of every
   palette), never the browser's own grey (3.8:1 on a dark field).
 
-### Menu / popover (`.menu*`)
-- Bordered `--radius-lg` surface with `--shadow-pop`; rows use `--control-h`, `--radius-md`, icon,
-  ellipsized main label and optional hint.
-- Hover or `aria-selected` uses `--bg-hover`. Headings are dim uppercase micro labels.
-- The sidebar's row menu (`.row-menu`) is a `.menu` drawn through a portal at fixed coordinates,
-  under its `⋯` with right edges aligned, above it when the screen ends first, and over the drawer.
+### Select (`<Select>`, `ui/select.tsx`)
+- A `fieldSurface` trigger (`h-input`, the chosen value truncating, a dim chevron that turns while
+  open, `shadow-focus` while open) that opens the menu surface below (`position="popper"`, as wide
+  as the trigger at least), its items `h-control` rows on `bg-fill-3` when highlighted, the chosen
+  one marked by an accent check at its start; groups under `SelectLabel` (12/550 dim), parted by an
+  etched `SelectSeparator`. Settings uses it for five or more choices (`SettingsSelect`: theme,
+  language, modes), following the editor's `select-field`. The New workspace dialog's Effort keeps
+  the native select on `fieldSurface` (above), and the agent picker is its own combobox (below).
+
+### Switch, Checkbox, Radio (`ui/switch.tsx`, `ui/checkbox.tsx`, `ui/radio-group.tsx`)
+- `<Switch>`: a 36×20 sunken track (`bg-well`, `shadow-sunken`) that takes `--primary` when on, a
+  `bg-thumb` white thumb with its own shadow sliding 16px in 200ms `ease-smooth` (none under reduced
+  motion); an invisible `coarse:before:` expander gives a finger its target. Every on/off setting.
+- `<Checkbox>`: a 16px `rounded-sm` square on `bg-input` with an inset ring of `--fill-4`, filled
+  with `--primary` and a white tick when checked (the directory browser's Show hidden). A menu's
+  checkable item (`DropdownMenuCheckboxItem`) draws the same box inside the row.
+- `<RadioGroup>`: the same ring as a circle, the chosen one an accent dot with a glow. A menu's
+  `DropdownMenuRadioItem` draws that dot.
+
+### Menu and popover (`<DropdownMenu>`, `<Popover>`, `menuSurface`, `menuItem`; `ui/dropdown-menu.tsx`, `ui/popover.tsx`)
+- `menuSurface`: glass a step above its panel (`--bg-elevated` at 92% under `backdrop-popover`,
+  `blur(12px)`), `rounded-lg`, `p-1.5`, `shadow-popover` (a deep shadow, a ring of `--ink-2` and the
+  inner light), arriving by `animate-pop-in` from its trigger's corner
+  (`origin-(--radix-…-transform-origin)`), at most the room Radix measures. `menuItem`: an
+  `h-control` `rounded-md` row of `text-sm`, its glyph dim, `bg-fill-3` and `text-strong` while
+  highlighted, 40% while disabled. Labels are 12/550 dim; separators etched (`--divider`);
+  shortcuts (`DropdownMenuShortcut`) dim at the end. A destructive item is `variant="destructive"`:
+  danger text, the danger tint when highlighted. The same two class strings dress the surfaces that
+  are not Radix menus: the command palette, the select's list, the base-branch listbox of Changes,
+  and `.menu` / `.menu-item` in styles.css for the composer's `/` and `@` completions, the agent
+  picker's listbox and the background-task list, which keep their own `listbox` / `dialog` roles and
+  key handling (a menu over a text box must leave the caret where it is).
+- `<DropdownMenu>`: the row menu (below), the tab and pane menus, the header's More, the file
+  viewer's phone More, the folder chips' `+N`. `<Popover>`: the plan meters' panel over the footer,
+  `PopoverAnchor` on the whole button so the panel is as wide as the footer.
+- The sidebar's row menu (`RowMenu`, `.row-menu`) is a `<DropdownMenu>` opened on a trigger nobody
+  sees: a fixed, inert box standing where the `⋯` is, or at the pointer for a right-click, because
+  the roster scrolls and a menu inside it would be cut at the list's edge. Radix places it under
+  the `⋯` with right edges aligned, above it when the screen ends first, and over the drawer;
+  its items are `DropdownMenuItem` (the danger one `variant="destructive"`), its mute switch a
+  `DropdownMenuCheckboxItem`, its groups parted by `DropdownMenuSeparator`.
   Both the button and right-click offer the same native workspace actions: Rename workspace,
   Close workspace/group, New/Open worktree for repository roots, Delete worktree checkout for
   linked worktrees, and Expand/Collapse for a group. Pane renaming stays in the pane menu. The
   danger item takes `--status-blocked`. The popover is as tall as its items, up to the room on
-  its side of the button (it scrolls only on a screen too short for it). At `<=640px` it is a `.modal` bottom sheet (`.row-sheet`):
-  a grip, the row's name and place, 48px rows and a Cancel button; Tab stays among them. The
+  its side of the button (it scrolls only on a screen too short for it). At `<=640px` it is a
+  bottom sheet on the `.modal-scrim` shell (`.row-sheet`, so lib/sheets.ts and lib/sheetHistory.ts
+  drive it): a grip, the row's name and place, 48px rows and a `<Button variant="field" size="md">`
+  Cancel; Tab stays among them. The
   rows scroll between the head and Cancel (`.row-sheet-items`), which stay put, when the sheet's
   92% of the screen cannot hold them. Escape, a press outside and
   focus leaving it close it (on a desktop a scroll or a resize too), and focus returns to the
@@ -954,12 +1095,21 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   controls below it. Wherever that ellipsis shows to a finger, the pane's banners (View only and the
   rest) start below it, so none covers it.
 
-### Badge (`.badge`)
+### Badge (`<Badge tone>`, `ui/badge.tsx`)
+- The editor's Tag: a 24px `rounded-md` chip with a sheen down it (`bg-sheen`), `shadow-chip` (a
+  ring and the inner light), 12/550 `tabular-nums` words in the tone's colour with a glow of the
+  colour under them. Tones: **neutral** (`bg-fill-2`, `text-text`: Host, a plan's name), **idle**
+  (`bg-fill-2`, dim: READY, Terminal in the completion menu, Resume unavailable, a stale pill),
+  **accent** (Already open, Recommended, soon), **working**, **blocked**, **done** (the agent states
+  and every other state word: a step's, a task's, a skill's, a goal's, a change's letter in Changes)
+  and **notice** (a note that the view is partial). The old `.badge` class stays only on markup that
+  is not a `<Badge>`.
 - Agent states read **READY**, **RUN**, **INPUT**, **DONE**; unknown reads **—**. **BG** is a pane
   whose turn ended while work it started still runs in the background (`background_wait`): it
   stands in for DONE or READY until that work's turn ends.
-- Idle is elevated/dim; working, blocked and done use their own tint and text. RUN carries a small
-  breathing dot before the word; the word itself never fades. BG takes the working tint and text,
+- Each state is a `<Badge tone>`: READY `idle` (a fill of light, dim words), RUN `working`, INPUT
+  `blocked`, DONE `done`, each on its tint with its words in its colour. RUN carries a small
+  breathing dot before the word; the word itself never fades. BG takes the working tone,
   holding still; a tab's dot for it is a working-coloured ring.
 - The written label and unknown dashed edge keep color from being the only signal.
 - The sidebar's compact variant weights each state by how much it asks of the user. Waiting for
@@ -979,16 +1129,64 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   grey. Working breathes as the dot does; BG, which herdr does not have, holds working's glyph still.
   A tab's mark follows the same choice, held still.
 
-### Pill (`.pill`)
-- Mono metadata at `--chip-h`. Offline is the one header pill that stays, and uses danger tokens. A deep link waiting for its PC's roster says **Opening link…** in the same `.header-note` pill (`role="status"`) until it lands or its failure note replaces it. That status stays in the document while there is no note, clipped and empty (`.visually-hidden`, never `display: none`, as `.conn-live`), and the words of a page that opens with a link land a frame after it: a live region that appears together with its content is not announced. The `.header-note` pill carries a sentence, so it is set in the interface face (`--font-ui`), not the mono one. A deep link that could not open what it named, and Copy link, say so in a plain `.header-note` pill for a moment (8 s, 1.6 s for Link copied). The note takes the flexible context's place and ellipsizes when narrow, keeping the lens and More controls in view.
+### Pill (`.pill-*` hooks)
+- The header's pills are `<Badge>`s carrying their old class as a hook for the scripts
+  (`.pill-offline`, `.pill-stale`, `.pill-soon`; `.pill:not([data-slot])` in styles.css dresses only
+  the hand-rolled ones left). Offline is the one header pill that stays, and is `tone="blocked"`. A deep link waiting for its PC's roster says **Opening link…** in the same `.header-note` pill (`role="status"`) until it lands or its failure note replaces it. That status stays in the document while there is no note, clipped and empty (`.visually-hidden`, never `display: none`, as `.conn-live`), and the words of a page that opens with a link land a frame after it: a live region that appears together with its content is not announced. The `.header-note` pill carries a sentence, so it is set in the interface face (`--font-ui`), not the mono one. A deep link that could not open what it named, and Copy link, say so in a plain `.header-note` pill for a moment (8 s, 1.6 s for Link copied). The note takes the flexible context's place and ellipsizes when narrow, keeping the lens and More controls in view.
 - This PC's herdr status follows its health reads, and one failed read is no outage: it says **Status unknown** in a
-  plain `.pill-stale` (the neutral pill, no danger tokens), its tooltip naming the last herdr that answered. A second
+  plain `.pill-stale` (`tone="idle"`, no danger tokens), its tooltip naming the last herdr that answered. A second
   failed read in a row says **herdr unavailable** in the offline pill's danger style; neither claims herdr stopped, since
   a failed read is not proof of that. An answer ends the failed reads before it; one that lands late keeps those after
   it. Another PC's **herdr offline** still comes from its bridge.
   What a PC's herdr can do (terminal attach, the mirror, a pane's default lens) is its last answer and never changes on a
   failed read, so a Windows PC keeps its chat lens. The pills follow the app's own connection chip and header pills
   rather than another app's policy; at `<=480px` both go with the other header pills.
+
+
+### Separator and card (`<Separator>`, `<Card>`, `<CardHeader>`, `<CardRow>`, `<IconBadge>`; `ui/separator.tsx`, `ui/card.tsx`)
+- `<Separator>` is the editor's Divider: etched, a dark line (`--ink-3`) and the light that falls
+  past it (`--edge-light`), two pixels (`--divider-h`), horizontal or vertical (the header's, before
+  Files), decorative unless told otherwise. A zone's own edge is `divider-b` / `divider-t` on the
+  zone (a dialog's header and footer, a card's header, the tab strip's floor) rather than an
+  element between them.
+- `<Card>` is the editor's section card: a `rounded-xl` surface a step above its panel (`--bg`
+  mixed 40% into `--bg-elevated`) with `shadow-panel` (a ring and the inner light). `<CardHeader
+  icon title description action>`: a shade lighter (`bg-elevated`), parted from the body by
+  `divider-b`, with an `<IconBadge>` (a 40px raised `rounded-[11px]` tile, the glyph 22px with a
+  drop shadow: the filled page marks of Settings, the prompt card's alert), the title at 16/550
+  engraved, the sentence 13px dim and a control at its end (a PC's state Badge). `<CardContent>`
+  stacks the body. `<CardRow title description htmlFor>` is one setting: a title and its sentence
+  on a field's own surface (`bg-fill-1`, `rounded-lg`, a ring of `--ink-1` and the inner light),
+  the control at the end of the line; its label is for the control, so the words toggle it. Settings
+  groups, the prompt card, the token gate.
+
+### Alert and progress (`<Alert tone>`, `<Progress>`; `ui/alert.tsx`, `ui/progress.tsx`)
+- `<Alert>` is the editor's notice: one sentence and the control that acts on it, `rounded-lg`, 13px,
+  on a tinted surface with a ring of its tone. Tones: **neutral** (`bg-fill-1`, a ring of `--ink-1`:
+  the terminal banners, the composer's notices), **notice** (the warning yellow at 8%: another app
+  holds the pane, a device Tailscale does not know), **danger** (the danger tint and a
+  `--status-blocked` ring: a failed upload, a refused form, a save the server refused) and **done**.
+  It is `role="alert"` unless told `role="status"` (a banner that is a state, not a failure).
+  `AlertTitle` / `AlertDescription` set the words.
+- `<Progress>`: a 6px sunken track (`bg-well`), the value a `bg-accent` bar with a light edge moving
+  in 300ms `ease-out` (the plan's bar, an update's download).
+
+### Collapsible and scroll area (`ui/collapsible.tsx`, `ui/scroll-area.tsx`)
+- `<Collapsible>` is Radix's, undressed: the trigger is whatever row opens it (a work row, a thinking
+  fold, the gate's Have an access token instead?, PC setup's Advanced settings), `aria-expanded` and
+  `data-state` for free, `forceMount` where the folded content must stay in the document (a work
+  block's rows keep their reads). `<ScrollArea>` draws the thin quiet scrollbar of styles.css where
+  the native one cannot be styled; nothing needs it yet.
+
+### Legacy primitives (`src/styles.css`)
+- `.btn` (`.btn-primary`, `.btn-danger`, `.btn-ghost`), `.icon-button` (`.is-outlined`), `.segmented`,
+  `.menu`, `.modal`, `.input`, `.pill`, `.badge` and `.kbd` are restyled to the same recipes as the
+  components above and read the same tokens, so a surface not yet migrated (`AppCrash`,
+  `LanExposureNotice`, `PortalPanel`, `PushTestControls`, `UsageLocalLogin`, the SSH panel of a PC's
+  sidebar header) and the hand-rolled shells named in this section look as the rest does. They are
+  fallbacks, not a second system: new markup uses `components/ui`, and a rule the component now covers
+  is deleted from the component's CSS when its markup moves. `:not([data-slot])` guards keep them off a
+  ui element that carries a legacy class as a hook (`.pill-offline` on a `<Badge>`).
 
 ### Sidebar roster row and footer
 - No top bar. The sidebar opens with the plan panel (when Settings puts it there), the PC workspace groups and a separate **Agents** list spanning the connected PCs. A workspace starts from the `+` on its PC's header, or from the **New workspace**
@@ -999,7 +1197,7 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   and which differs from the palette-only design on purpose: it narrows the lists in place, by the
   words the rows show, and holds no state.
 - **Filter workspaces and agents** (`.sidebar-filter`, MachineSidebar.tsx) is one
-  `.input` the height of a row (`--side-row`, so a finger's `--touch-target` on a phone) in the rows'
+  `<Input>` the height of a row (`--side-row`, so a finger's `--touch-target` on a phone) in the rows'
   gutter above the lists, a magnifier in its leading cell (`.sidebar-filter-glyph`, `--text-dim`,
   `--text` while the field has the focus), its word **Filter** for screen readers alone
   (`.sidebar-filter-label`, visually hidden), its placeholder naming the whole (**Filter workspaces and agents**) and its
@@ -1038,7 +1236,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   `--control-h` tall, two-line agent rows `--control-h` + `--space-3`; fills use `--radius-md`.
   Hover is `--fill-2`, only where a pointer hovers; selection is a raised face, `--bg-elevated`
   under `--raised-face` and `--shadow-raised` (`--side-selected`, `--side-selected-face`,
-  `--side-selected-edge`), and rows keep `--side-row-gap` (two hairlines) between them so a face
+  `--side-selected-edge`; the look of `<Button variant="raised">`, drawn by Sidebar.css because a
+  row is a grid of cells, not a button), and rows keep `--side-row-gap` (two hairlines) between them so a face
   never touches its neighbour's fill; keyboard focus draws the ring inside the row and no fill. A
   worktree hangs from its repository on a `--border-strong` hairline branch: an elbow with a
   `--radius-sm` corner into each row, and the trunk on down past every row but the last. A
@@ -1239,7 +1438,7 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   included. As herdr draws its tree, each indented worktree hangs from its repository's folder on
   a `--hairline` `--border-strong` branch in the indent: a tee for each but the last, an elbow for
   the last.
-  Selection uses a neutral rounded fill; workspace rows have no amber rail or separate reorder
+  Selection uses a neutral rounded fill; workspace rows have no accent rail or separate reorder
   gutter. Drag the row itself, or press `Alt+↑/↓` while its selector is focused, to reorder it.
   On a touch screen (`pointer: coarse`) the browser's drag is off: a long press (400ms, still
   within 8px) lifts the row (`.is-lifted`: `--bg-elevated` with `--shadow-card`), it follows
@@ -1295,7 +1494,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   itself is not a control) and a `+` in the status column that starts a workspace on that
   PC (disabled while it is offline). An SSH PC's manage button sits before the
   caret and shows on hover, focus, while its panel is open, while the PC is not connected, and always
-  on touch. Connected is the dot alone; every other state is also written under the name, with the server's
+  on touch. The header's controls are ghost icon Buttons (`icon-sm` for the manage and fold
+  buttons, `icon` for the `+`), each under a `<Tooltip>`; **Host** is a `<Badge tone="neutral">`. Connected is the dot alone; every other state is also written under the name, with the server's
   error clamped to two lines and complete in the tooltip.
 - SSH PC management stays inline: its rename form and action buttons reflow within the sidebar
   instead of floating over it. Rename shares the name field's row where both fit and goes under
@@ -1312,9 +1512,11 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
 - Rows use only shared theme tokens in dark and light. Touch keeps row menus and folds visible,
   with `--touch-target` controls, and draws no hover fill; reduced motion removes row transitions
   and keeps the working dot's breath (opacity only).
-- Footer holds the contextual **Install app** action and Settings, its gear alone (named
-  **Settings** to screen readers and in its tooltip), with the plan meters filling the rest of its row,
-  as rows on the same grid with no rule above.
+- Footer holds the contextual **Install app** action (a ghost `block` Button) and Settings, its
+  gear alone (a ghost `icon` Button, `.sidebar-footer-settings`, named **Settings** to screen
+  readers and in its tooltip), with the plan meters filling the rest of its row, as rows on the
+  same grid with no rule above. **New workspace** in an empty PC's box is a `field`-size field
+  Button with the plus glyph.
   It carries no product name or version: the running versions are read in Settings.
 
 ### Plan meters (`.usage*`)
@@ -1322,13 +1524,15 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   by the widest chip drawn, so the count settles), the rest folded into `+N`, one per account in
   the user's order: provider mark, mono `--fs-2xs` percent of the limit chosen in Settings, the
   plan's session by default or its week (what is left by default, or what is used), and a 2px bar on a `--border-strong` track
-  filled to that percent. From 80% used the percent and bar take `--status-blocked`; amber stays
-  chrome. A chip whose numbers are stale or missing dims. An account hidden in Settings is
+  filled to that percent. From 80% used the percent and bar take `--status-blocked`; the accent
+  stays chrome. A chip whose numbers are stale or missing dims. An account hidden in Settings is
   left out of the strip and the popover; with every account hidden, neither shows. The button's
   name and tooltip add, per account, another of its limits from 80% used that the chip does not
   show (`(Weekly 9% left)`); the chip itself does not mark it.
-- The button opens a popover above the footer (`--shadow-pop`, `--radius-lg`), as wide as the
-  footer and scrolling when it outgrows the sidebar: per account its mark, name and plan pill with
+- The button opens a `<Popover>` on the menu surface above the footer (`PopoverAnchor` on the
+  whole button, `side="top"`), as wide as the
+  footer and scrolling when it outgrows the sidebar: per account its mark, name and plan
+  `<Badge tone="neutral">` with
   the email or login right-aligned and ellipsized, then one row per limit (label, reset time, right-aligned percent) over a 4px bar. A problem
   note is dim, red for an expired sign-in or a failed request.
 
@@ -1346,13 +1550,17 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   environment's answer. The picker itself is unchanged. Directory defaults to
   the selected pane cwd and name is an optional workspace label. **Browse** updates Directory as
   each folder opens (`onFolder`), so **Start** uses the path shown in the browser even when
-  **Use this folder** was not pressed; Directory keeps the `~/…` form for a folder under home, as
-  that button does, which also closes Browse. A folder-plus icon button at the end of Browse's bar
+  **Use this folder** (the browser's one `accent` Button) was not pressed; Directory keeps the
+  `~/…` form for a folder under home, as
+  that button does, which also closes Browse. The browser's bar is `IconButton`s (Parent, Home,
+  New folder) and a `crumb` breadcrumb in mono (the last crumb `aria-current="location"`); its
+  filter is a `<Field>`, Show hidden a `<Checkbox>` with its `<Label>`. A folder-plus icon button at the end of Browse's bar
   (New workspace only, not Files) opens one name field under the bar: Enter makes the folder inside
   the one shown and opens it, so Directory follows; Escape or leaving it empty closes the field
   without closing the dialog, and a refusal (taken name, invalid name, no permission) shows as an
   inline alert under the field.
-- Recent folders appear as neutral `.btn` chips with `--radius-pill` and `--space-2` gaps: the
+- Recent folders appear as `<Button variant="field" size="sm">` chips with `--radius-pill` and
+  `--space-2` gaps (`RecentFolderChips`; a `+N` chip opens the rest in a `RowMenu`): the
   three most recent, on one row that never wraps. Each shows the folder basename with ellipsis
   and the full path in its tooltip and accessible name. Clicking puts the folder in Directory and
   starts nothing. History is per PC in this browser and retained after panes close. Only a
@@ -1368,15 +1576,17 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   instead of asking for one, and its name is the tab's (optional; the placeholder is the number
   herdr gives it). Submit calls `POST /api/tab/create` with the same agent launch.
 - Under Name, the launch's own choices, each only where the agent's CLI documents it
-  (`lib/agentLaunchMode.ts` launchCapabilities; today Claude Code and Codex): **Model**, a `.input`
+  (`lib/agentLaunchMode.ts` launchCapabilities; today Claude Code and Codex): **Model**, an `<Input>`
   whose empty value is the agent's own and whose datalist offers the aliases the agent documents
-  (`sonnet`, `opus`, `haiku`), and **Effort**, a `.select` of the agent's documented levels after
+  (`sonnet`, `opus`, `haiku`), and **Effort**, a native select on `fieldSurface` (`nativeSelect`) of
+  the agent's documented levels after
   **Agent default**, the two side by side (`.new-session-launch`, stacked where a column would fall
   under 9rem). A model that is not one word, or a choice the picked agent's launch does not take,
   disables Start and says so under its field in the blocked colour (`aria-invalid`, `role="alert"`);
   picking another agent drops the choices its launch does not take. The agent picker's rows carry a
   `.menu-item-hint` (**model, effort**) beside the agents whose launch takes them.
-- **First message** is a `.input` textarea (three rows, grown by hand) whose hint says where it goes.
+- **First message** is a `<Textarea>` in a `<Field>` (three rows, grown by hand) whose hint says
+  where it goes.
   Codex takes it as its own positional argument behind `--` (`codex [OPTIONS] [PROMPT]`; clap matches
   a subcommand only before the separator, verified on codex 0.163.0: `codex -- logout` starts the TUI),
   so it starts with the agent. Claude Code's parser runs a subcommand named by the first operand even
@@ -1398,14 +1608,17 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   Under the message, **Skills**: the agent's skills in the folder before any process exists
   (`GET /api/agent/commands?agent=&cwd=`, the pane commands route without a pane: the bridge's
   tables and a disk scan, no agent started; a device that may only watch is refused it as it is a
-  directory listing and a file read), as mono `.btn` chips with `--radius-pill` that wrap to
+  directory listing and a file read), as mono `<Button variant="field" size="xs">` chips with
+  `rounded-full` that wrap to
   three rows and then scroll, each the token the agent types (`$review-pr` for Codex, `/review-pr`
   elsewhere, `@name` where that is the trigger) with the skill's description as its tooltip; a tap
   puts the token at the message's caret, spaced, and focuses the box. An empty list says **No skills
   for Codex in this folder.**; a folder not there yet, or a PC whose bridge is from before the
   route, is said in one hint line. Start sends exactly one create: a ref-held in-flight guard
   (`lib/sessionHistory.ts` inFlightGuard) refuses a second press before the disabled fields have
-  rendered.
+  rendered. Every field is a `<Field label hint>` over an `<Input>`; **Browse** is a `field`-size
+  field Button at the directory's end, Cancel a field Button and Start the dialog's one `accent`
+  Button, both in a `DialogFooter`; a refusal is an `<Alert tone="danger">`.
 - In a mouse-driven window wider than 640px (the composer's own `(max-width: 640px), (pointer:
   coarse)` query) the chat's composer can show a **New tab with an agent…** icon button
   (Tabler `MessageSquarePlus`, beside Attach) that opens this dialog as New tab on the pane's
@@ -1431,8 +1644,13 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   is herdr's own new tab: it calls `POST /api/tab/create` with no agent at once, in the workspace's
   folder, and opens the new shell pane unless another pane was opened meanwhile; a refusal shows
   in the strip. An agent tab comes from the tab menu's New tab with agent…, which opens the dialog.
-  Tabs retain their names, status dots, active underline, keyboard navigation, rename field and
-  close confirmation. A right-click opens tab actions at the pointer, including Move tab left/right
+  Tabs retain their names, status dots, keyboard navigation, rename field (an `<Input>`) and
+  close confirmation. The strip is its own `tablist` (`TabStrip.css`), not a `<Tabs>`: its tabs
+  are dragged, renamed in place and scrolled sideways, and herdr's snapshot owns their order and
+  selection; the look is the segmented one, the open tab the well's raised face (`--raised-face`,
+  `--shadow-tab`, its words lit by `--edge-light-strong`), never an underline, and the row ends on
+  the etched `--divider`. The `+` and the selected tab's `⋯` are ghost `icon-sm` Buttons under
+  `<Tooltip>`s. A right-click opens tab actions at the pointer, including Move tab left/right
   when a neighbouring position exists. Tabs have no close buttons or chevrons. Touch and narrow layouts show a `⋯` beside
   the selected tab for a trimmed menu, and there a tab is at least `--touch-target` tall and wide, so a one- or
   two-character name (탭 1) is still a finger's target with the `⋯` a target of its own beside it; a desktop with a mouse draws the same `⋯` on the selected tab, hidden in its place
@@ -1506,6 +1724,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   a plain Ctrl/Alt chord is taken only after the user records it and confirms Save anyway.
 
 ### Worktree dialog (`.worktree-modal`)
+- The `.modal-scrim` shell (Dialog, above) with `<Field>`s, an `<Alert tone="danger">` for a
+  refusal and **Already open** / **Checkout missing** as `<Badge>`s (`idle`, `blocked`).
 - From a workspace row's menu, as herdr's prefix+shift+g: **New worktree** asks for the branch
   (required), where to start from (HEAD when empty, ignored for a branch that exists) and a
   name, then checks the branch out under herdr's worktree folder and opens it as a
@@ -1515,7 +1735,11 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
 - The branch arrives filled in as herdr's own form fills it (`worktree/brave-valley-07f8`:
   adjective, noun, four hex digits) and selected, so typing replaces it. The name is the branch
   with its slashes as dashes and follows the branch until it is typed over.
-- **Agent** is the New workspace dialog's picker, under the name: the agent last started, Shell
+- **Agent** is the New workspace dialog's picker (`AgentPicker`: a `fieldSurface` trigger with
+  `role="combobox"` over a `listbox` on the legacy `.menu`; it stays hand-rolled because its rows
+  show each agent's mark and a hint, a select-only combobox takes the row the focus leaves on as a
+  native select does, and Escape on its open list closes the list before the dialog), under the
+  name: the agent last started, Shell
   for none. It starts in the checkout's pane once the checkout is made. One that fails to start
   leaves the worktree there: the dialog says why, locks its fields, and its button reads **Open**.
 - The browser demo answers the same list/create/open/remove worktree APIs with fictional
@@ -1533,8 +1757,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   the first prompt under it in `--text-dim`, each clamped to two lines, and at the trailing end
   the time it was last touched (the chat turn's timestamp format; on hover the full date of its
   start, where the store records one, and of its last touch) over the way on. The
-  way on is a quiet `.btn` **Resume**, never the primary style: a list of up to fifty rows carries
-  no fifty accents. A session a pane of the workspace already shows (its `agent_session`, by id or
+  way on is a quiet `<Button variant="field" size="xs">` **Resume**, never the accent: a list of
+  up to fifty rows carries no fifty accents. The dialog itself is a `<Dialog>` (a sheet on a phone). A session a pane of the workspace already shows (its `agent_session`, by id or
   by file name) gets an **Already open** pill (over the button on a phone, beside it elsewhere) and
   **Open**, which selects that pane in the browser and moves herdr's focus nowhere. A row whose
   resume syntax is not verified (`resume: null`) is listed with no button. Resume sends one
@@ -1588,24 +1812,28 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   no resume route), so **Resume unavailable** shows there.
 
 ### Changes list and diff viewer (`.repo-changes`, `.repo-diff*`)
-- Files has two faces, **Browse** | **Changes** (`.segmented` in its header). **Changes** lists
+- Files has two faces, **Browse** | **Changes** (a `<Tabs>` list in its header, each a
+  `TabsContent`; the dialog is the `.modal-scrim` shell). **Changes** lists
   what a comparison changed in the repository the pane sits in: the working tree against the
   index, the index against HEAD, two commits named by hand (**From commit**, **To commit**,
-  **Compare**), or the branch against a base (**Branch**, below); a Refresh button re-reads it,
+  **Compare**), or the branch against a base (**Branch**, below): the four scopes are a
+  `<ToggleGroup type="single">`; a Refresh `IconButton` re-reads it,
   nothing polls. On a phone the four scopes share the bar's whole width and the fold-all and
   Refresh buttons take the row under them: side by side they would run past the card. Under the
   controls, the branch
   (`Detached HEAD`, `No commits yet`) beside a `GitBranch` glyph and the repository's root, mono,
   cut from its start. The files sit under the folders they are in (lib/changeTree.ts): a
   `.repo-change-folder` button row (caret, `--accent` folder glyph, name, and the count of files
-  below it in `.repo-change-folder-count`) stands where its first file was listed, a folder holding
+  below it in `.repo-change-folder-count`; the fold-all and Refresh are `IconButton`s) stands where its first
+  file was listed, a folder holding
   nothing but one folder joins it into one row (`src/components/diffs`), every folder starts open,
   a tap folds it (kept across Refresh and scope changes), and an icon button beside Refresh folds
   or opens them all. Each level moves its rows in by `--depth` steps of `--repo-change-indent`, in
   nested lists. One `.repo-change` row per file, like the folder browser's rows (only file rows
   carry that class, and the folder prefix of a path stays in `.repo-change-path` as visually hidden
   text, so a screen reader reads the whole path in listing order): git's own
-  letter in a `.repo-change-mark` chip (M, A, D, R, C, T, U, ?), the path in mono with a rename's
+  letter in a `.repo-change-mark` chip (a `<Badge>` in the change's tone, mono bold; M, A, D, R,
+  C, T, U, ?), the path in mono with a rename's
   old path dimmed before an arrow, and `+added −removed` in `--syntax-inserted` /
   `--syntax-deleted`, or **Binary**. The chip is tinted as the diff's rows are: added and
   untracked on `--status-done-tint`, deleted and conflicts on `--status-blocked-tint`, modified on
@@ -1620,9 +1848,9 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   the name cut inside its stem, a mono meta line with the status in words (`.repo-diff-status`,
   tinted like the chip), the counts, a `--notice` warning with an icon when the rows are left
   plain or forced to one column, the comparison (`Working tree`, `Staged`, `abc1234..def5678`),
-  and the folder giving way first. Its actions: **Unified** | **Split** (`.segmented`, the
+  and the folder giving way first. Its actions: **Unified** | **Split** (a `<ToggleGroup>`, the
   `diffStyle` setting; Split is disabled at `<=640px` with the reason as its tooltip and the note
-  in the meta line), **Fold context** (an `aria-pressed` icon button: one unchanged line around
+  in the meta line), **Fold context** (an `aria-pressed` `IconButton`: one unchanged line around
   each change instead of the three git printed, the rest counted in the separators), **Open
   file** (the file viewer, on the PC that holds the repository; not for a deleted file) and
   **Copy patch** (git's own text; without a clipboard the patch becomes a selected text box, as
@@ -1672,17 +1900,21 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   Staged, Commit and Branch, the last "the diff against your base branch", and `/review` asks
   "Review against a base branch"), adapted to herdr's per-pane target: the base is chosen for this
   PC, pane and folder alone and remembered nowhere, never guessed from the remote's HEAD or a
-  branch named `main`, and nothing is compared until **Compare**. One `.field`, **Base branch**,
-  holds an editable combobox (`.input`, `role=combobox`) with a `ChevronDown` icon button at its
-  end (**Choose a branch**, the touch target on a phone) and **Compare** beside it (`.btn-primary`,
+  branch named `main`, and nothing is compared until **Compare**. One `<Field>`, **Base branch**,
+  holds an editable combobox (an `<Input>` with `role=combobox`) with a `ChevronDown` `IconButton`
+  at its end (**Choose a branch**, the touch target on a phone) and **Compare** beside it
+  (`<Button variant="accent" size="md">`,
   disabled while the field is empty; beside the field on a phone too, and the field as tall as it
   there). Before the first Compare the list says `Choose a base, then Compare.` and the field's
   placeholder `Branch or commit`; nothing is shown as loading. Opening the list reads the
   repository's local and remote branches (`GET /api/workspace/diff/refs`, nothing fetched) into a
-  `.menu` listbox in the form's own flow, under the field and **Compare** and as wide as both, at
+  listbox on `menuSurface` (flattened: no blur, no pop-in, on `bg-fill-1` with a card's ring,
+  since it sits in the form) in the form's own flow, under the field and **Compare** and as wide
+  as both, at
   every width: it pushes the files down instead of floating, so it never covers **Compare**, the
   scopes or the sheet's header, and a phone gets no popover over its sheet. A click elsewhere
-  closes it once the click is done, so nothing moves under a press: one `.menu-item` per branch with a
+  closes it once the click is done, so nothing moves under a press: one `menuItem` row
+  (`role="option"`, `aria-selected` as its highlight) per branch with a
   `GitBranch` glyph, its short name (`main`, `origin/main`) in mono and its commit's seven
   characters as the hint (both mono `--fs-md`, and on a phone the name `--fs-xl`, the hint and
   the list's notes `--fs-lg`: they are read and picked, not captions), the remote's symbolic HEAD
@@ -1709,7 +1941,9 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
 ### Header context and connection
 - A selected pane shows agent mark + title (`--fs-md`), then on the same line the crumb
   PC › workspace › folder (`--fs-xs`, `--text-dim`); with one PC registered the PC is left out, as
-  the sidebar leaves it out. The folder shows as its last name, and only
+  the sidebar leaves it out. The header's glyph buttons (the drawer and sidebar toggles, the
+  palette, Files, More) are ghost icon Buttons under `<Tooltip>`s, `--touch-target-header`
+  squares at `<=768px`. The folder shows as its last name, and only
   when the title, the workspace or the PC name shown on the line does not already say it
   (`lib/headerCrumb.ts`, which also owns the one-PC rule). The
   title may shorten with an ellipsis; the crumb never does: when it does not fit whole beside the
@@ -1733,7 +1967,9 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
 - Connection is one quiet chip, drawn only while the bridge is not live: a pulsing dot plus the
   written state - connecting until this page's first connection to the PC's socket, reconnecting
   after a drop, disconnected once output stopped. Below `900px` it keeps only its dot; the word stays as
-  its accessible text and in its tooltip. While live the chip takes no room and stays in the
+  its accessible text and in its tooltip. It is a `<Badge>` in the state's tone (`working` while
+  connecting or reconnecting, `blocked` once disconnected, `done` while live and clipped).
+  While live the chip takes no room and stays in the
   document as a `role="status"` a screen reader can read (`.conn-live`; never `display: none`).
 
 ### Chat turn (`.chat-turn`)
@@ -1771,7 +2007,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   label) is capped at `--chat-fold-lines` lines of its prose. Only such a message is measured, and
   only where the cap cuts it does it fold: the last line fades into the card through an alpha mask
   one prose line tall, over a **Show full message** text button on the card's right edge
-  (`--text-dim`, `--fs-xs`, `--bg-hover` and `--text-strong` under the pointer; a `--touch-target`
+  (a `<Button variant="crumb" size="xs">`: `--text-dim`, `--fs-xs`, `--text-strong` under the
+  pointer; a `--touch-target`
   row where the primary pointer is coarse). Open, it reads **Show less**, and folding brings the
   card's top back into view as a code block's fold does. The choice stays with the row while it
   leaves and re-enters the list, and Find landing on the turn opens a cut message, so a match is
@@ -1790,7 +2027,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   transcript's edge cannot be tapped). With a mouse the copy and format buttons keep their `--chip-h`
   look and take a `--pointer-target` hit area through an invisible `::before` expander.
 - A user turn of Claude Code, grok or agy carries one more glyph button beside its copy, the same
-  `.chat-copy` look (`.chat-rewind`, Tabler Undo2): **Rewind in terminal** sends nothing and
+  `.chat-copy` look (`.chat-rewind`, an `icon-sm` `IconButton` with Tabler Undo2): **Rewind in
+  terminal** sends nothing and
   opens the pane's terminal with a dismissible, one-line `.terminal-banner-rewind` hint to run
   the agent's own `/rewind`. Drafts stay intact. Chat follows the native transcript's active
   branch once the agent records it; it never guesses a restore from a dialog's wording. The
@@ -1824,9 +2062,9 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   verbatim, in the same card open (`.chat-outcome-result`, `role="status"`, its text focusable for
   scrolling) with **Dismiss**, which only hides it in this view and sends nothing, as an
   informational sheet is closed in the Claude and Codex apps; no keys reach the pane.
-  The chip's **Answer** / **Open Terminal** are text
-  buttons in the fold control's register (`--chip-h`, `--touch-target` where the primary pointer
-  is coarse). A command the transcript keeps no turn for (Claude's `/btw`, an informational
+  The chip's **Answer** / **Open Terminal** are
+  `xs` Buttons in the fold control's register (`field` for a way on, `crumb` for Dismiss and the
+  quiet row's Open Terminal; `--touch-target` where the primary pointer is coarse). A command the transcript keeps no turn for (Claude's `/btw`, an informational
   command) still gets a sent row (`.chat-turn-sent`): the same neutral bubble, time and copy,
   placed by its send time; once a transcript turn records the command the chip moves onto that
   turn and the row goes, so a command never shows twice. Prose messages carry no chip.
@@ -1848,9 +2086,10 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   There is no separate Raw action. HTML blocks in Markdown files are parsed in the preview worker
   with HTML enabled; local images still pass through the file endpoint's image-size check.
   The page has an h1 and no Close or new-tab action; the dialog keeps its focus trap and sheet swipe.
-  Actions use the existing header icon-button primitive, labels and focus states. On a phone the
+  Actions are `IconButton`s (`asChild` over a link for Open in a new tab, Open raw file and
+  Download), labels and focus states as everywhere. On a phone the
   header is one row: the name cut inside its stem, Show source and Copy, a **More** (Ellipsis)
-  menu holding new tab, raw and download, then Close; the size and folder are left out there unless
+  `<DropdownMenu>` holding new tab, raw and download, then Close; the size and folder are left out there unless
   a partial-view notice is among them. A reader page has no Close.
   A file opens in the popup unless Settings → Chat → Open files is Beside the pane (`fileOpen`,
   per device), which docks text and code from 980px; the header button moves the open file either way.
@@ -1863,8 +2102,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   `--fw-medium` cut inside its stem, then the actions as `--control-h` − 6px ghost buttons in one
   run (popup, new tab, raw, download, copy, Close), never stacked; and a toolbar of `--control-h` −
   `--space-1` carrying the meta line (size or partial-view notice, folder) and, at its end, the
-  file's view modes as a compact segmented control (**Preview | Source** for Markdown in place of
-  Show source, **Page | Source** for HTML) whose chosen segment is the row's one `--bg-hover` fill.
+  file's view modes as a `<ToggleGroup>` (**Preview | Source** for Markdown in place of
+  Show source, **Page | Source** for HTML).
   The content fills the panel edge to edge (no inset, radius or frame around a page, PDF or
   video; code and Markdown keep their `--space-3` inset). The panel's left edge is an unseen
   `--space-2` grip that draws a 2px `--accent` seam under the pointer, while held and on focus.
@@ -1887,7 +2126,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   column is never narrower than its longest word, and a table without room scrolls sideways in
   its own box.
   Thinking renders as a folded block only when **Show thinking** is enabled.
-- Auto-follow stops when the reader scrolls up; later output raises a **New messages** pill.
+- Auto-follow stops when the reader scrolls up; later output raises a **New messages** pill (a
+  `field` Button with an ArrowDown glyph; **Jump to latest** is the same as an `icon`).
   A message sent from this browser's message box resumes it once the bridge accepts it at once
   (a receipt with no pending item, no refusal and no uncertain answer): the view goes to the end
   and follows the turn and its reply there. Agent of Empires re-pins its view on any prompt, local,
@@ -1921,7 +2161,10 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   agent is blocked, by the pane's status and not by whether a prompt card was parsed) over
   one-line rows on the header's own left edge, which is the prose edge too (the hover plate
   overhangs it by `--space-1`).
-- A row is caret + verb + object: `▸ Read src/metrics.ts`, `▸ Edited src/pages/Reports.tsx`,
+- A row is a `<Collapsible>` whose trigger is the row itself (`aria-expanded` for free, the detail
+  `forceMount`ed where its reads must survive the fold); its state words (`failed`, `N pending`)
+  are `<Badge>`s in the state's tone. A row is caret + verb + object: `▸ Read src/metrics.ts`,
+  `▸ Edited src/pages/Reports.tsx`,
   `▸ Ran pnpm test`. The caret is always shown; there is no per-tool icon and no separator. The
   verb (Read, Edited, Wrote, Ran; `lib/toolVerbs.ts`, by exact tool id) is in the interface face,
   `--fs-sm`, `--text-dim`; the object is mono `--fs-xs`. A tool the table does not know, a call
@@ -2016,10 +2259,11 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   padding and hover tint, a dim caret at its end, `aria-haspopup="dialog"`, `aria-expanded` while
   its detail is open; `--touch-target` tall under a finger). Ended rows stay plain: what ended has
   the chat's task card.
-- It opens one `.modal` (a sheet on a phone, 640px on a desktop) over the list, which stays open
+- It opens one `<Dialog>` (`BackgroundAgentDetail`: a sheet on a phone, 640px on a desktop) over
+  the list, which stays open
   under the scrim: the working-tint status glyph, the task's title over its dim `agent · model`
   line (selectable, a phone's sheet header included), **Refresh** and **Close** as icon buttons.
-  The sheet is as tall as `.modal`'s cap from the first frame, so loading, a note and the
+  The sheet is as tall as the dialog's cap from the first frame, so loading, a note and the
   transcript fill the same frame and the title and buttons never move as a read lands. The body
   alone scrolls: a **Prompt** heading over the dispatch text, then **Work so far**, the agent's
   prose as it wrote it (`pre-wrap`, in a `52ch` measure) and each tool call as a mono name chip
@@ -2069,9 +2313,12 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
 - Type: the card follows Settings → Chat font size and Chat font, as the transcript does. The dock
   scales the `--fs-*` tokens by `--chat-scale` and sets `--font-chat`; the reference text, the
   keycaps and the step numbers stay `--font-mono`. The height limit does not scale.
-- Look: `--bg-elevated`, a `--border-strong` hairline, `--radius-xl`, no shadow. The title is
+- Look: a `<Card>` with a `<CardHeader>` (`--radius-xl`, `shadow-panel`, the header an
+  `<IconBadge>` holding the filled alert glyph in `--status-blocked`). The title is
   the card's one red (`--status-blocked`, `--fs-sm`, semibold); the "input needed" badge is read
-  by assistive tech and not drawn. The question is prose in `--text-strong`. Reference text (the
+  by assistive tech and not drawn. Confirm, Submit and a custom answer's Send are the card's
+  `accent` Buttons (`field` while nothing is picked), Cancel, Skip and View plan `field`, Back a
+  ghost `xs`; the fold is an `icon-sm` `IconButton`. The question is prose in `--text-strong`. Reference text (the
   command of an approval, a plan, a diff: the prompt's `body`) is the card's one mono box
   (`--bg`, `--fs-xs`); a question in words is never set in mono.
 - Height: at most the larger of 60% of the app's height (`--app-height`, so a phone's keyboard
@@ -2111,8 +2358,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   with no native question known, permissions and legacy prompts use the generic fallback card.
 - While an answer is on its way, a `--text-dim` `--fs-xs` line under the actions says `Sending your answer…` (`role="status"`), so a slow PC never looks like a dead button. When two reads of the screen in a row fail, the same line says `Not updated: the question on screen may have changed.` and the card stays as it was; the next read that answers clears it. A restarted poll (after a refused answer, or the page shown again) keeps the notice and goes on counting: one failed read, a refused answer and one more failed read show it. The line is in the card from its first render, clipped and empty (`.visually-hidden`, never `display: none`) until the answer goes out: a live region that appears together with its content is not announced. The card's busy state (`aria-busy`) sits on its options group (`.prompt-card-options`), never on the card: Chromium fires no live-region event inside an `aria-busy` subtree, so the status line stays outside it.
 - Options are flat full-width rows (`.prompt-card-option`), not boxes in the box: the menu's
-  number as a keycap (mono, `--fs-2xs`, a `--border-strong` outline; the option's name keeps
-  `1.`), the label, its description under it in `--text-dim`. All rows weigh the same: none is
+  number as a `<Kbd>` keycap (the option's name keeps `1.`), the label, its description under it
+  in `--text-dim`. A `(Recommended)` mark is a `<Badge tone="accent">`. All rows weigh the same: none is
   filled, outlined or put first as a default, since herdr has no ground to recommend one. Hover
   and focus fill a row `--bg-hover`; a checked or typed pick gets `--accent-tint` + an `--accent`
   border and keycap. A `(Recommended)` suffix, the agent's own mark, renders as a tag. On a
@@ -2139,21 +2386,24 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   transcript's end as an iPhone's input bar does: the composer rises `--composer-over`
   (`--space-8`) into the transcript, whose last lines fade into `--bg` and blur behind the card on
   `--card-glass` and `--glass-blur`.
-  The input box is a card: `--bg-elevated`, hairline border, `--radius-2xl`, `--shadow-card`
-  (the only other card on this surface is the prompt card docked over it, while an agent asks);
-  focus turns its border `--accent` (no inner outline). Above it the notices (below), the
+  The input box is a field surface: `--bg-input`, `--radius-lg`, `--shadow-surface` (a ring and the
+  inner light, no drawn border; the one card on this surface is the prompt card docked over it,
+  while an agent asks); focus within it turns the ring to `--shadow-focus` (the accent inside its
+  edge, a halo outside). Above it the notices (below), the
   completion popover and the background-task list; inside, the image strip is its own row at the top, then the auto-growing
-  message box as a row of its own at the card's full width (each tile's X is a `--chip-h` circle
+  message box as a row of its own at the card's full width (each tile's X is an `icon-sm`
+  `IconButton` drawn as a `--chip-h` circle
   with a mouse, reaching `--pointer-target` through an invisible `::before` expander; under a
   coarse pointer the button itself grows to `--touch-target` wide and `--touch-target` plus
   `--space-1` tall), then ONE row of controls under it:
-  on the left the add button (Tabler `Plus`, named "Attach files"), the mic when voice input
-  shows it (see Voice input), and the background-task chip; on the right the status content and ONE round Send/Stop button.
+  on the left the add button (an `IconButton`, Tabler `Plus`, named "Attach files"), the mic when
+  voice input shows it (see Voice input), and the background-task chip; on the right the status
+  content and ONE round Send/Stop button.
   The message's text starts `--space-4` in (`--space-3` on a phone, `480px` and below).
 - The strip (`.composer-strip`) tucked under the card, as t3code's composer context strip: the
   card's own `--bg-elevated` with a `--border` hairline, inset on each side by the card's radius
   (`--radius-2xl`, never under `--space-5`) so it stays under the card's straight bottom edge,
-  its top `--space-4` under the card, where the card's hairline and `--shadow-card` part the two,
+  its top `--space-4` under the card, where the card's ring and `--shadow-surface` part the two,
   and only its bottom corners rounded (`--radius-xl`); `--space-5` top padding (so `--space-1`
   shows under the card), `--space-3` at the sides, `--space-1` under. It names the pane's
   working folder at its start (Tabler `Folder`, the folder's last name, the whole path in its
@@ -2182,9 +2432,10 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   own empty line. While the composer is lifted, the completion menu's height is capped to the
   room over the input card, where it scrolls. On a coarse pointer the greeting takes no touch:
   a tap or drag on it reaches the chat under it, which puts the keyboard away.
-- The round button (`.composer-action`, a `--space-8` / `32px` circle with a `--space-4` glyph) is
-  Send or Stop in the same place at the same size, so only the glyph changes: Send is `--primary`
-  with Tabler `ArrowUp`; Stop is `--text-strong` with a `--bg` square, and turns
+- The round button (`.composer-action`, an `icon` Button rounded to a `--space-8` / `32px` circle
+  with a `--space-4` glyph) is
+  Send or Stop in the same place at the same size, so only the glyph changes: Send is
+  `variant="accent"` with Tabler `ArrowUp`; Stop is `variant="field"` with a `--bg` square, and turns
   `--status-blocked` on hover and focus. Not connected, Stop is disabled and loses its fill
   (`--border-strong` outline, `--text-dim` glyph). A coarse pointer keeps that compact visible
   circle inside a transparent `--touch-target` / `44px` button, so tapping remains easy.
@@ -2289,11 +2540,13 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   terminal lens floats as top-right pills (another app holds the pane, a failed output stream, the
   input held for the terminal, a copy note) stand over the card instead, in the held messages'
   anatomy: one `--border` hairline above the group, then a row per notice (`role="status"`), no
-  tint and no box, every line of text `--space-3` in. A row is its lucide mark and its sentence in
-  `--text-dim` at `--fs-xs` (`--status-working` for the two warnings: another app holds the pane,
-  the stream failed), its own way on at its end (`Open here`, `Reconnect`, in the held rows' buttons)
-  and an X named `Dismiss notice`. The held input's row has no sentence on screen: the held text
-  (mono, one line, an ellipsis, the whole text as its title) and two `.icon-button` controls named
+  tint and no box, every line of text `--space-3` in. A row is an `<Alert>` (`tone="neutral"`;
+  `notice` for the two warnings: another app holds the pane, the stream failed) with
+  `role="status"`: its Tabler mark and its sentence in
+  `--text-dim` at `--fs-xs`, its own way on at its end (`Open here`, `Reconnect`, `field` `sm`
+  Buttons) and an `IconButton` X named `Dismiss notice`. The held input's row has no sentence on
+  screen: the held text
+  (mono, one line, an ellipsis, the whole text as its title) and two ghost `icon` Buttons named
   `Send held input` and `Discard held input`, as the terminal lens's held-input row; a clipped
   `Input held:` stays in the row for its `role="status"` words. Top to bottom
   the rows are the plain notice, then the urgent ones, then the activity (the held input) nearest
@@ -2340,8 +2593,9 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
 - Commands that run in the terminal (the catalog's `visibility: "terminal"`, or a bare form whose
   interaction is the terminal; `terminalCommand`, `src/lib/compose.ts`) are listed apart, last,
   under **Terminal commands**, and each carries a **Terminal** badge wherever it is listed, under a
-  typed query too (`.composer-menu-badge`: the `.badge` primitive in the quiet register, `--text-dim`
-  on `--bg-elevated`, never shrunk; the description beside it gives way). A row the agent's own
+  typed query too (`.composer-menu-badge`: a `<Badge tone="idle">`, never shrunk; the description
+  beside it gives way). The completion menu itself is the legacy `.menu` (`listbox`: a menu over
+  a text box must leave the caret and the keys where they are). A row the agent's own
   menu hides (`agent-hidden`) is never listed, and typed by hand it is sent like any text. The
   menu inserts a terminal command like any other completion; Send/Enter submits it through the
   ordinary input path. There is no extra composer notice or confirmation button.
@@ -2461,7 +2715,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   (`20,000-character limit`), said once through the composer's polite region as the cap is reached;
   no line under the card repeats it. The caret and selection move only with the
   text they sit in, so typing while files upload is not disturbed.
-- An upload that failed is one note on the box's top edge (`.composer-note`, `role="alert"`): what
+- An upload that failed is one note on the box's top edge (`.composer-note`, an
+  `<Alert tone="danger">`): what
   failed and the cause when it is known (`Couldn't attach · PC disk is full`, from the status or the
   server's own words, `lib/userError.ts` `userFailure`); with no known cause the line is
   `Couldn't attach` and Try again beside it uploads the file again (`offersRetry`: no cause, or the
@@ -2479,14 +2734,16 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
 - Enter sends and Shift+Enter breaks by default; with **Enter sends** off, Mod+Enter sends. On touch screens the same device setting is shown inverted as **Return inserts a new line**, with Send and hardware Mod+Enter explained below it. IME Enter is ignored. Stop sends Escape. While the agent works and a draft shows Send in Stop's place, Escape in the box is Stop; an open completion menu takes the first Escape, and its X in the top corner (`.composer-menu-close`, Close suggestions, sticky over the rows it scrolls; the first row leaves it room) does the same for a pointer or a phone, which has no Escape, keeping the text and the focus in the box. T3 Code's command menu closes on Escape alone. Working Send schedules a pending message; its Send now action submits that same message now.
 
 ### Voice input
-- A mic button sits beside the add button in the composer and beside Send in the terminal input line; it
-  fills with `--accent` while recording. Dictated text is inserted at the caret, never sent.
+- A mic button (a ghost `icon` Button with `aria-pressed`, under a `<Tooltip>`) sits beside the add
+  button in the composer and beside Send in the terminal input line; it
+  takes the accent while recording. Dictated text is inserted at the caret, never sent.
 - `voiceInput`: `auto`, `on` or `off`; default `auto`. Auto puts the mic in the composer only, not on
   a phone (the composer's `(max-width: 640px), (pointer: coarse)`), and leaves it out where dictation
   cannot work (no HTTPS, or no key and no browser recognition). On shows it in both inputs and on a
   phone, disabled with its reason where it cannot work.
-- The recording pill shows Cancel, a **Recording** label, the level bars, a mono timer and Done.
-  Amber only; `--danger` stays for errors.
+- The recording pill shows Cancel (a ghost `icon-sm` Button), a **Recording** label, the level
+  bars, a mono timer and Done (an `accent` `icon-sm` Button).
+  The accent only; the danger tones stay for errors.
 
 ### Command palette
 - At `<=480px` the header has no palette button: the More menu's first item, **Search panes and
@@ -2499,7 +2756,7 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   and Escape closes. IME candidate, commit and cancel keys stay with composition. Buttons reached
   with Tab keep their native activation, and arrow navigation scrolls the selected result into view.
 - Actions cover new workspace, new tab, lens/sidebar/theme, settings, notifications, lock and refresh, with
-  `.kbd` hints resolved from this browser's shortcut settings; disabled bindings have no hint.
+  `<Kbd>` hints resolved from this browser's shortcut settings; disabled bindings have no hint.
   With a pane selected they add herdr's **Split pane right / down**, the same **and open it**
   (herdr's `--focus`: the new pane is opened here only then) and, in a tab of several panes,
   **Zoom pane** / **Unzoom pane**.
@@ -2510,7 +2767,7 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   as Zed's settings search lands on the setting rather than its page. Titles rank before words
   found only in aliases, and a page before its groups. A search closed without picking leaves no
   request behind.
-- Rows are grouped as herdr's Goto picker groups them: a `.menu-heading` per PC/workspace (PC
+- Rows are grouped as herdr's Goto picker groups them: a dim 12/550 heading per PC/workspace (PC
   name when multiple PCs are registered, workspace name, a linked worktree's branch in mono when
   the name does not say it, the row count), Recent (up to
   three, an unsearched and unfiltered list only) before the workspaces, Actions last. The
@@ -2524,7 +2781,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   store both machine and pane IDs; existing per-PC history migrates into the combined list.
   New workspace, pane operations and plugin actions keep the selected PC's context and are not
   retargeted by hovering or searching another PC's panes.
-- Status chips (`.palette-filter`, a `radiogroup`) sit between the search and the list: All, then
+- Status chips (`.palette-filter`, a `<ToggleGroup type="single">`, so a `radiogroup` with one Tab
+  stop) sit between the search and the list: All, then
   INPUT, RUN, READY, DONE, BG in `STATUS_WORD`'s words with counts over all connected PCs. The
   checked chip takes its badge's tint and text (All and READY the neutral hover fill); a chip no
   pane answers to keeps a dashed edge. A chip is `--control-h` minus `--space-2` tall, and on a
@@ -2533,7 +2791,10 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   start of the query shows the actions alone and hides the chips.
 - The footer (`.palette-footer`) names the picked row's place (PC › workspace › tab, omitting
   the PC for a single-PC roster) and its path in
-  mono; on a desktop it also carries the `.kbd` hints for Left/Right (workspace) and `>` (actions).
+  mono; on a desktop it also carries the `<Kbd>` hints for Left/Right (workspace) and `>` (actions).
+- The palette is a `menuSurface` card (glass, `shadow-popover`) on the `.modal-scrim` shell at
+  `--z-palette`, its Close a ghost icon Button; a plugin's failure is an `<Alert tone="danger">`
+  over the rows.
 - Keys: Left and Right step to the previous or next section from a row, or from the search field
   while the caret sits at the text's edge; inside the text they move the caret. herdr's picker
   letters (`b` `w` `i` `d` `a` for a filter, `/` back to the search) act only while the focus is
@@ -2548,10 +2809,15 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   above the preview). Settings owns Escape until it closes; the preview keeps its history entry
   underneath for the next Back or close. With no preview open Settings stays at `--z-modal`. The
   command palette opened from its shortcut shows above both (`--z-palette`).
-- One page at a time. From 641px the dialog is two columns at a fixed size (`--content-w` wide,
-  `40rem` tall, so turning a page never moves its edge): a `13rem` list of pages on `--bg`
-  (icon + name, the open one on `--bg-hover` with its glyph in `--accent`) and the open page
-  beside it under its own title and the close button. A phone shows one of the two: the sheet
+- One page at a time. The dialog is a `<Dialog>` (`DialogContent` as a sheet on a phone), its
+  header on an etched `divider-b`. From 641px it is two columns at a fixed size (`--content-w`
+  wide, `40rem` tall, so turning a page never moves its edge): a `13rem` list of pages on `--bg`
+  (the page's filled Tabler mark + name, the open one a raised face: `bg-elevated` under
+  `bg-raised` with `shadow-raised`, as the sidebar's chosen row) and the open page
+  beside it under its own title and the close button. The list stays its own `tablist` of
+  `role="tab"` buttons rather than a `<Tabs>`: it is vertical, it turns the page on arrow keys
+  beside an open page and is a list of rows with a chevron on a phone, and the scripts find the
+  pages by `data-settings-page`. A phone shows one of the two: the sheet
   (`92%` tall) opens on the list, drawn as one card of rows with a chevron each, and a page
   replaces it under a Back to settings control. The dialog's accessible name stays **Settings**
   on every page; the list is a vertical `tablist` with one Tab stop, and the arrows walk it
@@ -2572,14 +2838,15 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   Keep screen on, Install; then Portal, where the server offers it; then paired devices),
   **Remote PCs**, **About** (Updates, herdr, the repository links). A button that points at
   Updates opens the dialog on About.
-- Every page is built from the same parts (`components/SettingsControls.tsx`). A group is an
-  optional caption (`--fs-sm`, `--fw-semibold`, `--text-dim`, sentence case) over one card:
-  `--bg-elevated`, hairline `--border`, `--radius-lg`, its rows parted by hairlines and never
-  boxed on their own. A row is a label (`--fs-sm`, `--fw-medium`, `--text-strong`) with at most
-  one dim sentence under it (`--fs-xs`, no wider than `54ch`) and one control at the end of the
-  line. The controls are a switch, a segmented control for two to four short choices, a select
-  for five or more, a stepper (minus, value in `--font-mono`, plus, in one bordered well) and a
-  text field; inside a card they sit on `--bg-input`. On a phone a control that needs the line
+- Every page is built from the same parts (`components/SettingsControls.tsx`, the editor's
+  `settings-section`). A group is a `<Card>` (`.settings-section`, the class the regression scripts
+  read) with a `<CardHeader>`: the group's filled Tabler mark in an `<IconBadge>`, its name at
+  16/550, one dim sentence, and a control at its end where the group has one (a PC's state
+  `<Badge>`). A row is a `<CardRow>`: a title (`text-sm font-medium text-strong`) with at most one
+  dim sentence under it (no wider than `54ch`) and one control at the end of the line, on a
+  field's own surface. The controls are a `<Switch>`, a `<ToggleGroup>` for two to four short
+  choices, a `<Select>` for five or more, a stepper (two ghost steps around a bare number in one
+  `fieldSurface` well, `h-input`) and an `<Input>`. On a phone a control that needs the line
   (three or more segments, a text field, or a long sentence above it) goes under its label at
   the card's width, its segments sharing it equally; the rest stay on the label's line. A
   condition that applies right now (Keep screen on without HTTPS) is one more line under the
@@ -2588,11 +2855,10 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   a `details` whose `summary` is the sentence); the conditions and exceptions open under it. On
   coarse pointers an invisible expander gives that line the touch target without changing its
   height.
-- Settings selects use `SettingsSelect` in `components/SettingsControls.tsx`: an inset Lucide
-  chevron with space reserved beside the text. This follows the padded indicator in
-  [T3 Code](https://github.com/pingdotgg/t3code/blob/main/apps/web/src/components/ui/select.tsx),
-  but keeps the native select and OS picker rather than a custom popup. The decorative arrow
-  passes clicks through; forced-colors mode restores the native indicator.
+- Settings selects are `SettingsSelect` in `components/SettingsControls.tsx`: the shadcn `<Select>`
+  (Select, above), `13rem` wide, its options grouped under `SelectLabel`s where the list has
+  families (the themes). It replaced the native select with its padded indicator: the list is
+  long and grouped, and the menu surface keeps it in the app's own type on every OS.
 - Terminal keeps Key bar as a compact description and Edit key bar button. That button opens
   a detail screen in the same dialog with its own scroll body and a Back to settings control.
   Back or Escape returns to the Terminal page's scroll position and focuses Edit key bar;
@@ -2649,12 +2915,13 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   sign-in status with an existing status-token dot, without badge pills. Within-provider reorder
   and visibility controls stay in fixed columns; hidden rows remain listed but fade. Empty lists
   show one dim sentence.
-- The global Add opens the shared `.modal` (a bottom sheet at 640px and below), with the existing
+- The global Add opens a `<Dialog>` (`UsageAccountDialog`; a bottom sheet at 640px and below), with
+  Radix's
   focus trap, Escape/close and return focus. Its small stepper leads through provider (Claude, Codex,
   Cursor, GitHub Copilot, Grok, Antigravity, OpenCode, then Hub, in server discovery order),
   method, and authentication; Back preserves the provider context. The provider step uses two equal
   columns above 640px to fit eight choices without expanding the existing modal width, and a single
-  column on phones. The existing bounded `.modal-body` alone scrolls inside the sheet; its header
+  column on phones. The `DialogBody` alone scrolls inside the sheet; its header
   and Back/Close remain fixed. No grid reordering: keyboard and reading order match the server.
   Use **Hub** in labels and source metadata; name CLIProxyAPI only in the picker description,
   **Import accounts from CLIProxyAPI**. Descriptions stay short across all four languages.
@@ -2680,15 +2947,16 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   and t3code's inline authentication metadata/compact hub row; their pixels are not copied.
   An unreadable hub configuration leaves the hub unconfigured without blocking server startup;
   its fixed diagnostic is logged and returned by the hub status endpoint, never its saved key.
-- A shared setting or pin the server refused to save is one alert at the top of whichever page is
+- A shared setting or pin the server refused to save is one `<Alert tone="danger">` at the top of
+  whichever page is
   open, never a mark on each row: the sentence in `--status-blocked` with the server's own words
   behind Details, then a dim "Not saved on the server yet; reloading or closing this page can undo
-  the change." at the reading size (14 px, 15 px under a finger) and one `.btn` Retry, which wraps
+  the change." at the reading size (14 px, 15 px under a finger) and one `field` Button Retry,
+  which wraps
   below the words on a phone. It never claims the change is kept on this device: only the open page
   holds it, and a reload takes the server's values again. While Retry's save is on the way the
   sentence says "Sending the change to the server…" and Retry is disabled, dimmed by its color
-  rather than faded so it stays legible; a mouse's press draws the amber edge of a pressed icon
-  button, a finger's fills it as a pressed settings row fills. Korean keeps each predicate and short
+  rather than faded so it stays legible; a press takes the field button's pressed face. Korean keeps each predicate and short
   phrase on one line.
   The change is sent again every few seconds; after three failures in a row sending pauses until
   Retry, the event stream reopens or a longer wait ends (a minute, doubling up to five), and edits
@@ -2745,8 +3013,8 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
 - While herdr's viewport is above the bottom and the pane is interactive, a round ArrowDown
   "Jump to bottom" button floats over the grid's bottom-right corner and sends `pane.scroll`
   offset 0, the one-tap way back to the live bottom now that no scrollbar offers End. It uses
-  the chat lens' round button form (`--control-h`, `--touch-target` on coarse pointers,
-  `--radius-pill`, `--shadow-pop`), keeps focus in the terminal, and is hidden at the bottom, in
+  the chat lens' round button form (an `<IconButton variant="field">`, its tooltip to its left,
+  `--control-h`, `--touch-target` on coarse pointers, `--radius-pill`), keeps focus in the terminal, and is hidden at the bottom, in
   read-only views and while Find owns the viewport. A grown touch input line floats over it.
 - Mod+Shift+PageUp/PageDown pages the selected pane only, preserving chat composer focus and
   selection. Chat moves instantly by its viewport minus one prose line;
@@ -2787,14 +3055,16 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   joining view needs the replay drawn, so only its side effect goes. Every xterm upgrade ports
   `oscStringState` (`scripts/xterm-parser-state.test.ts`) and reruns
   `scripts/replay-clipboard-demo-regression.ts`.
-- Terminal banners stack top-right for ended, reconnecting, view-only and held-input states, and
+- Terminal banners (`<Alert role="status">`: `neutral` for a state, `notice` for a warning,
+  `danger` for a failed stream, `done` for a copy note) stack top-right for ended,
+  reconnecting, view-only and held-input states, and
   say only what the person needs now (section 1). Ended reads **Terminal ended**; input held for
   the pane stays until the person sends or discards it (pty-exit also comes with a herdr restart).
   View only is the neutral pill with an eye glyph and the words **View only**: no accent, no
   sentence about the operator's grid. Held input, once the socket is back, is one row on the
-  neutral elevated surface with the `--border` hairline: the command in mono (one line, cut with an
-  ellipsis, the whole text as its title) and two `.icon-button` controls named **Send held input**
-  and **Discard held input**, `--touch-target` square on a coarse pointer; no label and no chip on
+  neutral Alert: the command in mono (one line, cut with an
+  ellipsis, the whole text as its title) and two `IconButton`s named **Send held input** (the
+  `accent` one) and **Discard held input**, `--touch-target` square on a coarse pointer; no label and no chip on
   screen (the live region keeps a clipped "Input held:" for its words). What the row has to tell
   only when it applies (text or an Enter left out) sits on a line under it.
   Under the chat lens, while the input card shows, the ones it shares with the composer (another
@@ -2810,6 +3080,10 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   had, so the grid and the pty are not resized. Keys draw at `--key-h` (`--keybar-h` less `3 * --space-1`), centered
   in the bar with equal room above and below, and reach `--touch-target` through an invisible
   expander inside the bar; the bar's safe-area padding is added below that.
+- The key bar and the touch input line stay hand-rolled (`KeyBar.css`, `TerminalInput.css`, on the
+  same tokens: a key is a `shadow-surface` cap): a key must cancel pointerdown and mousedown so
+  the soft keyboard stays on xterm's textarea, and the line's two actions are a caption over a
+  round face, which no Button size draws. Only the mic there is a `<Button>`.
 - The mobile key bar starts with Esc, Tab and `^C`, then sticky Ctrl/Alt/Shift, Enter and arrows;
   it never steals typing focus, and on a touch screen it never takes the focus either: a key tapped
   with the keyboard put away leaves it away (only the keyboard key or a tap on the line or the grid
@@ -2835,7 +3109,7 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   `--fs-chat`: "Insert text"; "Send", or "Enter" on an empty line) and its `--touch-target` round
   face below. Send's face is the filled accent; Insert's is outlined on `--bg-elevated` in
   `--text-dim`, which holds 3:1 against the panel where the `--border` hairline does not; its glyph
-  is lucide's text-cursor-input, Send keeps its arrow. Off (an empty line, disconnected, a send or
+  is Tabler's `TextCursorInput` (lib/icons.ts), Send keeps its arrow. Off (an empty line, disconnected, a send or
   insert on its way) a face turns to a dashed `--text-dim` outline with dim words, never a fade. A
   composition says "Finish the word, then insert." instead of sending the preedit. The text goes as
   the keyboard would type it, with no Enter after it (`insert`, feature `terminal-insert`), and no
@@ -2847,7 +3121,7 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   text with the note under the line (`.terminal-input-note`, `--fs-chat`), and a clipboard read
   still waiting says so in the note's dim `.is-pending` form. Korean notes keep each clause whole
   (no-break spaces inside it, keep-all between). On a touch screen the key bar's **Paste**
-  (`[data-key="paste"]`, lucide clipboard-paste, "Paste into the input line") stands beside the
+  (`[data-key="paste"]`, Tabler `ClipboardPaste`, "Paste into the input line") stands beside the
   Input line toggle, `--space-1` further from its neighbours than other keys: a tap, never a hold,
   read from that tap alone and dropped when the line, its caret, a composition, the pane, mode,
   role, input lease or connection changed before the clipboard answered, even and back again. With
@@ -2871,10 +3145,16 @@ Alert rows of the table above from the `--droplet-*` roles in `src/styles.css`.
   up puts it away; it leaves by itself 3.6s after its text shows, and waits while touched.
 - Not for the pane already open, and not while the app is hidden (system notifications cover that).
 - Reduced motion: it fades in and out where it rests, without falling or spreading.
+- The card is its own (`Droplet.css`, on the `--droplet-*` tokens, §4): it is island black on every
+  theme and moves as liquid, which no card recipe draws. Its one control, Dismiss, is a ghost
+  `icon-sm` Button rounded full, recoloured by the droplet tokens.
 
 ### Token gate
-- A centered password card replaces the entire shell while authentication is required. It has a real
-  label, autofocused field, primary Unlock button and linked alert text.
+- A centered `<Card>` (`.access-gate`, `data-testid="token-gate"`) replaces the entire shell while
+  authentication is required. It has a `<Field>` with a real label over an autofocused `<Input>`,
+  one full-width `accent` Button, an `<Alert tone="danger">` linked by `aria-describedby`, a
+  `notice` Alert where Tailscale says the device is someone else's, and **Have an access token
+  instead?** as a `<Collapsible>` whose trigger is a ghost Button.
 - Success mounts the shell; Lock unsubscribes push, deletes auth and returns to the gate.
 
 ### Role (no control surface)
@@ -2891,28 +3171,36 @@ The values are the ones in `src/styles.css`.
 
 | Type | Token | Value | Usage |
 |------|-------|-------|-------|
-| Micro | `--dur-fast` | `150ms` | Hover, active, toggle and control state |
-| Standard | `--dur-base` | `200ms` | Drawer slide; reserved dialog timing token |
+| Micro | `--dur-fast` | `150ms` | Hover, active, toggle and control state (colour, background, shadow under the pointer, on `--ease-in-out`); the pop-in of every Radix content (a menu, a tooltip, a popover, a dialog) |
+| Standard | `--dur-base` | `200ms` | A dialog's scrim fading in, the `.modal` shells' pop-in, the drawer slide (on `--ease-out`); a select's chevron turn and a switch's thumb are 200ms too |
+| Layout | `--dur-slow` | `300ms` | A layout change (the sidebar's width, a panel sliding in); today the settle of a segmented option's colour |
 | Pulse | `--dur-pulse` | `1600ms` | Working and reconnecting dots (trough opacity 0.35; text never pulses) |
 | Spin | `--dur-spin` | `1600ms` | One turn of a stepped spinner (the command palette's busy arc); the step count sets the frame rate |
 | Breathe | `--dur-breathe` | `2000ms` | The sidebar's working dot: full for 40% of the cycle, six steps down to opacity 0.5, held, six steps back; every dot shares the document clock's phase, so several runs breathe together. It replaced a spinning arc that read as flicker beside the rows |
-| Easing | `--ease-out` | `cubic-bezier(0.25, 1, 0.5, 1)` | Finite transitions |
+| Easing | `--ease-out` | `cubic-bezier(0.25, 1, 0.5, 1)` | What appears (GSAP's power3.out): pop-in, fade-in, the drawer, a progress bar's value (300ms) |
+| In-out easing | `--ease-in-out` | `cubic-bezier(0.76, 0, 0.24, 1)` | What changes state under the pointer (power3.inOut): colour, background and shadow of every control |
+| Smooth easing | `--ease-smooth` | `cubic-bezier(0.7, 0, 0, 1)` | Layout and travel: the sidebar's width, a switch's thumb |
 | Pulse easing | `--ease-pulse` | `steps(2, jump-none)` | Endless working and reconnecting dots; avoids drawing every display refresh |
 | Spring easing | `--ease-spring` | `cubic-bezier(0.32, 0.72, 0, 1)` | Voice recording pill enter (180ms, scale 0.96->1 + opacity, from the mic button) and exit (120ms); a phone's sheet rising and springing back |
 | Sheet in | `--dur-sheet` | `360ms` | A phone's sheet rising, and springing back after a short drag |
 | Sheet out | `--dur-sheet-out` | `240ms` | A phone's sheet dropping, however it closed |
 
 ### Rules
-- Only state changes move: hover/press, the drawer, a phone's sheets, settings switches, working and
-  reconnecting.
-- From `641px` dialogs and their scrims snap open and closed; they have no entrance or exit
-  animation. At `<=640px` they are bottom sheets and move as an iPhone's do (Modal, above): what a
-  finger drags follows the finger, and the rest rises and drops.
+- Only state changes move: hover/press, what appears (a menu, a tooltip, a dialog, a popover),
+  the drawer, a phone's sheets, settings switches, working and reconnecting.
+- What appears pops in: a fade with a breath of scale (`0.96` to `1`, `animate-pop-in` at
+  `--dur-fast`: a menu, a tooltip or a popover from its trigger's corner, a dialog over its scrim
+  fading in at `--dur-base`; the `.modal` shells pop in at `--dur-base`) and pops out faster
+  (`animate-pop-out`, 100ms). From `641px` that is a dialog's whole motion. At `<=640px` dialogs are bottom sheets and move as an iPhone's do
+  (Dialog, above): what a finger drags follows the finger, and the rest rises and drops.
+- The tooltip waits 400ms, then 300ms of skip between neighbours, so a bar read glyph by glyph
+  does not flicker.
 - The voice recording waveform is the one surface allowed to draw every frame: only while
   recording, driven by the live microphone level, transform-only (`scaleY` on 7 bars). The pill is
   a state change, not a dialog, so the snap rule above does not apply to it.
-- `prefers-reduced-motion: reduce` removes pulses, drawer/control transitions, sheet rise and drop,
-  smooth chat scrolling and settings toggle motion; a drag still follows the finger. State remains legible without animation.
+- `prefers-reduced-motion: reduce` removes pulses, drawer/control transitions, pop-in and
+  pop-out (`motion-reduce:animate-none` on every Radix content), sheet rise and drop,
+  smooth chat scrolling and the switch's travel; a drag still follows the finger. State remains legible without animation.
   One exception: the sidebar's RUN dot keeps its stepped breath, opacity only and nothing moving,
   so a running agent does not look frozen.
 - Under reduced motion the voice pill swaps its bars for one level bar updated at 4 Hz and drops
@@ -2945,13 +3233,13 @@ own: the pane is a card by its ring, the sidebar by its darker panel.
 
 | Shadow | Usage |
 |--------|-------|
-| `--shadow-surface` | A control: `.btn`, a field, an outlined glyph button |
+| `--shadow-surface` | A control: `<Button variant="field">`, a field, the stepper's well, a key bar cap (`.btn` where it is left) |
 | `--shadow-raised` | A raised face: the chosen nav row (the selected sidebar row), an icon badge |
 | `--shadow-sunken` | A well: the segmented track, a switch's track |
 | `--shadow-tab` | The chosen option of a segmented control |
 | `--shadow-chip` | A tag, a badge, the connection chip |
 | `--shadow-panel` | A card on its panel |
-| `--shadow-popover` | A menu, the palette (with `--popover-blur` behind it) |
+| `--shadow-popover` | A menu, a select's list, a popover, the palette (`menuSurface`, with `--popover-blur` behind it) |
 | `--shadow-dialog` | A dialog (over `--scrim` and `--scrim-blur`) |
 | `--shadow-tooltip` | A tooltip |
 | `--shadow-primary` | The accent button: a glow of its own colour |
@@ -2959,7 +3247,7 @@ own: the pane is a card by its ring, the sidebar by its darker panel.
 | `--edge-highlight` | The inner light alone, added to a role shadow (`--shadow-pop`) |
 | `--shadow-drawer` | Mobile drawer (a theme role) |
 | `--shadow-pop` | Overlays drawn by the legacy primitives (a theme role) |
-| `--shadow-card` | The composer's input box (a theme role) |
+| `--shadow-card` | A sidebar row lifted by a finger (`.is-lifted`); a theme role |
 
 Also `--divider` (an etched line as a background, `background-size: 100% var(--divider-h)`),
 `--surface-sheen` (down a chip), `--raised-face` (a face lit from above), `--primary-sheen` (over
@@ -2992,9 +3280,16 @@ shadcn components reach these as Tailwind utilities (`src/tailwind.css`): `shado
   chrome (header, sidebar, tab strip, key bar, menus, sheet heads and feet, buttons, tabs, labels)
   is not selectable and opens no link callout, while the transcript, code, files and fields are;
   page pinch zoom remains available on ordinary content, while the terminal's two-finger pinch
-  sizes its font; landscape does not inflate text. A pressed button dims to `0.55` at once in place
-  of the amber `:active` box; a list row (sidebar, agent, menu, sheet, Settings page) fills instead.
-- `prefers-reduced-motion` is honored. Lucide/inline SVG decoration is hidden from assistive tech.
+  sizes its font; landscape does not inflate text. A pressed button takes its pressed face at
+  once (`active:` a step more fill); a list row (sidebar, agent, menu, sheet, Settings page)
+  fills, and a sidebar row's held press dims it to `0.55`.
+- `prefers-reduced-motion` is honored. Tabler/inline SVG decoration is hidden from assistive tech
+  (`aria-hidden` on every glyph beside a word; a glyph alone has its button's `aria-label`).
+- Radix adds its own roles and keys (a menu's arrows, Home and End, typeahead; a dialog's focus
+  trap and Escape; a toggle group's roving focus where it is on). Every `aria-label`, `role`,
+  `data-testid`, `id` and `title` the markup had before the move is kept on the same element, and
+  the hand-rolled shells keep their own keyboard rules, so the regression scripts find what they
+  did. A tooltip is never the only name: `IconButton` puts the name on the button.
 - Global shortcuts default to **Mod+Shift+key**: Mod is Command on Apple platforms and Ctrl
   elsewhere. Settings lists the global bindings and allows changing or disabling them, with
   duplicate assignments blocked and known browser/OS reservations warned about. Record also keeps
@@ -3023,4 +3318,4 @@ shadcn components reach these as Tailwind utilities (`src/tailwind.css`): `shado
 |------|----------|--------------|------|
 | Terminal content accessibility relies on xterm defaults | `PaneTerminal.tsx` | Screen-reader mode changes terminal DOM and input behavior | Decide with herdr TUI owners |
 | Drawer has no focus trap | `.sidebar.is-open` | Closed state leaves the tab order, but open-state trapping is not implemented | Add a shared focus utility |
-| Modal focus is initialized, not fully trapped | Dialog components | Escape/scrim/close work; tab containment is not shared | Add the same focus utility |
+| Two focus traps: Radix's in `<Dialog>`, `useFocusTrap` in the `.modal-scrim` shells | New workspace, worktree, Files, file viewer, diff viewer, palette, row sheet | Both hold the focus; the shells stay on `.modal-scrim` while lib/sheets.ts and lib/sheetHistory.ts drive their phone sheet | Teach lib/sheets.ts a Radix `DialogContent`, then move the shells onto `<Dialog>` |
