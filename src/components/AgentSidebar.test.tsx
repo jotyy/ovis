@@ -27,7 +27,8 @@ describe("AgentSidebar phone sheet live row", () => {
   let historyState: unknown;
   let steppedBack: Promise<void>;
   let originalTokens: ReturnType<typeof currentAgentRowTokens>;
-  const anchor = { isConnected: true, focus() {}, querySelector: () => null };
+  // the row's ⋯, as RowMenu reads it: it places a desktop menu by the button's box
+  const anchor = { isConnected: true, focus() {}, querySelector: () => null, getBoundingClientRect: () => ({ top: 0, left: 0, width: 0, height: 0 }) };
 
   beforeEach(() => {
     originalTokens = currentAgentRowTokens();

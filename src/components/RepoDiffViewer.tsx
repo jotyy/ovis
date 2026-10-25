@@ -1,5 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowDown, ArrowUp, Check, Columns2, Copy, CopySlash, FileText, FoldVertical, Rows3, Search, TriangleAlert, X } from "../lib/icons.ts";
+import { Badge, IconButton, Input, ToggleGroup, ToggleGroupItem, TooltipProvider } from "./ui/index.ts";
+import { statusTone } from "./RepoChanges.tsx";
 
 import "./FindBar.css";
 import "./RepoDiffViewer.css";
@@ -53,9 +55,9 @@ function CopyButton({ text, label, doneLabel, icon, onShowText }: { text: string
     if (await copyText(text)) setCopied(true);
     else onShowText(text);
   };
-  return <button type="button" className="icon-button repo-diff-action" aria-label={name} title={name} disabled={text === null} onClick={() => void copy()}>
+  return <IconButton label={name} className="repo-diff-action" disabled={text === null} onClick={() => void copy()}>
     {copied ? <Check aria-hidden="true" /> : icon}
-  </button>;
+  </IconButton>;
 }
 
 /** Where the active match is, in words: its kind and its line on its side, so it is not told by the row's tint alone. */
@@ -222,54 +224,60 @@ export function RepoDiffViewer({ target, onClose, onOpenFile, keyboardActive = t
   })();
 
   return (
+    <TooltipProvider>
     <div className="modal-scrim repo-diff-scrim" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className="modal repo-diff-viewer" role="dialog" aria-modal="true" aria-label={t("Changes to {name}", { name: `${stem}${extension}` })} ref={surface} tabIndex={-1}>
-        <header className="modal-header repo-diff-header">
-          <div className="repo-diff-title">
-            <h2 className="modal-title"><span className="repo-diff-stem">{stem}</span>{extension}</h2>
-            <p className="repo-diff-meta" title={oldPath === null ? path : t("Renamed from {path}", { path: oldPath })}>
+        <header className="repo-diff-header flex items-center gap-4 px-5 py-4 divider-b">
+          <div className="repo-diff-title min-w-0 flex-1">
+            {/* the extension never gives way: a long name is cut inside its stem */}
+            <h2 className="m-0 flex min-w-0 text-lg font-medium whitespace-nowrap text-strong text-engraved"><span className="repo-diff-stem min-w-0 truncate">{stem}</span>{extension}</h2>
+            <p className="repo-diff-meta m-0 flex min-w-0 items-center gap-2 font-mono text-2xs whitespace-nowrap text-dim" title={oldPath === null ? path : t("Renamed from {path}", { path: oldPath })}>
+              {/* the status and counts come with the patch: their places are kept, so the line does not jump when they land */}
               {load.status === "pending" && <>
-                <Skeleton className="repo-diff-skeleton-status" />
-                <Skeleton className="repo-diff-skeleton-counts" />
+                <Skeleton className="repo-diff-skeleton-status h-chip w-[6em] rounded-md" />
+                <Skeleton className="repo-diff-skeleton-counts w-[4em]" />
               </>}
-              {file !== null && <span className="repo-diff-status" data-status={file.status}>{statusWord(t, file.status)}</span>}
-              {file !== null && file.additions !== null && file.deletions !== null && <span className="repo-diff-counts">
-                <span className="repo-diff-added">+{file.additions.toLocaleString()}</span>
-                <span className="repo-diff-deleted">−{file.deletions.toLocaleString()}</span>
+              {/* the status in words, in the tone the rows of that kind take */}
+              {file !== null && <Badge tone={statusTone(file.status)} className="repo-diff-status font-sans uppercase tracking-[var(--tracking-caps)]" data-status={file.status}>{statusWord(t, file.status)}</Badge>}
+              {file !== null && file.additions !== null && file.deletions !== null && <span className="repo-diff-counts inline-flex shrink-0 gap-1 tabular-nums">
+                <span className="repo-diff-added text-done">+{file.additions.toLocaleString()}</span>
+                <span className="repo-diff-deleted text-blocked">−{file.deletions.toLocaleString()}</span>
               </span>}
-              {file?.binary === true && <span className="repo-diff-binary">{t("Binary")}</span>}
-              {notes.length > 0 && <span className="repo-diff-notice" title={notes.join("\n")}>
+              {file?.binary === true && <span className="repo-diff-binary shrink-0">{t("Binary")}</span>}
+              {/* a partial view (left plain, one column on a phone): the warning colour with an icon, so it is not told by colour alone */}
+              {notes.length > 0 && <span className="repo-diff-notice inline-flex shrink-0 cursor-help items-center gap-1 font-medium text-notice [&>svg]:size-[1.1em] [&>svg]:shrink-0" title={notes.join("\n")}>
                 <TriangleAlert aria-hidden="true" />
                 <span>{notes[0]}</span>
                 <span className="visually-hidden">{notes.join(". ")}</span>
               </span>}
-              <span className="repo-diff-compare">{comparisonWord(t, target)}</span>
-              {folder !== "" && <span className="repo-diff-path"><span dir="ltr">{folder}</span></span>}
+              <span className="repo-diff-compare shrink-0">{comparisonWord(t, target)}</span>
+              {folder !== "" && <span className="repo-diff-path min-w-0 flex-1 overflow-hidden text-left text-ellipsis [direction:rtl]"><span dir="ltr">{folder}</span></span>}
             </p>
           </div>
-          <div className="repo-diff-actions">
-            <div className="segmented repo-diff-styles" role="group" aria-label={t("Diff layout")}>
-              <button type="button" aria-pressed={style === "unified"} onClick={() => update({ diffStyle: "unified" })}><Rows3 aria-hidden="true" /><span className="repo-diff-style-word">{t("Unified")}</span></button>
-              <button type="button" aria-pressed={style === "split"} disabled={narrow} title={narrow ? t("Split view needs a wider screen") : undefined} onClick={() => update({ diffStyle: "split" })}><Columns2 aria-hidden="true" /><span className="repo-diff-style-word">{t("Split")}</span></button>
-            </div>
-            <div className="repo-diff-group">
-              <button ref={findButton} type="button" className="icon-button repo-diff-action" aria-pressed={finding} aria-label={t("Find in diff")} title={patch === null && !finding ? t("There is no loaded patch to search.") : t("Find in diff")} disabled={patch === null && !finding} onClick={() => (finding ? closeFind() : openFind())}><Search aria-hidden="true" /></button>
-              <button type="button" className="icon-button repo-diff-action" aria-pressed={folded} aria-label={t("Fold context")} title={folded ? t("Showing one line around each change") : t("Fold context")} disabled={patch === null} onClick={() => setFolded((value) => !value)}><FoldVertical aria-hidden="true" /></button>
-              <button type="button" className="icon-button repo-diff-action" aria-label={t("Open file")} title={t("Open file")} disabled={!openable} onClick={() => answer !== null && onOpenFile(repositoryFilePath(answer.repository.root, path))}><FileText aria-hidden="true" /></button>
+          <div className="repo-diff-actions flex shrink-0 items-center gap-4">
+            <ToggleGroup type="single" className="repo-diff-styles" value={style} aria-label={t("Diff layout")} onValueChange={(value) => { if (value === "unified" || value === "split") update({ diffStyle: value }); }}>
+              <ToggleGroupItem value="unified"><Rows3 aria-hidden="true" /><span className="repo-diff-style-word">{t("Unified")}</span></ToggleGroupItem>
+              {/* Split on a phone: offered and declined in place, with the reason as its tooltip and a note in the meta line */}
+              <ToggleGroupItem value="split" disabled={narrow} title={narrow ? t("Split view needs a wider screen") : undefined}><Columns2 aria-hidden="true" /><span className="repo-diff-style-word">{t("Split")}</span></ToggleGroupItem>
+            </ToggleGroup>
+            <div className="repo-diff-group flex items-center gap-1">
+              <IconButton ref={findButton} label={t("Find in diff")} className="repo-diff-action" aria-pressed={finding} title={patch === null && !finding ? t("There is no loaded patch to search.") : t("Find in diff")} disabled={patch === null && !finding} onClick={() => (finding ? closeFind() : openFind())}><Search aria-hidden="true" /></IconButton>
+              <IconButton label={t("Fold context")} className="repo-diff-action" aria-pressed={folded} title={folded ? t("Showing one line around each change") : t("Fold context")} disabled={patch === null} onClick={() => setFolded((value) => !value)}><FoldVertical aria-hidden="true" /></IconButton>
+              <IconButton label={t("Open file")} className="repo-diff-action" disabled={!openable} onClick={() => answer !== null && onOpenFile(repositoryFilePath(answer.repository.root, path))}><FileText aria-hidden="true" /></IconButton>
               {shown === null && <>
                 <CopyButton text={path} label={t("Copy path")} doneLabel={t("Path copied")} icon={<CopySlash aria-hidden="true" />} onShowText={(text) => setShown({ kind: "path", text })} />
                 {(load.status === "pending" || patch !== null) && <CopyButton text={patch} label={t("Copy patch")} doneLabel={t("Patch copied")} icon={<Copy aria-hidden="true" />} onShowText={(text) => setShown({ kind: "patch", text })} />}
               </>}
             </div>
           </div>
-          <button type="button" className="icon-button repo-diff-action repo-diff-close" aria-label={t("Close diff")} title={t("Close diff")} onClick={onClose}><X aria-hidden="true" /></button>
+          <IconButton label={t("Close diff")} className="repo-diff-action repo-diff-close" onClick={onClose}><X aria-hidden="true" /></IconButton>
         </header>
         {finding && <form className="find-bar repo-diff-find" role="search" aria-label={t("Find in diff")} onSubmit={(event) => { event.preventDefault(); step(1); }}>
           <div className="find-bar-controls">
             <label className="find-bar-query">
               <Search size={16} aria-hidden="true" />
               <span className="repo-diff-find-label">{t("Find in diff")}</span>
-              <input ref={findInput} className="input" type="search" value={query} maxLength={DIFF_FIND_MAX_QUERY} disabled={patch === null} spellCheck={false}
+              <Input ref={findInput} type="search" value={query} maxLength={DIFF_FIND_MAX_QUERY} disabled={patch === null} spellCheck={false}
                 onChange={(event) => { setQuery(event.target.value); setActiveIndex(0); }}
                 onKeyDown={(event) => {
                   if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
@@ -280,14 +288,15 @@ export function RepoDiffViewer({ target, onClose, onOpenFile, keyboardActive = t
               {findCount}
               {activeMatch !== null && <span className="repo-diff-find-place">{matchPlace(t, activeMatch)}</span>}
             </span>
-            <button className="icon-button repo-diff-action" type="button" aria-label={t("Previous match")} title={t("Previous match")} disabled={matches.length === 0} onClick={() => step(-1)}><ArrowUp size={16} aria-hidden="true" /></button>
-            <button className="icon-button repo-diff-action" type="button" aria-label={t("Next match")} title={t("Next match")} disabled={matches.length === 0} onClick={() => step(1)}><ArrowDown size={16} aria-hidden="true" /></button>
-            <button className="icon-button repo-diff-action" type="button" aria-label={t("Close search")} title={t("Close search")} onClick={closeFind}><X size={16} aria-hidden="true" /></button>
+            <IconButton label={t("Previous match")} className="repo-diff-action" disabled={matches.length === 0} onClick={() => step(-1)}><ArrowUp size={16} aria-hidden="true" /></IconButton>
+            <IconButton label={t("Next match")} className="repo-diff-action" disabled={matches.length === 0} onClick={() => step(1)}><ArrowDown size={16} aria-hidden="true" /></IconButton>
+            <IconButton label={t("Close search")} className="repo-diff-action" onClick={closeFind}><X size={16} aria-hidden="true" /></IconButton>
           </div>
           <p className="find-bar-hint">{patch === null ? t("There is no loaded patch to search.") : t("Searches this loaded patch, including context. Content outside the patch is not searched.")}</p>
         </form>}
         <div className="repo-diff-body">{body}</div>
       </section>
     </div>
+    </TooltipProvider>
   );
 }

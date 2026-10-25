@@ -193,7 +193,7 @@ export function BackgroundTasks({ paneId, count, omo, claude = false, plan = nul
     const main = <span className="bg-task-main">
       <span className="bg-task-title">{task.title}<span className="sr-only"> ({words[task.status]})</span></span>
       {(meta.length > 0 || (task.status !== "running" && task.status !== "completed")) && <span className="bg-task-meta">
-        {task.status !== "running" && task.status !== "completed" && <Badge tone={task.status === "cancelled" ? "idle" : "blocked"} className="bg-task-state">{words[task.status]}</Badge>}
+        {task.status !== "running" && task.status !== "completed" && <Badge tone={task.status === "cancelled" ? "idle" : "blocked"} className="task-state">{words[task.status]}</Badge>}
         {meta.length > 0 && <span>{meta}</span>}
       </span>}
     </span>;
@@ -236,7 +236,7 @@ export function BackgroundTasks({ paneId, count, omo, claude = false, plan = nul
         {wave.map((node) => {
           const Icon = NODE_ICONS[node.state];
           const tone = node.state === "running" ? "working" : node.state === "completed" ? "done" : node.state === "failed" || node.state === "blocked" ? "blocked" : "idle";
-          return <Badge key={node.id} tone={tone} className={`bg-node is-${node.state}`} title={node.error ?? undefined}><Icon aria-hidden="true" />{node.label}<span className="sr-only"> ({nodeWords[node.state]})</span></Badge>;
+          return <Badge key={node.id} tone={tone} className={`run-node is-${node.state}`} title={node.error ?? undefined}><Icon aria-hidden="true" />{node.label}<span className="sr-only"> ({nodeWords[node.state]})</span></Badge>;
         })}
       </li>)}</ol>
       {failedNodes.filter((node) => node.error !== null).map((node) => <p key={node.id} className="bg-run-error">{node.label}: {node.error}</p>)}
@@ -269,7 +269,7 @@ export function BackgroundTasks({ paneId, count, omo, claude = false, plan = nul
         <span className="bg-task-title">{step.label}</span>
         {step.status === "in_progress" && step.active && step.active !== step.label && <span className="bg-step-active">{step.active}</span>}
         <span className="bg-task-meta">
-          <Badge tone={step.status === "in_progress" ? "working" : step.status === "completed" ? "done" : "idle"} className="bg-task-state">{stepWords[step.status]}</Badge>
+          <Badge tone={step.status === "in_progress" ? "working" : step.status === "completed" ? "done" : "idle"} className="task-state">{stepWords[step.status]}</Badge>
           {meta.length > 0 && <span>{meta}</span>}
         </span>
       </span>
@@ -285,7 +285,7 @@ export function BackgroundTasks({ paneId, count, omo, claude = false, plan = nul
     {open && <div id={id} ref={menu} className="menu bg-tasks-menu" role="dialog" aria-live="off" aria-label={planShown && tasksShown ? t("Plan and background tasks") : planShown ? t("Plan") : t("Background tasks")}>
       {planShown && <>
         <div className="menu-heading">{t("Plan")}{plan && <span className="bg-plan-progress">{t("{done} of {total} done", { done: plan.done, total: plan.total })}</span>}</div>
-        {plan && plan.total > 0 && <Progress className="bg-plan-bar" value={Math.round((plan.done / plan.total) * 100)} aria-label={t("Plan: {done} of {total} done", { done: plan.done, total: plan.total })} indicatorClassName={plan.done === plan.total ? "bg-done" : undefined} />}
+        {plan && plan.total > 0 && <Progress className="plan-bar" value={Math.round((plan.done / plan.total) * 100)} aria-label={t("Plan: {done} of {total} done", { done: plan.done, total: plan.total })} indicatorClassName={plan.done === plan.total ? "bg-done" : undefined} />}
         {steps === undefined && !planFailed && <p className="bg-tasks-note">{t("Reading the plan…")}</p>}
         {steps === null && <p className="bg-tasks-note">{t("This session keeps no plan right now")}</p>}
         {planFailed && <p className="bg-tasks-note" role="status">{t("Couldn't read the plan. Trying again…")}</p>}
@@ -302,10 +302,10 @@ export function BackgroundTasks({ paneId, count, omo, claude = false, plan = nul
       {goingRuns.length > 0 && <><div className="menu-heading">{t("Workflows")}</div><ul className="bg-task-list">{goingRuns.map(runView)}</ul></>}
       {running.length > 0 && <><div className="menu-heading">{t("Running")}</div><ul className="bg-task-list">{running.map(row)}</ul></>}
       {summary.ended > 0 && <>
-        <Button variant="ghost" size="sm" className="bg-ended-toggle" aria-expanded={showEnded} aria-controls={endedId} onClick={() => setShowEnded(!showEnded)}>
+        <Button variant="ghost" size="sm" className="ended-toggle" aria-expanded={showEnded} aria-controls={endedId} onClick={() => setShowEnded(!showEnded)}>
           {showEnded ? <ChevronDown aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
           <span>{t("{n} recently ended", { n: summary.ended })}</span>
-          {summary.failed > 0 && <Badge tone="blocked" className="bg-ended-failed">{t("{n} failed", { n: summary.failed })}</Badge>}
+          {summary.failed > 0 && <Badge tone="blocked" className="ended-failed">{t("{n} failed", { n: summary.failed })}</Badge>}
         </Button>
         <ul id={endedId} className="bg-task-list" hidden={!showEnded}>{endedRuns.map(runView)}{ended.map(row)}</ul>
       </>}

@@ -254,11 +254,11 @@ export function SessionHistory({ workspace, panes, agent: firstAgent, sourcePane
                       {when && <time className="session-time" dateTime={row.updatedAt} title={when.title}>{when.label}</time>}
                       {shown || withheld ? (
                         <span className="session-actions">
-                          <Badge tone="accent" className="pill">{t("Already open")}</Badge>
+                          <Badge tone="accent" className="session-pill">{t("Already open")}</Badge>
                           <Button variant="field" size="xs" className="session-action" disabled={pending !== null || relisting || shown === undefined} aria-label={t("Open the pane showing {title}", { title })} onClick={() => { if (shown) onSelectPane(shown.pane_id); }}>{t("Open")}</Button>
                         </span>
                       ) : unbound ? (
-                        <Badge tone="idle" className="pill" title={t("This PC can't start this session in the store it was listed from")}>{t("Resume unavailable")}</Badge>
+                        <Badge tone="idle" className="session-pill" title={t("This PC can't start this session in the store it was listed from")}>{t("Resume unavailable")}</Badge>
                       ) : resumable && (
                         <Button variant="field" size="xs" className="session-action" disabled={pending !== null || relisting} aria-label={t("Resume {title}", { title })} onClick={() => resume(row)}>{t("Resume")}</Button>
                       )}

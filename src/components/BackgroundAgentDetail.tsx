@@ -104,13 +104,13 @@ export function BackgroundAgentDetail({ paneId, task, onClose }: { paneId: strin
               <DialogTitle className="bg-agent-detail-title" id={`${id}-title`}>{detail?.title ?? task.title}</DialogTitle>
               {meta.length > 0 && <p className="bg-agent-detail-meta">{meta}</p>}
             </div>
-            {supported && <IconButton className="bg-agent-detail-refresh" label={t("Refresh")} disabled={loading} onClick={load}><RefreshCw aria-hidden="true" /></IconButton>}
+            {supported && <IconButton className="icon-button agent-detail-refresh" label={t("Refresh")} disabled={loading} onClick={load}><RefreshCw aria-hidden="true" /></IconButton>}
           </DialogHeader>
           {/* the body is the one scroll region: a tab stop of its own, so the keyboard reaches a long transcript */}
           <DialogBody className="bg-agent-detail-body" role="region" aria-labelledby={`${id}-title`} tabIndex={0}>
             {loading && detail === null && note([t("Loading…")])}
             {/* a failure reads as a sentence, never as an empty transcript: the words carry it, and the alert's tone says it first */}
-            {failure !== null && <Alert tone="danger" className="bg-agent-note is-failure" role="status">{lines(notes[failure])}</Alert>}
+            {failure !== null && <Alert tone="danger" className="agent-failure" role="status"><p className="bg-agent-note">{lines(notes[failure])}</p></Alert>}
             {failure !== null && detail !== null && note([t("Couldn't refresh: this is what it last read")])}
             {empty && note([t("Nothing recorded yet"), t("The agent may still be starting. Try Refresh in a moment.")])}
             {detail?.truncated === true && note([t("The agent wrote more than this view reads."), t("The middle part is left out.")])}

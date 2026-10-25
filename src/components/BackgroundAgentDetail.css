@@ -9,6 +9,9 @@
 .bg-agent-detail {
   max-width: 640px;
   height: min(calc(100dvh - 64px), 720px);
+  /* the class is named for the regression scripts; tailwind-merge takes its bg- for a background
+     utility and drops the dialog's own, so the surface is set again here */
+  background: var(--bg-elevated);
 }
 
 @media (max-width: 640px) {
@@ -53,7 +56,7 @@
   overflow-wrap: anywhere;
 }
 
-.bg-agent-detail-refresh {
+.agent-detail-refresh {
   flex: none;
   color: var(--text-dim);
 }
@@ -68,7 +71,7 @@
   }
 
   /* a phone's header controls keep the touch target the header gives them */
-  .bg-agent-detail-refresh {
+  .agent-detail-refresh {
     width: var(--touch-target);
     height: var(--touch-target);
     margin: calc((var(--control-h) - var(--touch-target)) / 2) 0;
@@ -98,10 +101,9 @@
   line-height: var(--lh-base);
 }
 
-/* a failure is an Alert in the danger tone: its lines stack as a note's do */
-.bg-agent-note.is-failure {
-  flex-direction: column;
-  font-size: var(--fs-md);
+/* a failure is an Alert in the danger tone, its note inside it in the alert's own colour */
+.agent-failure .bg-agent-note {
+  color: inherit;
 }
 
 .bg-agent-section {

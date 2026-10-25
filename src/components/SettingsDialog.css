@@ -5,6 +5,8 @@
 .settings-dialog {
   grid-template-columns: 13rem minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
+  max-width: var(--content-w);
+  height: min(calc(100dvh - 64px), 40rem);
 }
 
 .settings-header {
@@ -184,6 +186,8 @@
 @media (max-width: 640px) {
   .settings-dialog {
     grid-template-columns: minmax(0, 1fr);
+    max-width: none;
+    height: 92dvh;
   }
 
   .settings-header,

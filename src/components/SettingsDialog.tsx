@@ -310,7 +310,7 @@ function AppearancePage() {
       <SettingsRow label={t("Density")}>
         <Segmented label={t("Density")} value={settings.density} onChange={(density) => update({ density })} options={[{ value: "comfortable", label: t("Comfortable") }, { value: "compact", label: t("Compact") }]} />
       </SettingsRow>
-      <SettingsRow label={t("Language")} description={t("Follows the browser unless you choose one")} htmlFor="settings-language">
+      <SettingsRow label={t("Language")} description={t("Follows the browser unless you choose one")} htmlFor="settings-language" wide>
         <SettingsSelect id="settings-language" value={settings.language} onChange={(value) => update({ language: value as typeof settings.language })} options={LANGUAGE_SETTINGS.map((language) => ({ value: language, label: language === "system" ? t("System") : LANGUAGE_NAMES[language] }))} />
       </SettingsRow>
       <SettingsRow label={t("Sidebar rows")} description={t("Name each workspace on one line, or show what its agent is doing with the workspace under it")} wide>
@@ -453,7 +453,7 @@ function TerminalPage({ keyBarButtonRef, onEditKeyBar }: { keyBarButtonRef: RefO
       <SettingsRow label={t("Wheel scroll speed")} description={t("How far one turn of the wheel scrolls the terminal")}>
         <Stepper label={t("Wheel scroll speed")} value={settings.terminalWheelSpeed} unit="×" min={TERMINAL_WHEEL_SPEED_MIN} max={TERMINAL_WHEEL_SPEED_MAX} decreaseLabel={t("Slower wheel scrolling")} increaseLabel={t("Faster wheel scrolling")} onChange={(terminalWheelSpeed) => update({ terminalWheelSpeed })} />
       </SettingsRow>
-      <SettingsRow label={t("Terminal input mode")} htmlFor="terminal-input-mode">
+      <SettingsRow label={t("Terminal input mode")} htmlFor="terminal-input-mode" wide>
         {/* "auto", the stored default, types straight into the grid on every device: it reads as Direct typing */}
         <SettingsSelect id="terminal-input-mode" value={settings.terminalInputMode === "line" ? "line" : "direct"} onChange={(value) => update({ terminalInputMode: value as "line" | "direct" })} options={[{ value: "direct", label: t("Direct typing") }, { value: "line", label: t("Input line") }]} />
       </SettingsRow>
@@ -556,7 +556,7 @@ function VoicePage() {
           <Segmented label={t("Microphone button")} value={settings.voiceInput} onChange={(voiceInput) => void chooseVoiceInput(voiceInput)} options={VOICE_BUTTONS.map((voiceInput) => ({ value: voiceInput, label: t(voiceInput === "auto" ? "Auto" : voiceInput === "on" ? "On" : "Off") }))} />
         </SettingsRow>
         {settings.voiceInput !== "off" && (
-          <SettingsRow label={t("Dictation language")} description={t("Auto listens for the app's language, or for the browser's when the app is not translated into it")} htmlFor="settings-voice-language">
+          <SettingsRow label={t("Dictation language")} description={t("Auto listens for the app's language, or for the browser's when the app is not translated into it")} htmlFor="settings-voice-language" wide>
             <DictationLanguageSelect />
           </SettingsRow>
         )}
@@ -637,10 +637,10 @@ function LaunchModesGroup() {
   const t = useT();
   return (
     <SettingsGroup title={t("New agents")} icon={<Bot />} section="launch-modes" note={t("Applies to agents started from New workspace, New tab and New worktree. Agent default adds no flag, so the agent's own configuration decides.")}>
-      <SettingsRow label="Claude Code" description={t("Permission mode")} htmlFor="settings-claude-launch-mode">
+      <SettingsRow label="Claude Code" description={t("Permission mode")} htmlFor="settings-claude-launch-mode" wide>
         <SettingsSelect id="settings-claude-launch-mode" value={settings.claudeLaunchMode} onChange={(value) => update({ claudeLaunchMode: value as ClaudeLaunchMode })} options={CLAUDE_LAUNCH_MODES.map((mode) => ({ value: mode, label: claudeModeName(mode, t) }))} />
       </SettingsRow>
-      <SettingsRow label="Codex" description={t("Sandbox and approvals")} htmlFor="settings-codex-launch-mode">
+      <SettingsRow label="Codex" description={t("Sandbox and approvals")} htmlFor="settings-codex-launch-mode" wide>
         <SettingsSelect id="settings-codex-launch-mode" value={settings.codexLaunchMode} onChange={(value) => update({ codexLaunchMode: value as CodexLaunchMode })} options={CODEX_LAUNCH_MODES.map((mode) => ({ value: mode, label: codexModeName(mode, t) }))} />
       </SettingsRow>
     </SettingsGroup>
@@ -1225,7 +1225,7 @@ function OpenSettingsDialog({ section = null, linkPage = null, linkSection = nul
         aria-describedby={undefined}
         closeLabel={t("Close settings")}
         tabIndex={-1}
-        className={cn("settings-dialog grid", narrow ? "h-[92dvh]" : "h-[min(calc(100dvh-64px),40rem)] max-w-(--content-w)", overPreview && "z-[calc(var(--z-modal)+2)]")}
+        className={cn("settings-dialog grid", overPreview && "z-[calc(var(--z-modal)+2)]")}
         // the focus is placed by the layout effect above: the open page's row, or the Back button on a phone
         onOpenAutoFocus={(event) => event.preventDefault()}
         onEscapeKeyDown={(event) => {
@@ -1246,7 +1246,7 @@ function OpenSettingsDialog({ section = null, linkPage = null, linkSection = nul
             <p className="settings-nav-title" aria-hidden="true">{t("Settings")}</p>
             <div ref={tabsRef} className="settings-tabs" role="tablist" aria-orientation="vertical">
               {PAGES.map(({ id, icon: Icon }, index) => (
-                <button key={id} type="button" role="tab" className="settings-tab group flex h-9 w-full cursor-pointer items-center gap-3 rounded-[10px] px-2.5 text-left text-sm font-medium text-dim outline-none transition-[background-color,color] duration-150 ease-in-out hover:bg-fill-2 hover:text-text focus-visible:ring-2 focus-visible:ring-accent/60 aria-selected:bg-elevated aria-selected:bg-raised aria-selected:text-strong aria-selected:shadow-raised [&_svg]:size-[18px] [&_svg]:shrink-0 aria-selected:[&_svg]:text-accent" data-settings-page={id} aria-selected={page === id} aria-controls={page === id ? "settings-panel" : undefined} tabIndex={focusable === id ? 0 : -1} onClick={() => openPage(id)} onKeyDown={(event) => onTabKey(event, index)}>
+                <button key={id} type="button" role="tab" className="settings-tab group flex h-9 w-full cursor-pointer appearance-none items-center gap-3 rounded-[10px] border-0 bg-transparent px-2.5 text-left text-sm font-medium text-dim outline-none transition-[background-color,color] duration-150 ease-in-out hover:bg-fill-2 hover:text-text focus-visible:ring-2 focus-visible:ring-accent/60 aria-selected:bg-elevated aria-selected:bg-raised aria-selected:text-strong aria-selected:shadow-raised [&_svg]:size-[18px] [&_svg]:shrink-0 aria-selected:[&_svg]:text-accent" data-settings-page={id} aria-selected={page === id} aria-controls={page === id ? "settings-panel" : undefined} tabIndex={focusable === id ? 0 : -1} onClick={() => openPage(id)} onKeyDown={(event) => onTabKey(event, index)}>
                   <Icon aria-hidden="true" />
                   <span className="min-w-0 flex-1 truncate">{label(id)}</span>
                   <ChevronRight className="settings-tab-chevron" aria-hidden="true" />

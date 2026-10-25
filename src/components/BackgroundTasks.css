@@ -158,8 +158,10 @@
   list-style: none;
 }
 
-/* what ended is one line until asked for (a ghost Button the row wide): the list is for what runs now */
-.bg-ended-toggle {
+/* what ended is one line until asked for (a ghost Button the row wide): the list is for what runs now.
+   Classes on a shadcn component never start with bg-: tailwind-merge would take them for a
+   background utility and drop the component's own */
+.ended-toggle {
   justify-content: flex-start;
   gap: var(--space-1);
   width: 100%;
@@ -170,7 +172,7 @@
   font-weight: var(--fw-regular);
 }
 
-.bg-task-list + .bg-ended-toggle {
+.bg-task-list + .ended-toggle {
   margin-top: var(--space-1);
   background-image: var(--divider);
   background-repeat: no-repeat;
@@ -179,17 +181,17 @@
   border-radius: 0 0 var(--radius-md) var(--radius-md);
 }
 
-.bg-ended-toggle svg {
+.ended-toggle svg {
   width: 12px;
   height: 12px;
   flex: none;
 }
 
-.bg-ended-toggle[aria-expanded="true"] {
+.ended-toggle[aria-expanded="true"] {
   color: var(--text);
 }
 
-.bg-ended-failed {
+.ended-failed {
   margin-left: var(--space-1);
 }
 
@@ -281,7 +283,7 @@
   text-transform: none;
 }
 
-.bg-plan-bar {
+.plan-bar {
   width: auto;
   margin: 0 var(--space-2) var(--space-2);
 }
@@ -320,7 +322,7 @@
 }
 
 /* the state word, a Badge, on the meta line */
-.bg-task-state {
+.task-state {
   margin-top: 2px;
 }
 
@@ -355,7 +357,7 @@
 }
 
 /* a step of a wave is a Badge in its state's tone (ui/badge); a long label wraps inside it */
-.bg-node {
+.run-node {
   height: auto;
   min-height: var(--chip-h);
   max-width: 100%;
@@ -363,8 +365,8 @@
   overflow-wrap: anywhere;
 }
 
-.bg-node svg { width: 12px; height: 12px; flex: none; }
-.bg-node.is-running svg { animation: pulse var(--dur-pulse) var(--ease-pulse) infinite; }
+.run-node svg { width: 12px; height: 12px; flex: none; }
+.run-node.is-running svg { animation: pulse var(--dur-pulse) var(--ease-pulse) infinite; }
 
 .bg-run-error {
   margin: var(--space-1) 0 0;
@@ -374,7 +376,7 @@
   overflow-wrap: anywhere;
 }
 
-.bg-task .sr-only, .bg-node .sr-only {
+.bg-task .sr-only, .run-node .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;

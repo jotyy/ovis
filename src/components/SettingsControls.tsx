@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentProps, type ReactNode } from "react";
+import { Children, useEffect, useState, type ComponentProps, type ReactNode } from "react";
 import { Minus, Plus } from "../lib/icons.ts";
 import { cn } from "../lib/cn.ts";
 import { Button, Card, CardContent, CardHeader, CardRow, Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, Switch, ToggleGroup, ToggleGroupItem } from "./ui/index.ts";
@@ -23,7 +23,8 @@ export function SettingsGroup({ title, description, icon, action, note, classNam
   return (
     <Card className={cn("settings-section settings-card", className)} data-section={section} tabIndex={section ? -1 : undefined} {...rest}>
       {title !== undefined && <CardHeader icon={icon} title={title} description={description} action={action} />}
-      {(children !== undefined || note !== undefined) && <CardContent className="gap-3 p-4">
+      {/* a card that is its header alone (a PC with nothing to do) draws no empty body */}
+      {(Children.toArray(children).length > 0 || note !== undefined) && <CardContent className="gap-3 p-4">
         {note !== undefined && <p className="settings-description settings-note">{note}</p>}
         {children}
       </CardContent>}
