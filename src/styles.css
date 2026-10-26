@@ -262,6 +262,8 @@
   /* a well's floor: the segmented track and other recesses sit a step below their surface */
   --well: color-mix(in srgb, var(--bg) 78%, black);
   --edge-highlight: inset 0 1px 0 var(--edge-light), inset 0 0 0 1px var(--edge-light);
+  /* a fall of shade down a field button's face (Blob0's outline button); none unless a palette draws it */
+  --field-face: none;
   --shadow-surface: 0 2px 4px -1px rgba(0, 0, 0, 0.08), 0 1px 1px -1px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--ink-1), var(--edge-highlight);
   --shadow-raised: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.16), var(--edge-highlight);
   --shadow-sunken: 0 0 0 1px var(--ink-2), 0 1px 1px rgba(0, 0, 0, 0.05), inset 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -661,68 +663,112 @@
   --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
-/* Studio in light: the editor's own light tokens (shadcn's neutral scale), white content on a
-   grey chrome, the same violet; the states darkened until each reads AA on white */
+/* Studio in light: Blob0's light system (blob0.com; the values are read off its stylesheet, no
+   code is taken). White content on a neutral-100 chrome, every edge neutral-200, the text
+   neutral-950 over neutral-500, and blue for the accent and the primary action (blue-600, lit to
+   blue-500 at the top of a button). The states are its status colours: blue-800 working, rose-700
+   blocked, lime-800 done, yellow-800 for a notice; each reads AA on white. Depth is its layered
+   shadow (a ring of neutral at 8%, then 1px, 3px, 6px … of black at 6% each half as strong),
+   never the dark line of the shared light block: the surface tokens are overridden below. */
 [data-theme="light"][data-palette="studio"] {
   --bg: #ffffff;
-  --bg-panel: #f5f5f6;
-  --bg-elevated: #fafafa;
-  --bg-hover: #ebebed;
-  --bg-input: #ffffff;
-  --border: #e4e4e7;
-  --border-strong: #d1d1d6;
-  --text: #27272a;
-  --text-dim: #62626b;
-  --text-strong: #0a0a0b;
-  --accent: #5016ff;
-  --accent-tint: rgba(80, 22, 255, 0.1);
-  --primary: #5016ff;
-  --primary-hover: #4812e6;
+  --bg-panel: #f7f7f7;
+  --bg-elevated: #ffffff;
+  --bg-hover: #f2f2f2;
+  --bg-input: #f7f7f7;
+  --border: #ebebeb;
+  --border-strong: #d4d4d4;
+  --text: #171717;
+  --text-dim: #737373;
+  --text-strong: #0a0a0a;
+  --accent: #155dfc;
+  --accent-tint: rgba(21, 93, 252, 0.1);
+  --primary: #155dfc;
+  --primary-hover: #2b7fff;
   --primary-text: #ffffff;
-  --primary-tint: rgba(80, 22, 255, 0.12);
-  --status-idle: #62626b;
-  --status-working: #0a5a6d;
-  --status-blocked: #a8282c;
-  --status-done: #136029;
-  --status-working-tint: rgba(10, 90, 109, 0.12);
-  --status-blocked-tint: rgba(168, 40, 44, 0.12);
-  --status-done-tint: rgba(19, 96, 41, 0.12);
-  --danger-tint: rgba(168, 40, 44, 0.1);
-  --notice: #a85a00;
-  --danger-text: #9b1c1c;
-  --scrim: rgba(10, 10, 11, 0.4);
+  --primary-tint: rgba(21, 93, 252, 0.12);
+  --status-idle: #737373;
+  --status-working: #193cb8;
+  --status-blocked: #c70036;
+  --status-done: #3c6300;
+  --status-working-tint: rgba(43, 127, 255, 0.14);
+  --status-blocked-tint: rgba(236, 0, 63, 0.1);
+  --status-done-tint: rgba(94, 165, 0, 0.14);
+  --danger-tint: rgba(236, 0, 63, 0.08);
+  --notice: #894b00;
+  --danger-text: #c70036;
+  --scrim: rgba(10, 10, 10, 0.4);
   --term-bg: #ffffff;
-  --term-fg: #27272a;
-  --term-cursor: #5016ff;
-  --term-selection: #e6ddff;
-  --term-black: #27272a;
-  --term-red: #b3261e;
-  --term-green: #22743a;
-  --term-yellow: #8a5300;
-  --term-blue: #0b6e8a;
-  --term-magenta: #6f42c1;
-  --term-cyan: #0f6f74;
-  --term-white: #62626b;
-  --term-bright-black: #4e4b47;
-  --term-bright-red: #c92d24;
-  --term-bright-green: #277d3f;
-  --term-bright-yellow: #9f6100;
-  --term-bright-blue: #1a7391;
-  --term-bright-magenta: #7f52d1;
-  --term-bright-cyan: #13767e;
-  --term-bright-white: #0a0a0b;
+  --term-fg: #171717;
+  --term-cursor: #155dfc;
+  --term-selection: #dbeafe;
+  --term-black: #171717;
+  --term-red: #c70036;
+  --term-green: #3c6300;
+  --term-yellow: #894b00;
+  --term-blue: #1447e6;
+  --term-magenta: #8200db;
+  --term-cyan: #005f78;
+  --term-white: #737373;
+  --term-bright-black: #525252;
+  --term-bright-red: #e7000b;
+  --term-bright-green: #497d00;
+  --term-bright-yellow: #a65f00;
+  --term-bright-blue: #155dfc;
+  --term-bright-magenta: #9810fa;
+  --term-bright-cyan: #007595;
+  --term-bright-white: #0a0a0a;
   --line-number: var(--text-dim);
-  --syntax-function: #5b21b6;
-  --syntax-keyword: #c0392b;
-  --syntax-string: #1f7a3f;
-  --syntax-number: #a85a00;
-  --syntax-type: #0a5a6d;
-  --syntax-variable: #27272a;
-  --syntax-meta: #7c3aed;
-  --bubble-border: var(--border);
-  --shadow-drawer: 0 0 40px rgba(10, 10, 11, 0.18);
-  --shadow-pop: 0 16px 48px rgba(10, 10, 11, 0.12), 0 0 0 1px var(--border);
-  --shadow-card: 0 4px 16px rgba(10, 10, 11, 0.06);
+  --syntax-function: #6e11b0;
+  --syntax-keyword: #c70036;
+  --syntax-string: #3c6300;
+  --syntax-number: #894b00;
+  --syntax-type: #005f78;
+  --syntax-variable: #171717;
+  --syntax-meta: #8200db;
+  --bubble-border: transparent;
+  --shadow-drawer: 0 0 40px rgba(10, 10, 10, 0.16);
+  --shadow-pop: 0 16px 48px rgba(10, 10, 10, 0.12), 0 0 0 1px var(--border);
+  --shadow-card: 0 4px 16px rgba(10, 10, 10, 0.06);
+}
+
+/* Studio light's surface language (the html selector keeps it out of the palette table that
+   scripts/generate-themes.ts reads): Blob0's shadows over the palette above. A ring of neutral
+   at 8% is every edge, a field button is white over a faint fall of grey (--field-face) under a
+   pixel of white at its top, the primary button is lit from above and rimmed in its own lighter
+   blue, a well is neutral-200 with no drawn edge, and the composer and every popover carry the
+   layered shadow: 1px, 3px, 6px, 12px of black at 6%, each layer half the last. */
+html[data-theme="light"][data-palette="studio"] {
+  --fill-1: rgba(10, 10, 10, 0.02);
+  --fill-2: rgba(10, 10, 10, 0.04);
+  --fill-3: rgba(10, 10, 10, 0.06);
+  --fill-4: rgba(10, 10, 10, 0.1);
+  --ink-1: rgba(10, 10, 10, 0.08);
+  --ink-2: rgba(10, 10, 10, 0.12);
+  --ink-3: rgba(10, 10, 10, 0.16);
+  --edge-light: rgba(255, 255, 255, 0.8);
+  --edge-light-strong: rgba(255, 255, 255, 1);
+  --well: color-mix(in srgb, var(--bg) 92%, black);
+  --edge-highlight: inset 0 1px 0 var(--edge-light);
+  --field-face: linear-gradient(to bottom, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.045) 100%);
+  --shadow-surface: 0 0 0 1px var(--ink-1), 0 1px 2px rgba(0, 0, 0, 0.05), var(--edge-highlight);
+  --shadow-raised: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0 3px 3px -1.5px rgba(0, 0, 0, 0.06), var(--edge-highlight);
+  --shadow-sunken: inset 0 1px 1px rgba(0, 0, 0, 0.03);
+  --shadow-tab: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0 3px 3px -1.5px rgba(0, 0, 0, 0.06);
+  --shadow-chip: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06);
+  --shadow-panel: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0 3px 3px -1.5px rgba(0, 0, 0, 0.06);
+  --shadow-canvas: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0 3px 3px -1.5px rgba(0, 0, 0, 0.06);
+  --shadow-popover: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.04), 0 3px 3px rgba(0, 0, 0, 0.04), 0 6px 6px rgba(0, 0, 0, 0.02), 0 12px 12px rgba(0, 0, 0, 0.02), 0 24px 24px rgba(0, 0, 0, 0.02);
+  --shadow-dialog: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0 3px 3px -1.5px rgba(0, 0, 0, 0.06), 0 6px 6px -3px rgba(0, 0, 0, 0.06), 0 12px 12px -6px rgba(0, 0, 0, 0.04), 0 24px 32px -12px rgba(0, 0, 0, 0.03), 0 48px 64px -24px rgba(0, 0, 0, 0.02);
+  --shadow-tooltip: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.04), 0 3px 3px rgba(0, 0, 0, 0.04), 0 6px 6px rgba(0, 0, 0, 0.02), 0 12px 12px rgba(0, 0, 0, 0.02);
+  --shadow-primary: inset 0 2px 0 rgba(255, 255, 255, 0.28), inset 0 -1px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px var(--primary-hover), 0 1px 2px color-mix(in srgb, var(--primary) 22%, transparent), 0 2px 6px -2px color-mix(in srgb, var(--primary) 22%, transparent);
+  --shadow-focus: 0 0 0 1px var(--bg), 0 0 0 4px color-mix(in srgb, var(--accent) 24%, transparent), inset 0 0 0 1px var(--accent);
+  --divider: linear-gradient(to bottom, var(--ink-1) 0, var(--ink-1) 1px, var(--edge-light) 1px);
+  --surface-sheen: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 100%);
+  --raised-face: linear-gradient(to bottom, var(--bg-elevated) 0%, color-mix(in srgb, var(--bg-elevated) 95%, black) 100%);
+  --primary-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 100%);
+  --shadow-composer: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0 3px 3px -1.5px rgba(0, 0, 0, 0.06), 0 6px 6px -3px rgba(0, 0, 0, 0.06), 0 12px 12px -6px rgba(0, 0, 0, 0.04);
+  --shadow-composer-focus: 0 0 0 1px color-mix(in srgb, var(--accent) 60%, var(--ink-1)), 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0 3px 3px -1.5px rgba(0, 0, 0, 0.06), 0 6px 6px -3px rgba(0, 0, 0, 0.06), 0 12px 12px -6px rgba(0, 0, 0, 0.04);
 }
 
 /* Catppuccin (catppuccin.com/palette): Mocha in dark, Latte in light, mapped by the
@@ -2432,6 +2478,7 @@ button {
   height: var(--control-h);
   padding: 0 var(--space-3);
   background: var(--bg-elevated);
+  background-image: var(--field-face);
   border: 0;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-surface);

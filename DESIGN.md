@@ -18,8 +18,13 @@ and a pixel of light inside its top edge, dividers are etched, and depth is a st
 layers over whatever surface a palette gives (§7). Agent states carry the remaining saturated
 colors (cyan working, red blocked, green done, amber for a notice) and none of them is violet.
 The user's chat turns are neutral raised cards, so a long thread never turns into a wall of color.
-Dark is the default, light follows the same hierarchy in shadcn's neutral scale, and comfortable
-or compact density changes scale without changing information architecture. A new browser starts
+Dark is the default. Light is [Blob0](https://blob0.com)'s light system, read off its stylesheet:
+white content on a neutral-100 chrome, every edge neutral-200, text neutral-950 over neutral-500,
+blue for the accent and the primary action (a blue-600 face lit to blue-500 at its top, rimmed in
+its own lighter blue), and depth as its layered shadow (a ring of neutral at 8%, then 1px, 3px,
+6px, 12px of black at 6%, each layer half the last) instead of the dark line and inner light of
+the other light palettes; a field button is white over a faint fall of grey (`--field-face`).
+Comfortable or compact density changes scale without changing information architecture. A new browser starts
 on the Studio theme (dark and light); amber, charcoal, Codex, Catppuccin and herdr's built-in
 themes are picked in Settings → Appearance → Dark theme and Light theme, and each keeps its own
 colors under the same surfaces, shadows and type. Amber stays the base every theme block
@@ -140,22 +145,22 @@ Normal and bright slots may share a colour to preserve the palette while keeping
 
 | ANSI | xterm key | amber | charcoal | codex | studio | catppuccin | catppuccin-latte | tokyo-night-day | gruvbox-light | one-light | solarized-light | kanagawa-lotus | rose-pine-dawn |
 |------|-----------|-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|
-| 0 | `black` | `#2a251f` | `#242424` | `#1a1c1f` | `#27272a` | `#4c4f69` | `#4c4f69` | `#3760bf` | `#3c3836` | `#383a42` | `#556a72` | `#545464` | `#464261` |
-| 1 | `red` | `#a82323` | `#b3261e` | `#b3261e` | `#b3261e` | `#ac0c2f` | `#ac0c2f` | `#90001b` | `#9d0006` | `#a51110` | `#b60006` | `#95002b` | `#873a52` |
-| 2 | `green` | `#2f6317` | `#22743a` | `#22743a` | `#22743a` | `#28651b` | `#28651b` | `#405b1f` | `#676200` | `#287c2a` | `#5d6e00` | `#4a6228` | `#286983` |
-| 3 | `yellow` | `#8c5000` | `#8a5300` | `#8a5300` | `#8a5300` | `#8a5710` | `#8a5710` | `#6c4d1f` | `#8e5100` | `#995f00` | `#8a5f00` | `#625b2a` | `#9e5600` |
-| 4 | `blue` | `#155a72` | `#0b6e8a` | `#0b6e8a` | `#0b6e8a` | `#1750bf` | `#1750bf` | `#004db6` | `#076678` | `#2f64dd` | `#006baf` | `#4d699b` | `#286983` |
-| 5 | `magenta` | `#8a3f7a` | `#6f42c1` | `#6f42c1` | `#6f42c1` | `#712fc6` | `#712fc6` | `#7847bd` | `#8f3f71` | `#a626a4` | `#c12073` | `#624c83` | `#755f8d` |
-| 6 | `cyan` | `#0f6b6f` | `#0f6f74` | `#0f6f74` | `#0f6f74` | `#0e6b70` | `#0e6b70` | `#005f4a` | `#316b48` | `#0072a9` | `#00746d` | `#216276` | `#33717c` |
-| 7 | `white` | `#685e52` | `#5f5b56` | `#5f5b56` | `#62626b` | `#5c5f77` | `#5c5f77` | `#41508a` | `#504945` | `#686b77` | `#5a6a6c` | `#43436c` | `#605b78` |
-| 8 | `brightBlack` | `#5a5045` | `#4e4b47` | `#4e4b47` | `#4e4b47` | `#64677d` | `#64677d` | `#41508a` | `#504945` | `#686b77` | `#586e75` | `#43436c` | `#605b78` |
-| 9 | `brightRed` | `#c42b2b` | `#c92d24` | `#c92d24` | `#c92d24` | `#c41545` | `#c41545` | `#90001b` | `#9d0006` | `#a51110` | `#b60006` | `#95002b` | `#873a52` |
-| 10 | `brightGreen` | `#3b741c` | `#277d3f` | `#277d3f` | `#277d3f` | `#2f7620` | `#2f7620` | `#405b1f` | `#676200` | `#287c2a` | `#5d6e00` | `#4a6228` | `#286983` |
-| 11 | `brightYellow` | `#9d5a00` | `#9f6100` | `#9f6100` | `#9f6100` | `#905c13` | `#905c13` | `#6c4d1f` | `#8e5100` | `#995f00` | `#8a5f00` | `#625b2a` | `#9e5600` |
-| 12 | `brightBlue` | `#1d6f8c` | `#1a7391` | `#1a7391` | `#1a7391` | `#0b59f4` | `#0b59f4` | `#004db6` | `#076678` | `#2f64dd` | `#006baf` | `#4d699b` | `#286983` |
-| 13 | `brightMagenta` | `#a24b90` | `#7f52d1` | `#7f52d1` | `#7f52d1` | `#8839ef` | `#8839ef` | `#7847bd` | `#8f3f71` | `#a626a4` | `#c12073` | `#624c83` | `#755f8d` |
-| 14 | `brightCyan` | `#117676` | `#13767e` | `#13767e` | `#13767e` | `#13737a` | `#13737a` | `#005f4a` | `#316b48` | `#0072a9` | `#00746d` | `#216276` | `#33717c` |
-| 15 | `brightWhite` | `#16120d` | `#111111` | `#0d0d0d` | `#0a0a0b` | `#4c4f69` | `#4c4f69` | `#3760bf` | `#3c3836` | `#383a42` | `#556a72` | `#545464` | `#464261` |
+| 0 | `black` | `#2a251f` | `#242424` | `#1a1c1f` | `#171717` | `#4c4f69` | `#4c4f69` | `#3760bf` | `#3c3836` | `#383a42` | `#556a72` | `#545464` | `#464261` |
+| 1 | `red` | `#a82323` | `#b3261e` | `#b3261e` | `#c70036` | `#ac0c2f` | `#ac0c2f` | `#90001b` | `#9d0006` | `#a51110` | `#b60006` | `#95002b` | `#873a52` |
+| 2 | `green` | `#2f6317` | `#22743a` | `#22743a` | `#3c6300` | `#28651b` | `#28651b` | `#405b1f` | `#676200` | `#287c2a` | `#5d6e00` | `#4a6228` | `#286983` |
+| 3 | `yellow` | `#8c5000` | `#8a5300` | `#8a5300` | `#894b00` | `#8a5710` | `#8a5710` | `#6c4d1f` | `#8e5100` | `#995f00` | `#8a5f00` | `#625b2a` | `#9e5600` |
+| 4 | `blue` | `#155a72` | `#0b6e8a` | `#0b6e8a` | `#1447e6` | `#1750bf` | `#1750bf` | `#004db6` | `#076678` | `#2f64dd` | `#006baf` | `#4d699b` | `#286983` |
+| 5 | `magenta` | `#8a3f7a` | `#6f42c1` | `#6f42c1` | `#8200db` | `#712fc6` | `#712fc6` | `#7847bd` | `#8f3f71` | `#a626a4` | `#c12073` | `#624c83` | `#755f8d` |
+| 6 | `cyan` | `#0f6b6f` | `#0f6f74` | `#0f6f74` | `#005f78` | `#0e6b70` | `#0e6b70` | `#005f4a` | `#316b48` | `#0072a9` | `#00746d` | `#216276` | `#33717c` |
+| 7 | `white` | `#685e52` | `#5f5b56` | `#5f5b56` | `#737373` | `#5c5f77` | `#5c5f77` | `#41508a` | `#504945` | `#686b77` | `#5a6a6c` | `#43436c` | `#605b78` |
+| 8 | `brightBlack` | `#5a5045` | `#4e4b47` | `#4e4b47` | `#525252` | `#64677d` | `#64677d` | `#41508a` | `#504945` | `#686b77` | `#586e75` | `#43436c` | `#605b78` |
+| 9 | `brightRed` | `#c42b2b` | `#c92d24` | `#c92d24` | `#e7000b` | `#c41545` | `#c41545` | `#90001b` | `#9d0006` | `#a51110` | `#b60006` | `#95002b` | `#873a52` |
+| 10 | `brightGreen` | `#3b741c` | `#277d3f` | `#277d3f` | `#497d00` | `#2f7620` | `#2f7620` | `#405b1f` | `#676200` | `#287c2a` | `#5d6e00` | `#4a6228` | `#286983` |
+| 11 | `brightYellow` | `#9d5a00` | `#9f6100` | `#9f6100` | `#a65f00` | `#905c13` | `#905c13` | `#6c4d1f` | `#8e5100` | `#995f00` | `#8a5f00` | `#625b2a` | `#9e5600` |
+| 12 | `brightBlue` | `#1d6f8c` | `#1a7391` | `#1a7391` | `#155dfc` | `#0b59f4` | `#0b59f4` | `#004db6` | `#076678` | `#2f64dd` | `#006baf` | `#4d699b` | `#286983` |
+| 13 | `brightMagenta` | `#a24b90` | `#7f52d1` | `#7f52d1` | `#9810fa` | `#8839ef` | `#8839ef` | `#7847bd` | `#8f3f71` | `#a626a4` | `#c12073` | `#624c83` | `#755f8d` |
+| 14 | `brightCyan` | `#117676` | `#13767e` | `#13767e` | `#007595` | `#13737a` | `#13737a` | `#005f4a` | `#316b48` | `#0072a9` | `#00746d` | `#216276` | `#33717c` |
+| 15 | `brightWhite` | `#16120d` | `#111111` | `#0d0d0d` | `#0a0a0a` | `#4c4f69` | `#4c4f69` | `#3760bf` | `#3c3836` | `#383a42` | `#556a72` | `#545464` | `#464261` |
 <!-- END GENERATED THEMES -->
 
 The glass tokens are expressions over the palette above, not colors of their own:
@@ -184,7 +189,7 @@ theme can be picked on either side. Picking one half of a herdr pair also sets t
 its sibling, but only while that side still holds `studio` (the default, even if picked by hand),
 `codex` or `amber` (the defaults before it) or the sibling of the previous pick; any other value is kept. A
 dark theme picked for light mode still draws dark.
-The themes are studio (the default: the editor's neutrals and violet, in dark and light), amber,
+The themes are studio (the default: the editor's neutrals and violet in dark, Blob0's white, grey and blue in light), amber,
 charcoal, codex and catppuccin plus herdr's built-ins; herdr's `terminal` theme is
 not offered. The tables above are amber, the base blocks; every other theme overrides them in a
 `[data-theme][data-palette]` block of `src/styles.css`.
@@ -490,7 +495,7 @@ blocks of `src/styles.css`.
   `src/styles.css`.
 
 ### Rules
-- The accent is the one chrome color: violet in Studio, amber in the amber base, each theme's own
+- The accent is the one chrome color: violet in Studio dark and blue in Studio light, amber in the amber base, each theme's own
   in its block. Accent (selected, focused, informational: `--accent`, `text-accent`) and primary
   (the user's action: Send, the one `<Button variant="accent">` of a surface: `--primary`) are the
   same hue; in light, accent is the darker text-safe cut and primary the fill carrying
@@ -3236,6 +3241,7 @@ own: the pane is a card by its ring, the sidebar by its darker panel.
 | `--edge-light-strong` | `rgba(255, 255, 255, 0.12)` | `rgba(255, 255, 255, 0.9)` | The same on the chosen tab |
 | `--well` | `color-mix(in srgb, var(--bg) 78%, black)` | `color-mix(in srgb, var(--bg) 95%, black)` | A recess: the segmented track |
 | `--divider-h` | `2px` | | An etched divider's height |
+| `--field-face` | `none` | | A fall of shade down a field button's face; Studio light draws it |
 
 | Shadow | Usage |
 |--------|-------|

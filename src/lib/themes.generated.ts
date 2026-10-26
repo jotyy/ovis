@@ -65,8 +65,8 @@ export const SUPPORTED_ENTRIES = [
     id: "studio",
     mode: "light",
     roles: ["bg", "bg-panel", "bg-elevated", "bg-hover", "bg-input", "border", "border-strong", "text", "text-dim", "text-strong", "accent", "accent-tint", "primary", "primary-hover", "primary-text", "primary-tint", "status-idle", "status-working", "status-blocked", "status-done", "status-working-tint", "status-blocked-tint", "status-done-tint", "danger-tint", "notice", "danger-text", "scrim", "term-bg", "term-fg", "term-cursor", "term-selection", "line-number", "syntax-function", "syntax-keyword", "syntax-string", "syntax-number", "syntax-type", "syntax-variable", "syntax-meta", "bubble-border", "shadow-drawer", "shadow-pop", "shadow-card", "term-black", "term-red", "term-green", "term-yellow", "term-blue", "term-magenta", "term-cyan", "term-white", "term-bright-black", "term-bright-red", "term-bright-green", "term-bright-yellow", "term-bright-blue", "term-bright-magenta", "term-bright-cyan", "term-bright-white"],
-    terminal: { background: "#ffffff", foreground: "#27272a", cursor: "#5016ff", selectionBackground: "#e6ddff", black: "#27272a", red: "#b3261e", green: "#22743a", yellow: "#8a5300", blue: "#0b6e8a", magenta: "#6f42c1", cyan: "#0f6f74", white: "#62626b", brightBlack: "#4e4b47", brightRed: "#c92d24", brightGreen: "#277d3f", brightYellow: "#9f6100", brightBlue: "#1a7391", brightMagenta: "#7f52d1", brightCyan: "#13767e", brightWhite: "#0a0a0b" },
-    bgPanel: "#f5f5f6",
+    terminal: { background: "#ffffff", foreground: "#171717", cursor: "#155dfc", selectionBackground: "#dbeafe", black: "#171717", red: "#c70036", green: "#3c6300", yellow: "#894b00", blue: "#1447e6", magenta: "#8200db", cyan: "#005f78", white: "#737373", brightBlack: "#525252", brightRed: "#e7000b", brightGreen: "#497d00", brightYellow: "#a65f00", brightBlue: "#155dfc", brightMagenta: "#9810fa", brightCyan: "#007595", brightWhite: "#0a0a0a" },
+    bgPanel: "#f7f7f7",
     bg: "#ffffff",
   },
   {

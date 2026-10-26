@@ -219,6 +219,10 @@
   background-image: var(--raised-face);
 }
 
+@utility bg-field {
+  background-image: var(--field-face);
+}
+
 @utility bg-sheen {
   background-image: var(--surface-sheen);
 }

@@ -835,7 +835,9 @@
   grid-area: attachments;
   display: flex;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4) 0;
+  /* a tile's ring lies outside it: a breath under the row inside the scroll box, taken back below */
+  margin-bottom: calc(-1 * var(--space-1));
+  padding: var(--space-3) var(--space-4) var(--space-1);
   overflow-x: auto;
 }
 
@@ -1369,11 +1371,15 @@
   white-space: nowrap;
 }
 
-/* one-tap replies above the box: one row that scrolls sideways, never a second line */
+/* one-tap replies above the box: one row that scrolls sideways, never a second line. A chip's
+   ring and shadow lie outside its box, and a scroll box clips at its edge: the row keeps a
+   breath of room around the chips inside it and takes it back with its margins, so the chips
+   stay on the column's edge with their edges whole */
 .composer-quick {
   display: flex;
   gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-1)) calc(var(--space-2) - var(--space-1));
+  padding: var(--space-1);
   overflow-x: auto;
   scrollbar-width: none;
 }

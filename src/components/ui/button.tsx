@@ -15,7 +15,7 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         /** the editor's toolbar button: a field-like face */
-        field: "bg-elevated text-text shadow-surface text-engraved hover:bg-hover hover:text-strong active:bg-[color-mix(in_srgb,var(--bg-elevated)_80%,var(--bg))] [&_svg]:text-dim hover:[&_svg]:text-text",
+        field: "bg-elevated bg-field text-text shadow-surface text-engraved hover:bg-hover hover:text-strong active:bg-[color-mix(in_srgb,var(--bg-elevated)_80%,var(--bg))] [&_svg]:text-dim hover:[&_svg]:text-text",
         /** the one accent action on a surface: lit from above, a glow of its own colour */
         accent: "bg-primary bg-primary-sheen text-primary-text shadow-primary text-engraved hover:bg-primary-hover active:bg-[color-mix(in_srgb,var(--primary)_88%,black)]",
         /** a raised face in a gradient, the chosen nav row's and a card's own button */

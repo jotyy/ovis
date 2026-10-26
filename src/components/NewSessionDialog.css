@@ -52,6 +52,9 @@
 @media (max-width: 640px), (pointer: coarse) {
   .new-session-folder-chips {
     flex-wrap: nowrap;
+    /* a chip's ring lies outside it: room for it inside the scroll box, taken back by the margin */
+    margin: calc(-1 * var(--space-1));
+    padding: var(--space-1);
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x proximity;
