@@ -3234,7 +3234,7 @@ own: the pane is a card by its ring, the sidebar by its darker panel.
 | `--ink-3` | `rgba(0, 0, 0, 0.32)` | `rgba(0, 0, 0, 0.16)` | A divider's dark line; a dialog's ring |
 | `--edge-light` | `rgba(255, 255, 255, 0.04)` | `rgba(255, 255, 255, 0.6)` | The light along a top edge |
 | `--edge-light-strong` | `rgba(255, 255, 255, 0.12)` | `rgba(255, 255, 255, 0.9)` | The same on the chosen tab |
-| `--well` | `color-mix(in srgb, var(--bg) 78%, black)` | `color-mix(in srgb, var(--bg) 94%, black)` | A recess: the segmented track |
+| `--well` | `color-mix(in srgb, var(--bg) 78%, black)` | `color-mix(in srgb, var(--bg) 95%, black)` | A recess: the segmented track |
 | `--divider-h` | `2px` | | An etched divider's height |
 
 | Shadow | Usage |
@@ -3245,6 +3245,7 @@ own: the pane is a card by its ring, the sidebar by its darker panel.
 | `--shadow-tab` | The chosen option of a segmented control |
 | `--shadow-chip` | A tag, a badge, the connection chip |
 | `--shadow-panel` | A card on its panel |
+| `--shadow-canvas` | The pane's canvas card inset in the chrome (`.pane-column`): a ring of ink in dark, a soft lift in light |
 | `--shadow-popover` | A menu, a select's list, a popover, the palette (`menuSurface`, with `--popover-blur` behind it) |
 | `--shadow-dialog` | A dialog (over `--scrim` and `--scrim-blur`) |
 | `--shadow-tooltip` | A tooltip |

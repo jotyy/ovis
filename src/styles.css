@@ -268,6 +268,8 @@
   --shadow-tab: 0 2px 4px -1px rgba(0, 0, 0, 0.5), inset 0 1px 0 var(--edge-light-strong), inset 0 -1px 0.5px rgba(0, 0, 0, 0.02), inset 0 0 1px rgba(0, 0, 0, 0.05);
   --shadow-chip: 0 1px 2px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.01), inset 0 0 0 1px var(--edge-light);
   --shadow-panel: 0 2px 4px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--ink-1), var(--edge-highlight);
+  /* the pane's canvas card inset in the chrome: a ring of ink and the faintest halo */
+  --shadow-canvas: 0 0 0 1px var(--ink-3), 0 0 2px var(--ink-2);
   --shadow-popover: 0 24px 48px rgba(0, 0, 0, 0.24), 0 10px 18px rgba(0, 0, 0, 0.16), 0 5px 8px rgba(0, 0, 0, 0.16), 0 2px 4px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--ink-2), var(--edge-highlight);
   --shadow-dialog: 0 32px 64px rgba(0, 0, 0, 0.44), 0 12px 24px rgba(0, 0, 0, 0.24), 0 0 0 1px var(--ink-3), var(--edge-highlight);
   --shadow-tooltip: 0 8px 16px rgba(0, 0, 0, 0.24), 0 0 0 1px var(--ink-3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -373,13 +375,16 @@
   --ink-3: rgba(0, 0, 0, 0.16);
   --edge-light: rgba(255, 255, 255, 0.6);
   --edge-light-strong: rgba(255, 255, 255, 0.9);
-  --well: color-mix(in srgb, var(--bg) 94%, black);
+  --well: color-mix(in srgb, var(--bg) 95%, black);
   --shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--ink-1), var(--edge-highlight);
   --shadow-raised: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--ink-1), var(--edge-highlight);
-  --shadow-sunken: 0 0 0 1px var(--ink-1), inset 0 1px 2px rgba(0, 0, 0, 0.08);
-  --shadow-tab: 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 0 1px var(--ink-1), inset 0 1px 0 var(--edge-light-strong);
+  --shadow-sunken: 0 0 0 1px var(--ink-1), inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-tab: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--ink-1), inset 0 1px 0 var(--edge-light-strong);
   --shadow-chip: 0 1px 1px rgba(0, 0, 0, 0.04), 0 0 0 1px var(--ink-1), inset 0 1px 0 var(--edge-light);
   --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--ink-1);
+  /* in light the canvas is lifted off the chrome by a soft shadow, not held by a dark line: the
+     ring is the lightest ink, and two diffuse layers do the parting */
+  --shadow-canvas: 0 0 0 1px var(--ink-1), 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
   --shadow-popover: 0 16px 32px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--ink-2);
   --shadow-dialog: 0 24px 48px rgba(0, 0, 0, 0.18), 0 8px 16px rgba(0, 0, 0, 0.1), 0 0 0 1px var(--ink-2);
   --shadow-tooltip: 0 8px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--ink-2);
@@ -2258,7 +2263,7 @@ button {
     position: relative;
     border-radius: var(--radius-lg);
     background: var(--bg);
-    box-shadow: 0 0 0 1px var(--ink-3), 0 0 2px var(--ink-2);
+    box-shadow: var(--shadow-canvas);
     overflow: hidden;
     isolation: isolate;
   }
