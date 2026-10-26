@@ -1,8 +1,8 @@
 /* Notices over the input card (ComposerNotices.tsx): what the terminal lens floats top-right
    (PaneTerminal.css) stands here under the chat lens, as Alert rows (components/ui/alert.tsx)
-   stacked over the card, a row per notice, the warning ones in the notice tone. The plain notice
-   is the top row and the activity stands on the card (lib/composerNotices.ts). The column's width
-   is the composer's rule (Composer.css) */
+   stacked over the card, a row per notice. The plain notice is the top row and the activity
+   stands on the card (lib/composerNotices.ts). The column's width is the composer's rule
+   (Composer.css): a row is never wider than the card under it. */
 .composer-notices {
   display: flex;
   flex-direction: column;
@@ -10,33 +10,45 @@
   margin-bottom: var(--space-2);
 }
 
+/* A row is the card's own kind of surface, not a tinted banner: the elevated colour under a
+   hairline edge and the card's small fall of shadow (never a ring: the chips under it paint over
+   one), one line of 13px text at the control height. The tone (another app holds the pane, the
+   stream failed) shows in the mark alone, as Claude.ai's and Linear's inline notices do. The
+   Alert's tone fill and edge are set aside here on purpose. */
 .composer-notice {
+  --notice-x: calc(var(--control-h) - var(--space-2));
   position: relative;
-  /* the floor is the content's, so the X (below) fits it */
-  box-sizing: content-box;
+  box-sizing: border-box;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1) var(--space-2);
   min-height: var(--control-h);
-  padding: var(--space-1) var(--space-3);
-  font-size: var(--fs-xs);
+  padding: calc(var(--space-1) / 2) var(--space-2) calc(var(--space-1) / 2) var(--space-3);
+  background: var(--bg-elevated);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lift);
+  color: var(--text);
+  font-size: var(--fs-sm);
   line-height: var(--lh-base);
 }
 
 /* The dismiss keeps the row's top trailing corner (below), so a row that has one keeps that
    corner clear on every line: no text and no way on runs under it */
 .composer-notice:has(.composer-notice-dismiss) {
-  padding-right: calc(var(--control-h) + var(--space-1));
+  padding-right: calc(var(--notice-x) + var(--space-2));
 }
 
 .composer-notice-mark {
   display: inline-flex;
   flex: none;
+  color: var(--text-dim);
 }
 
 .composer-notice-mark svg {
-  width: 1em;
-  height: 1em;
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.75;
 }
 
 .composer-notice.is-warning .composer-notice-mark {
@@ -75,10 +87,24 @@
   margin-left: auto;
 }
 
-/* a notice's own way on (Open here, Reconnect, Send) is a field button; Discard is the quiet one */
+/* A notice's own way on (Open here, Reconnect, Send) is an outline button, as the quick replies
+   are: a hairline edge, no face, a fill of light under the pointer (the ghost variant's). Discard
+   is the quiet one. It is a line shorter than the row, so the row stays one control high. */
 .composer-notice-action {
+  height: calc(var(--control-h) - var(--space-1));
+  padding-inline: var(--space-3);
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
   font-size: var(--fs-xs);
   text-decoration: none;
+}
+
+@media (hover: hover) {
+  .composer-notice-action:hover {
+    border-color: var(--border-strong);
+    color: var(--text-strong);
+  }
 }
 
 /* The X stands in the row's top trailing corner whatever wraps under it, as a banner's close
@@ -88,7 +114,14 @@
   position: absolute;
   top: var(--space-1);
   right: var(--space-1);
+  width: var(--notice-x);
+  height: var(--notice-x);
   color: var(--text-dim);
+}
+
+.composer-notice-dismiss svg {
+  width: 14px;
+  height: 14px;
 }
 
 @media (pointer: coarse) {

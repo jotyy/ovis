@@ -1183,9 +1183,13 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 - `<Alert>` is the editor's notice: one sentence and the control that acts on it, `rounded-lg`, 13px,
   on a tinted surface with a drawn hairline edge of its tone, never an outside ring (the chips
   under a composer notice paint over a ring). Tones: **neutral** (`bg-fill-1`, a `--border` edge:
-  the terminal banners, the composer's notices), **notice** (the warning yellow at 8%: another app
-  holds the pane, a device Tailscale does not know), **danger** (the danger tint and a
+  the terminal banners), **notice** (the warning yellow at 8%: another app holds the pane under
+  the terminal lens, a device Tailscale does not know), **danger** (the danger tint and a
   `--status-blocked` edge: a failed upload, a refused form, a save the server refused) and **done**.
+  The rows over the message box (`ComposerNotices.css`) set the tone's fill and edge aside: they
+  are the card's own kind of surface (`--bg-elevated`, a `--border` hairline, `--shadow-lift`,
+  `--radius-lg`), one 13px line at `--control-h`, never wider than the card, the tone in the
+  16px mark alone; the way on is an outline button and the dismiss a 24px glyph in the corner.
   It is `role="alert"` unless told `role="status"` (a banner that is a state, not a failure).
   `AlertTitle` / `AlertDescription` set the words.
 - `<Progress>`: a 6px sunken track (`bg-well`), the value a `bg-accent` bar with a light edge moving

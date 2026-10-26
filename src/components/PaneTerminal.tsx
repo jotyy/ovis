@@ -745,11 +745,11 @@ export function PaneTerminal({
     if (held) noticeItems.push({
       id: `${owner}:held`, priority: "urgent", revision: takeOver ? "open-here" : "", warning: true, mark: <Unplug />,
       text: t("Another app has this pane open. It connects here as soon as that app lets go."),
-      actions: takeOver && <Button variant="field" size="sm" className="composer-notice-action" title={t("Take this pane from another web app or terminal attach. That connection will close.")} onClick={() => { socketRef.current?.takeOver(paneId); }}>{t("Open here")}</Button>,
+      actions: takeOver && <Button variant="ghost" size="sm" className="composer-notice-action" title={t("Take this pane from another web app or terminal attach. That connection will close.")} onClick={() => { socketRef.current?.takeOver(paneId); }}>{t("Open here")}</Button>,
     });
     if (outputError) noticeItems.push({
       id: `${owner}:output`, priority: "urgent", revision: outputError, warning: true, mark: <TriangleAlert />, text: outputError,
-      actions: <Button variant="field" size="sm" className="composer-notice-action" asChild><a href={`?machine=${encodeURIComponent(machineId)}&pane=${encodeURIComponent(paneId)}`}>{t("Reconnect")}</a></Button>,
+      actions: <Button variant="ghost" size="sm" className="composer-notice-action" asChild><a href={`?machine=${encodeURIComponent(machineId)}&pane=${encodeURIComponent(paneId)}`}>{t("Reconnect")}</a></Button>,
     });
     if (!ended && connected && !draftIsEmpty(draft)) noticeItems.push({
       id: `${owner}:draft`, priority: "activity", revision: `${draft.truncated ? "…" : ""}${draft.text}`, warning: false, mark: <Clock />,
@@ -771,7 +771,7 @@ export function PaneTerminal({
     if (stillOpen !== null && stillOpen.pane === paneId) noticeItems.push({
       id: `${owner}:still-open`, priority: "urgent", revision: stillOpen.named ? stillOpen.command : "", warning: false, mark: <SquareTerminal />,
       text: stillOpen.named ? t("{command} is still open in the terminal", { command: stillOpen.command }) : t("A screen is still open in the terminal"),
-      actions: <Button variant="field" size="sm" className="composer-notice-action" onClick={showStillOpen}>{t("Show terminal")}</Button>,
+      actions: <Button variant="ghost" size="sm" className="composer-notice-action" onClick={showStillOpen}>{t("Show terminal")}</Button>,
     });
   }
   const settledNotices = settleDismissed(dismissedNotices, noticeItems);
