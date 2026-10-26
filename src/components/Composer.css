@@ -163,7 +163,7 @@
   gap: var(--space-1);
   min-width: 0;
   min-height: var(--chip-h);
-  padding: 0 var(--space-2) var(--space-3);
+  padding: 0 var(--space-2) calc(var(--space-2) + 2px);
   color: var(--text-dim);
   font-size: var(--fs-xs);
   white-space: nowrap;
@@ -237,12 +237,12 @@
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
-  height: var(--control-h);
-  padding: 0 var(--space-3) 0 var(--space-2);
+  height: calc(var(--control-h) - var(--space-1));
+  padding: 0 var(--space-2) 0 calc(var(--space-1) + 2px);
   border-radius: var(--radius-pill);
   background: var(--fill-2);
   box-shadow: 0 0 0 1px var(--ink-1), inset 0 1px 0 var(--edge-light);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
   overflow: hidden;
 }
 
@@ -476,9 +476,9 @@
   grid-area: text;
   width: 100%;
   min-width: 0;
-  min-height: calc(1lh + var(--space-6));
+  min-height: calc(1lh + var(--space-5));
   max-height: 10lh;
-  padding: var(--space-4) var(--space-5) var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-1);
   resize: none;
   overflow-x: hidden;
   overflow-y: auto;
@@ -548,7 +548,7 @@
 
 /* the card's last row: 36px round controls at a 12px inset, air between them */
 .composer-controls {
-  --composer-round: 36px;
+  --composer-round: var(--control-h);
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -557,12 +557,12 @@
 
 .composer-controls-left {
   grid-area: left;
-  padding: 0 0 var(--space-3) var(--space-3);
+  padding: 0 0 calc(var(--space-2) + 2px) calc(var(--space-2) + 2px);
 }
 
 .composer-controls-right {
   grid-area: right;
-  padding: 0 var(--space-3) var(--space-3) 0;
+  padding: 0 calc(var(--space-2) + 2px) calc(var(--space-2) + 2px) 0;
 }
 
 /* the round controls: attach and new tab as a ringed disc (ChatGPT's +), the mic a bare disc */
@@ -591,8 +591,8 @@
 
 .composer-attach svg,
 .composer-new-session svg {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size);
+  height: var(--icon-size);
   stroke-width: 1.75;
 }
 
@@ -606,8 +606,8 @@
    fault); Stop is the inverse disc, the page's strongest colour with the filled stop glyph in
    the surface colour, as ChatGPT draws it, so only the face changes when a turn starts and ends */
 .composer-send svg {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size);
+  height: var(--icon-size);
   stroke-width: 2.25;
 }
 

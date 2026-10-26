@@ -48,8 +48,8 @@
 /* a bare disc the size of the composer's round controls */
 .voice-mic {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: var(--control-h);
+  height: var(--control-h);
   border-radius: var(--radius-pill);
   color: var(--text-dim);
   touch-action: manipulation;
@@ -63,8 +63,8 @@
 }
 
 .voice-mic svg {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size);
+  height: var(--icon-size);
   stroke-width: 1.75;
 }
 
