@@ -1,14 +1,16 @@
 #!/bin/sh
-# Ovis in one line, from a PC that may have none of it yet:
+# Ovis (jotyy's Studio fork of devswha/ovis) in one line, from a PC that may have none of it yet:
 #
-#   curl -fsSL https://ovis.sh/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/jotyy/ovis/studio/install.sh | sh
 #
 # 1. Installs what is missing, for this user only and without sudo: herdr (its own installer, into
 #    ~/.local/bin) and Bun (its own installer, into ~/.bun). Terminals run on the release's Rust PTY
 #    host, checked against its SHA-256; only when that cannot be installed, Node 22 (the official
 #    build, checked against its published SHA-256, into ~/.local/share/ovis/node) runs them instead.
-# 2. Installs Ovis as a herdr plugin, so it starts with herdr and Settings → Updates keeps it
-#    current, and starts it now when herdr is running.
+# 2. Installs Ovis as a herdr plugin from the fork's `studio` branch, so it starts with herdr, and
+#    starts it now when herdr is running. The fork publishes no release tags, so Settings → Updates
+#    has nothing to offer: run this again to update (it stops the app, pulls the branch, rebuilds and
+#    starts it). An install of upstream Ovis (devswha.ovis) is replaced, with its settings and token.
 # 3. When Tailscale runs on this PC, serves the app to your tailnet (`tailscale serve`, on the first
 #    free HTTPS port, or only the one OVIS_TAILSCALE_HTTPS_PORT names) and prints the address
 #    a phone opens as a QR code (scripts/plugin.ts phone).
@@ -17,14 +19,16 @@
 #    never stars by itself.
 #
 # Run it again at any time: what is already there is kept, and step 3 is repeated.
-#   OVIS_REF=<branch or tag>   install that ref instead of the latest release
+#   OVIS_REF=<branch or tag>   install that ref instead of the studio branch
 #   OVIS_TAILSCALE_HTTPS_PORT=<port>   serve the app on that HTTPS port only, keeping 443 free
 set -eu
 
-REPO="devswha/ovis"
-PLUGIN="devswha.ovis"
-# the id before the rename: an install under it moves to PLUGIN, keeping its config
-LEGACY_PLUGIN="devswha.herdr-web-ui"
+REPO="jotyy/ovis"
+PLUGIN="jotyy.ovis"
+# the branch this fork is published from: it has no releases of its own
+DEFAULT_REF="studio"
+# upstream Ovis, which this fork replaces: an install under it moves to PLUGIN, keeping its config
+LEGACY_PLUGIN="devswha.ovis"
 BIN_DIR="$HOME/.local/bin"
 NODE_DIR="$HOME/.local/share/ovis/node"
 # Official digests from nodejs.org/dist/v22.23.2/SHASUMS256.txt, as scripts/build-remote-bundle.ts pins them
@@ -52,22 +56,13 @@ adopt_legacy_config() {
 link() { if [ "$terminal" = 1 ]; then printf '\033]8;;%s\033\\%s\033]8;;\033\\' "$1" "$1"; else printf '%s' "$1"; fi; }
 fail() { printf '%s\n' "Ovis: $*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || fail "needs '$1', which is not installed. Install it and run this again."; }
-# The highest vX.Y.Z tag, as the updater picks it: a new install gets what existing ones run,
-# never the commits merged to main since the last release.
-latest_release() {
-  git ls-remote --tags --refs "https://github.com/$REPO.git" 'v*' 2>/dev/null |
-    sed -n 's|.*refs/tags/\(v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$|\1|p' |
-    sort -t. -k1.2,1n -k2,2n -k3,3n | tail -n 1
-}
-# The plugin id a ref installs under, or nothing when it cannot be told. Releases before the rename
-# (0.4.13 and older) name the old id. Its manifest says so; raw.githubusercontent.com can be blocked
-# where github.com is not, and then a release tag's version tells it.
+# The plugin id a ref installs under, or nothing when it cannot be told. Every vX.Y.Z tag on the fork
+# is an upstream release and names upstream's id. Its manifest says so; raw.githubusercontent.com can
+# be blocked where github.com is not, and then a release tag tells it.
 ref_plugin_id() {
   ref_id=$(curl -fsSL --max-time 10 "https://raw.githubusercontent.com/$REPO/$1/herdr-plugin.toml" 2>/dev/null </dev/null |
     sed -n '/^id *=/{s/^id *= *"\([^"]*\)".*/\1/p;q;}') || ref_id=""
-  if [ -z "$ref_id" ] && printf '%s\n' "$1" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
-    if at_least 0.4.14 "${1#v}"; then ref_id=$PLUGIN; else ref_id=$LEGACY_PLUGIN; fi
-  fi
+  if [ -z "$ref_id" ] && printf '%s\n' "$1" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then ref_id=$LEGACY_PLUGIN; fi
   printf '%s' "$ref_id"
 }
 # at_least 1.4.0 1.10.2: is the second dotted version the first or newer
@@ -335,39 +330,49 @@ main() {
     installed_here="$installed_here bun"
   fi
 
-  # The ref to install is settled before anything moves: a release from before the rename still
-  # names the plugin by its old id, and installing it cannot move an install to the new one
+  # The ref to install is settled before anything moves: an upstream ref names upstream's id, and
+  # installing it cannot replace an upstream install with the fork
   ref=""
   move=1
   if ! herdr plugin list 2>/dev/null | grep -q "$PLUGIN "; then
     need git
-    ref=${OVIS_REF:-${HERDR_WEB_UI_REF:-$(latest_release)}}
-    [ -n "$ref" ] || fail "could not look up the latest release on github.com. Check the connection and run this again."
+    ref=${OVIS_REF:-$DEFAULT_REF}
     case "$(ref_plugin_id "$ref")" in
-      # that release installs, runs and updates under the old id: the move waits for a release
-      # that names the new one, which Settings → Updates or this script brings
+      # an upstream ref (a release tag, or upstream's main) installs, runs and updates under
+      # upstream's id: nothing of the fork comes with it, and an upstream install stays as it is
       "$LEGACY_PLUGIN") PLUGIN=$LEGACY_PLUGIN ;;
-      # a branch whose manifest cannot be read: an install under the old id is left running, since
-      # the ref may not be able to move it
+      # a branch whose manifest cannot be read: an upstream install is left running, since the ref
+      # may not be able to replace it
       "") move=0 ;;
     esac
   fi
 
   legacy_root=""
   if [ "$move" = 0 ] && herdr plugin list 2>/dev/null | grep -q "$LEGACY_PLUGIN "; then
-    say "could not read the plugin id at $ref, so the install under $LEGACY_PLUGIN is left as it is; run this again to move it"
+    say "could not read the plugin id at $ref, so the install under $LEGACY_PLUGIN is left as it is; run this again to replace it"
   elif [ "$PLUGIN" != "$LEGACY_PLUGIN" ] && herdr plugin list 2>/dev/null | grep -q "$LEGACY_PLUGIN "; then
     legacy_root=$(plugin_root "$LEGACY_PLUGIN")
-    say "moving the installed plugin to its Ovis id; its settings and token come along"
+    say "replacing the upstream Ovis install ($LEGACY_PLUGIN) with this fork; its settings and token come along"
     # stopped first: removed with its server up, the old checkout would keep serving, and the new
     # id's start would find the port answering and leave it
     if [ -n "$legacy_root" ] && ! bun "$legacy_root/scripts/plugin.ts" stop </dev/null >/dev/null 2>&1; then
-      fail "could not stop the server of the old id, so nothing was moved. Stop it (herdr plugin action invoke $LEGACY_PLUGIN.stop, or restart herdr), then run this again."
+      fail "could not stop the server of the upstream install, so nothing was replaced. Stop it (herdr plugin action invoke $LEGACY_PLUGIN.stop, or restart herdr), then run this again."
     fi
   fi
 
   if herdr plugin list 2>/dev/null | grep -q "$PLUGIN "; then
-    say "already installed as a herdr plugin; Settings → Updates keeps it current"
+    if [ "$PLUGIN" = "$LEGACY_PLUGIN" ]; then
+      # upstream's install has upstream's releases to update from
+      say "already installed as a herdr plugin; Settings → Updates keeps it current"
+    else
+      # the fork has no release tags for Settings → Updates to offer: a rerun is the update. The app is
+      # stopped first so that the start below runs the new code; a pull that fails leaves the old one,
+      # which that start brings back
+      root=$(plugin_root "$PLUGIN")
+      say "already installed as a herdr plugin; updating it to the latest $DEFAULT_REF (herdr pulls and builds it)"
+      [ -z "$root" ] || bun "$root/scripts/plugin.ts" stop </dev/null >/dev/null 2>&1 || true
+      herdr plugin update "$PLUGIN" --yes </dev/null >/dev/null 2>&1 || say "could not update the plugin; the installed version stays. See: herdr plugin update $PLUGIN"
+    fi
   else
     say "installing the herdr plugin at $ref (herdr clones and builds it: about a minute)"
     # herdr previews the whole manifest first; on success its last word is enough, on failure all of it
@@ -401,7 +406,7 @@ main() {
 
   if [ "$PLUGIN" != "$LEGACY_PLUGIN" ] && [ "$move" = 1 ] && herdr plugin list 2>/dev/null | grep -q "$LEGACY_PLUGIN "; then
     adopt_legacy_config
-    herdr plugin uninstall "$LEGACY_PLUGIN" </dev/null >/dev/null || fail "could not remove the plugin's old id; run: herdr plugin uninstall $LEGACY_PLUGIN"
+    herdr plugin uninstall "$LEGACY_PLUGIN" </dev/null >/dev/null || fail "could not remove the upstream install; run: herdr plugin uninstall $LEGACY_PLUGIN"
   fi
 
   # the Rust PTY host of the release that runs, checked against its SHA-256: herdr's build step and

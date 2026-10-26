@@ -9,8 +9,8 @@ import { QrCode } from "./QrCode.tsx";
 import { useT } from "../lib/i18n.ts";
 import { Button } from "./ui/index.ts";
 
-const README_PHONE = "https://github.com/devswha/ovis#on-your-phone";
-const README_SAFETY = "https://github.com/devswha/ovis#access-and-safety";
+const README_PHONE = "https://github.com/jotyy/ovis#on-your-phone";
+const README_SAFETY = "https://github.com/jotyy/ovis#access-and-safety";
 
 export interface PhonePanelProps {
   plan: PhonePlan;

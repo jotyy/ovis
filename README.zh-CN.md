@@ -90,8 +90,10 @@ https://github.com/user-attachments/assets/d854dbb6-64bd-4eba-81c7-fbd3f525726b
 
 ## 安装
 
+> 这是 **jotyy 的分支**（fork 自 [devswha/ovis](https://github.com/devswha/ovis)），采用 Studio 设计系统：Inter 字体、Tabler 图标和 shadcn 组件。它以独立的 herdr 插件 id（`jotyy.ovis`）安装，并替换已安装的上游版本，保留其设置和令牌。本分支不发布版本号，更新时再运行一次安装命令即可拉取最新的 `studio` 分支（设置 → 更新 只跟随发布标签）。匿名使用计数在本分支默认关闭。要换回上游版本：`herdr plugin uninstall jotyy.ovis`，然后 `herdr plugin install devswha/ovis`。
+
 ```bash
-curl -fsSL https://ovis.sh/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/jotyy/ovis/studio/install.sh | sh
 ```
 
 支持基于 glibc 的 Linux（x64、arm64）和 macOS（Intel、Apple Silicon）；不支持 Alpine/musl 或 32 位 ARM。需预先安装 `curl`、Git 和 `tar`；如果没有 Bun，还需要 Bash 和 `unzip`。所需版本为 herdr 0.9.0+ 和 Bun 1.4+，无需 Node。安装程序为当前用户安装缺少的工具、升级旧版 Bun，然后将应用安装为 herdr 插件。终端运行在每个版本随附的 Rust PTY 主机上，安装时按 SHA-256 校验；电脑上已有的 Node 18+ 仅作后备。如果已安装的 herdr 低于 0.9.0，请先自行更新并重启 herdr，再重新运行安装程序。
@@ -101,7 +103,7 @@ curl -fsSL https://ovis.sh/install.sh | sh
 Windows x64 请在 PowerShell 中运行：
 
 ```powershell
-irm https://ovis.sh/install.ps1 | iex
+irm https://raw.githubusercontent.com/jotyy/ovis/studio/install.ps1 | iex
 ```
 
 需要 [Git for Windows](https://git-scm.com/download/win)。安装程序会为当前用户补齐 herdr 和 Bun，然后安装同一个插件，无需 Node 或 WSL。要在手机上使用，请在 herdr 中打开 **Phone setup**。在 herdr 支持 Windows 终端附加之前，Windows 上的终端是一个可以输入、网格固定的[屏幕镜像](docs/remote-pcs.md#windows-pcs)。
@@ -113,7 +115,7 @@ irm https://ovis.sh/install.ps1 | iex
 已安装 herdr 0.9.0+ 和 Bun 1.4+？只需安装插件：
 
 ```bash
-herdr plugin install devswha/ovis
+herdr plugin install jotyy/ovis --ref studio
 ```
 
 旧版 herdr 必须先更新并重启。[INSTALL.md](INSTALL.md) 说明了各步操作及失败时的处理方法。
@@ -148,7 +150,7 @@ Grok 聊天仅支持 Linux，并要求进程只持有一个会话，且与 herdr
 
 会话文件保留在运行各个智能体的电脑上，内容会发送到你连接的浏览器。本应用没有自有的云端中继或账号服务。可选的语音输入会将录音（启用文字整理时还包括文本）发送给配置的服务商；浏览器语音识别也可能使用浏览器厂商的服务。启用用量显示后会连接服务商 API；更新、远程电脑设置和推送提醒也可能使用外部服务。启用 Portal 后，连接会经过你选择的中继，它能看到连接元数据并持有该地址的证书，因此请只使用可信中继。
 
-匿名使用计数默认启用。在应用内显示说明并留出 10 分钟等待时间后，应用可发送安装或更新计数，包含随机安装 ID、版本（更新时包括旧版本）、操作系统、CPU 架构、安装方式和白名单内的设置快照。自定义文本和账号标识会被省略或概括，不收集代码、对话或文件。仓库中的接收端会在 Cloudflare 提供国家/地区代码时记录该代码，但不保存 IP 地址。活动计数包含打开应用当天（UTC）的智能体类型；同一天出现新类型时可更新当日计数。可在 **Settings → About → Anonymous usage counts** 中查看内容并关闭，也可设置 `OVIS_TELEMETRY=0` 或 `DO_NOT_TRACK=1`。智能体自身如何连接模型，取决于它的配置。[数据传输与访问 →](docs/guide.md#faq)
+匿名使用计数在本分支默认关闭（接收端属于上游项目，只有设置 `OVIS_TELEMETRY=1` 才会发送）；上游版本默认启用。在应用内显示说明并留出 10 分钟等待时间后，应用可发送安装或更新计数，包含随机安装 ID、版本（更新时包括旧版本）、操作系统、CPU 架构、安装方式和白名单内的设置快照。自定义文本和账号标识会被省略或概括，不收集代码、对话或文件。仓库中的接收端会在 Cloudflare 提供国家/地区代码时记录该代码，但不保存 IP 地址。活动计数包含打开应用当天（UTC）的智能体类型；同一天出现新类型时可更新当日计数。可在 **Settings → About → Anonymous usage counts** 中查看内容并关闭，也可设置 `OVIS_TELEMETRY=0` 或 `DO_NOT_TRACK=1`。智能体自身如何连接模型，取决于它的配置。[数据传输与访问 →](docs/guide.md#faq)
 
 随机 ID 可关联同一安装的计数，并不保证完全匿名。
 

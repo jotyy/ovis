@@ -213,7 +213,7 @@ export const SETTINGS_JA: Record<string, string> = {
   "Ovis sends anonymous usage counts.": "Ovis は匿名の利用集計を送信します。",
   "What is sent": "送信内容",
   "Anonymous usage counts": "匿名の利用集計",
-  "Turned off on this PC by OVIS_TELEMETRY=0, DO_NOT_TRACK or a CI environment.": "この PC では OVIS_TELEMETRY=0、DO_NOT_TRACK または CI 環境によりオフになっています。",
+  "Off in this fork of Ovis. Set OVIS_TELEMETRY=1 to send counts to the upstream project's receiver, unless DO_NOT_TRACK or a CI environment forbids it.": "この Ovis のフォークでは既定でオフです。OVIS_TELEMETRY=1 を設定すると、DO_NOT_TRACK や CI 環境が禁じていない限り、上流プロジェクトの受信側にカウントを送ります。",
   "Send anonymous usage counts": "匿名の利用集計を送る",
   "Once on install and once per update, with the last browser's app settings, and once a day you open the app, with the kinds of coding agents running in herdr (such as claude or codex). Custom fonts, shortcuts and replies are reported only as customization flags or counts, never their text. Account identifiers, terminal content and files are excluded. The receiver stores the country, not the IP address.": "インストール時に 1 回、更新ごとに 1 回、最後に使用したブラウザーのアプリ設定とともに送信し、アプリを開いた日に 1 回、herdr で動いているコーディングエージェントの種類（claude や codex など）とともに送信します。カスタムフォント、ショートカット、返信は、内容そのものではなく、カスタマイズの有無を示すフラグまたは件数としてのみ報告されます。アカウント識別子、ターミナルの内容、ファイルは含まれません。受信側が保存するのは国であり、IP アドレスではありません。",
   "Once a day you open the app:": "アプリを開いた日に 1 回:",

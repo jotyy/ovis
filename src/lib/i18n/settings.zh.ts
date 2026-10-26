@@ -213,7 +213,7 @@ export const SETTINGS_ZH: Record<string, string> = {
   "Ovis sends anonymous usage counts.": "Ovis 会匿名发送使用统计。",
   "What is sent": "发送的内容",
   "Anonymous usage counts": "匿名使用统计",
-  "Turned off on this PC by OVIS_TELEMETRY=0, DO_NOT_TRACK or a CI environment.": "此电脑因 OVIS_TELEMETRY=0、DO_NOT_TRACK 或 CI 环境而已关闭。",
+  "Off in this fork of Ovis. Set OVIS_TELEMETRY=1 to send counts to the upstream project's receiver, unless DO_NOT_TRACK or a CI environment forbids it.": "此版本是 Ovis 的分支，默认不发送匿名使用计数。设置 OVIS_TELEMETRY=1 可把计数发给上游项目的接收端，除非 DO_NOT_TRACK 或 CI 环境禁止。",
   "Send anonymous usage counts": "发送匿名使用统计",
   "Once on install and once per update, with the last browser's app settings, and once a day you open the app, with the kinds of coding agents running in herdr (such as claude or codex). Custom fonts, shortcuts and replies are reported only as customization flags or counts, never their text. Account identifiers, terminal content and files are excluded. The receiver stores the country, not the IP address.": "应用安装时发送一次，每次更新发送一次，并附带最后使用的浏览器中的应用设置；在你打开应用的每一天再发送一次，并附带 herdr 中正在运行的编码代理类型（例如 claude 或 codex）。自定义字体、快捷键和快捷回复仅以自定义标记或数量的形式上报，不会上报其文本。账户标识符、终端内容和文件均不包含在内。接收端保存国家/地区，而非 IP 地址。",
   "Once a day you open the app:": "在你打开应用的每一天发送一次：",

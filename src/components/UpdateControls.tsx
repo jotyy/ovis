@@ -19,10 +19,10 @@ import { useLocale, useT } from "../lib/i18n.ts";
 
 declare const __APP_VERSION__: string;
 
-export const CHANGELOG_URL = "https://github.com/devswha/ovis/blob/main/CHANGELOG.md";
+export const CHANGELOG_URL = "https://github.com/jotyy/ovis/blob/studio/CHANGELOG.md";
 const CHANGELOG = CHANGELOG_URL;
 /** the restart commands for a plugin and a source install */
-const RESTART_HELP = "https://github.com/devswha/ovis/blob/main/docs/guide.md#updates";
+const RESTART_HELP = "https://github.com/jotyy/ovis/blob/studio/docs/guide.md#updates";
 
 /**
  * What an update brings, or brought: each release it installs, newest first. A release is told

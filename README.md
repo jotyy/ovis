@@ -88,8 +88,10 @@ https://github.com/user-attachments/assets/d854dbb6-64bd-4eba-81c7-fbd3f525726b
 
 ## install
 
+> This is **jotyy's fork** of [devswha/ovis](https://github.com/devswha/ovis) with the Studio design system: Inter, Tabler icons and shadcn components. It installs as its own herdr plugin (`jotyy.ovis`) and replaces an upstream install, keeping its settings and token. It has no releases of its own: run the installer again to update to the latest `studio` branch, since Settings → Updates follows release tags only. Anonymous usage counts are off in this fork. To go back to upstream: `herdr plugin uninstall jotyy.ovis`, then `herdr plugin install devswha/ovis`.
+
 ```bash
-curl -fsSL https://ovis.sh/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/jotyy/ovis/studio/install.sh | sh
 ```
 
 Linux with glibc (x64, arm64) or macOS (Intel, Apple Silicon); not Alpine/musl or 32-bit ARM. Have `curl`, Git and `tar` installed; installing a missing Bun also needs Bash and `unzip`. Requires herdr 0.9.0+ and Bun 1.4+; Node is not needed. The installer adds missing prerequisites for your user, upgrades an older Bun, then installs the app as a herdr plugin. Terminals run on the Rust PTY host each release ships, checked against its SHA-256; a Node 18+ already on the PC is only its fallback. If an existing herdr installation is older than 0.9.0, update and restart herdr yourself before rerunning the installer.
@@ -99,7 +101,7 @@ With the default listen address and Tailscale running, successful HTTPS setup pr
 Windows x64, in PowerShell:
 
 ```powershell
-irm https://ovis.sh/install.ps1 | iex
+irm https://raw.githubusercontent.com/jotyy/ovis/studio/install.ps1 | iex
 ```
 
 Requires [Git for Windows](https://git-scm.com/download/win). Installs missing herdr and Bun for your user, then installs the same plugin. No Node or WSL is needed. Open **Phone setup** in herdr for phone access. Windows terminals use the [screen mirror](docs/remote-pcs.md#windows-pcs), with typing and a fixed grid, until herdr supports terminal attach there.
@@ -111,7 +113,7 @@ Requires [Git for Windows](https://git-scm.com/download/win). Installs missing h
 Already have herdr 0.9.0+ and Bun 1.4+? Install just the plugin:
 
 ```bash
-herdr plugin install devswha/ovis
+herdr plugin install jotyy/ovis --ref studio
 ```
 
 An older herdr has to be updated and restarted first. [INSTALL.md](INSTALL.md) walks through each step and what to do when one fails.
@@ -144,7 +146,7 @@ No. Tailscale, an SSH tunnel, a VPN or your own HTTPS proxy can provide a route 
 
 Session files stay on the PC running each agent, and their contents are served to browsers you connect. The app has no hosted relay or account service of its own. Optional voice input sends audio (and text when polishing) to the configured provider; browser speech recognition may also use the browser vendor's service. Enabled usage meters contact provider APIs. Updates, remote-PC setup and push alerts can also use external services. If you enable Portal, connections pass through your chosen relay, which sees connection metadata and holds the address's certificate; use a relay you trust.
 
-Anonymous usage counts are on by default. After showing its notice and a ten-minute grace period, the app can send install/update counts with a random installation ID, version (and previous version on update), OS, CPU architecture, install method and an allowlisted settings snapshot. Custom text and account identities are omitted or summarized; code, conversations and files are not collected. The checked-in receiver adds a country code when Cloudflare provides one, but stores no IP address. Activity counts include the kinds of agents running on days the app is opened (UTC); the same day's count can be updated when a new kind appears. **Settings → About → Anonymous usage counts** shows the payload and turns sending off; `OVIS_TELEMETRY=0` or `DO_NOT_TRACK=1` also disables it. The agents’ own model connections depend on their configuration. [Data flow and access →](docs/guide.md#faq)
+Anonymous usage counts are off in this fork, since the receiver is the upstream project's: only `OVIS_TELEMETRY=1` turns them on. Upstream has them on by default. After showing its notice and a ten-minute grace period, the app can then send install/update counts with a random installation ID, version (and previous version on update), OS, CPU architecture, install method and an allowlisted settings snapshot. Custom text and account identities are omitted or summarized; code, conversations and files are not collected. The checked-in receiver adds a country code when Cloudflare provides one, but stores no IP address. Activity counts include the kinds of agents running on days the app is opened (UTC); the same day's count can be updated when a new kind appears. **Settings → About → Anonymous usage counts** shows the payload and turns sending off; `OVIS_TELEMETRY=0` or `DO_NOT_TRACK=1` also disables it. The agents’ own model connections depend on their configuration. [Data flow and access →](docs/guide.md#faq)
 
 The random ID links counts from the same installation; it is not a guarantee of anonymity.
 

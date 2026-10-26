@@ -64,7 +64,7 @@ import { writePrivateState } from "./private-state.ts";
 /** A blocked agent is still blocked when the phone gets signal back; a newer push for the pane replaces it anyway. */
 const PUSH_TTL_SECONDS = 12 * 60 * 60;
 const PUSH_TIMEOUT_MS = 10_000;
-const DEFAULT_SUBJECT = "https://github.com/devswha/ovis";
+const DEFAULT_SUBJECT = "https://github.com/jotyy/ovis";
 /** How many retired endpoints are remembered; the oldest is forgotten first. */
 const RETIRED_LIMIT = 1000;
 /** How long a retired endpoint is remembered: a browser that kept it this long has long since moved on. */

@@ -213,7 +213,7 @@ export const SETTINGS_KO: Record<string, string> = {
   "Ovis sends anonymous usage counts.": "Ovis는 사용 현황을 익명으로 집계합니다.",
   "What is sent": "보내는 내용",
   "Anonymous usage counts": "익명 사용 집계",
-  "Turned off on this PC by OVIS_TELEMETRY=0, DO_NOT_TRACK or a CI environment.": "이 PC에서는 OVIS_TELEMETRY=0, DO_NOT_TRACK 또는 CI 환경 때문에 꺼져 있습니다.",
+  "Off in this fork of Ovis. Set OVIS_TELEMETRY=1 to send counts to the upstream project's receiver, unless DO_NOT_TRACK or a CI environment forbids it.": "이 Ovis 포크에서는 기본으로 꺼져 있습니다. OVIS_TELEMETRY=1을 설정하면 DO_NOT_TRACK이나 CI 환경이 막지 않는 한 상위 프로젝트의 수신 서버로 집계를 보냅니다.",
   "Send anonymous usage counts": "익명 사용 집계 보내기",
   "Once on install and once per update, with the last browser's app settings, and once a day you open the app, with the kinds of coding agents running in herdr (such as claude or codex). Custom fonts, shortcuts and replies are reported only as customization flags or counts, never their text. Account identifiers, terminal content and files are excluded. The receiver stores the country, not the IP address.": "앱 설치 시 한 번, 업데이트마다 한 번, 마지막으로 사용한 브라우저의 앱 설정과 함께 보내고, 앱을 여는 날마다 한 번, herdr에서 실행 중인 코딩 에이전트의 종류(claude, codex 등)와 함께 보냅니다. 사용자 지정 글꼴, 바로 가기 및 답변은 텍스트가 아니라 사용자 지정 여부 플래그나 개수로만 보고됩니다. 계정 식별자, 터미널 내용 및 파일은 제외됩니다. 받는 쪽은 IP 주소가 아닌 국가를 저장합니다.",
   "Once a day you open the app:": "앱을 여는 날마다 한 번:",

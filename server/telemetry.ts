@@ -76,9 +76,14 @@ interface Saved {
 
 type Env = Record<string, string | undefined>;
 
+/**
+ * This fork sends nothing unless OVIS_TELEMETRY opts in: the receiver is the upstream project's
+ * (TELEMETRY_URL), and a fork's installs would be counted as its own. DO_NOT_TRACK and a CI
+ * environment still forbid it over an opt-in.
+ */
 export function telemetryBlocked(env: Env): boolean {
   const own = env["OVIS_TELEMETRY"]?.trim().toLowerCase();
-  if (own && ["0", "false", "off", "no"].includes(own)) return true;
+  if (!own || !["1", "true", "on", "yes"].includes(own)) return true;
   const dnt = env["DO_NOT_TRACK"]?.trim();
   if (dnt && dnt !== "0") return true;
   return Boolean(env["CI"] || env["HERDR_TEST_MODE"] || env["HERDR_TEST_SESSION"]);

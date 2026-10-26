@@ -50,7 +50,7 @@ git --version
 | **C. One-line installer** | The user agrees to install what is missing (herdr, Bun, and Node 22 only when the Rust PTY host does not run on the PC and it has no Node 18 or newer) and to let Tailscale serve the app | In-app, like A |
 
 Use A unless the user says otherwise. C is A plus the prerequisites and step 5 in one command,
-`curl -fsSL https://ovis.sh/install.sh | sh`: it installs herdr and Bun for the user only (no sudo)
+`curl -fsSL https://raw.githubusercontent.com/jotyy/ovis/studio/install.sh | sh`: it installs herdr and Bun for the user only (no sudo)
 when they are missing (and Node 22 only when the release's Rust PTY host cannot be installed on the
 PC and it has no Node 18 or newer), installs the plugin, starts it when herdr
 runs, and, when Tailscale runs on the PC, serves the app to the tailnet (`tailscale serve`) and
@@ -60,15 +60,15 @@ for a GitHub star, unless the account gh is signed in to has starred the reposit
 asks whether to give one only at a terminal, and goes on by itself after 20 seconds: do not answer
 the question, and do not star the repository for the user.
 
-On Windows x64, use `irm https://ovis.sh/install.ps1 | iex` in PowerShell.
+On Windows x64, use `irm https://raw.githubusercontent.com/jotyy/ovis/studio/install.ps1 | iex` in PowerShell.
 It requires Git for Windows and installs missing herdr and Bun for the user, without Node or WSL.
 It starts the plugin when herdr runs. Phone access stays optional: use the **Phone setup** action.
-`OVIS_REF` selects a branch or tag for testing; otherwise it installs the latest release.
+`OVIS_REF` selects a branch or tag for testing; otherwise it installs this fork's `studio` branch (the fork has no releases of its own, and every `vX.Y.Z` tag on it is an upstream release that installs upstream Ovis).
 
 ## 3A. Install as a herdr plugin
 
 ```bash
-herdr plugin install devswha/ovis --yes
+herdr plugin install jotyy/ovis --ref studio --yes
 ```
 
 herdr clones the repository, runs `bun install` and `bun run build`, then registers the plugin. This
@@ -249,8 +249,8 @@ The old `HERDR_WEB_*` names still work. The [user guide](docs/guide.md#configura
 - Settings → **About** → **Update and restart** when a new release (`vX.Y.Z`) is out. It works for
   both install methods. The new
   version is built separately and the app restarts only if the build and health check pass.
-- Plugin alternative: `herdr plugin install devswha/ovis --yes` again. It replaces the
-  checkout; restart the plugin afterwards.
+- Plugin alternative: `herdr plugin update jotyy.ovis --yes`, or the one-line installer again, which
+  does that and restarts the plugin. This fork has no releases, so Settings → **About** offers none.
 - Source alternative: `git pull` on `main`, then restart `bun run start`. The in-app updater only
   offers published releases (`vX.Y.Z` tags); `main` can be ahead of the latest release.
 

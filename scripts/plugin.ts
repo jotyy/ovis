@@ -51,9 +51,9 @@ function ownDir(parent: string): string {
   return existsSync(next) || !existsSync(legacy) ? next : legacy;
 }
 const DEFAULT_STATE_DIR = ownDir(join(homedir(), ".local", "state"));
-const PLUGIN_ID = "devswha.ovis";
-/** the id before the rename: an install from then keeps it until the installer moves it to PLUGIN_ID */
-const LEGACY_PLUGIN_ID = "devswha.herdr-web-ui";
+const PLUGIN_ID = "jotyy.ovis";
+/** upstream Ovis (devswha/ovis), whose install this fork replaces: its state is kept until the installer moves it to PLUGIN_ID */
+const LEGACY_PLUGIN_ID = "devswha.ovis";
 const HERDR_PLUGIN_STATE = join(herdrStateDir(process.env, platform(), homedir()), "plugins");
 const MANAGED_STATE_DIR = [PLUGIN_ID, LEGACY_PLUGIN_ID].map((id) => join(HERDR_PLUGIN_STATE, id)).find((dir) => existsSync(dir)) ?? join(HERDR_PLUGIN_STATE, PLUGIN_ID);
 // run by hand, without herdr's HERDR_PLUGIN_STATE_DIR: a server started from a checkout keeps its

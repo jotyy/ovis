@@ -33,7 +33,7 @@ function setup(options: { version?: string; env?: Record<string, string>; status
   const clock = { now: Date.parse(options.now ?? "2026-10-08T12:00:00Z") };
   const timers: { fn: () => void; ms: number; cleared: boolean }[] = [];
   const telemetry = new Telemetry({
-    stateDir, version: options.version ?? "0.4.1", env: options.env ?? {}, fetch: fake,
+    stateDir, version: options.version ?? "0.4.1", env: { OVIS_TELEMETRY: "1", ...options.env }, fetch: fake,
     activeUrl: TEST_ACTIVE_URL,
     platform: "linux", arch: "x64", previousVersion: () => options.previous ?? null,
     now: () => clock.now, noticeGraceMs: options.grace ?? 0,
@@ -130,7 +130,10 @@ describe("telemetry events", () => {
       expect(sent).toEqual([]);
       expect(telemetry.status().blocked_by_env).toBe(true);
     }
-    expect(telemetryBlocked({ DO_NOT_TRACK: "0" })).toBe(false);
+    expect(telemetryBlocked({ OVIS_TELEMETRY: "1", DO_NOT_TRACK: "0" })).toBe(false);
+    // this fork: nothing is sent without the opt-in
+    expect(telemetryBlocked({})).toBe(true);
+    expect(telemetryBlocked({ DO_NOT_TRACK: "0" })).toBe(true);
   });
 
   test("an event the receiver refused is sent again later", async () => {

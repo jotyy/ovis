@@ -35,24 +35,25 @@ type Gh = "starred" | "not" | "refuses" | "denied" | "upstream" | "signed-out" |
 const STAND_INS: Record<string, string> = {
   herdr: `case "$*" in
   --version) echo "herdr 0.9.3" ;;
-  "plugin list") [ ! -e "$SCRATCH/installed" ] || echo "devswha.ovis 0.0.0"; [ ! -e "$SCRATCH/legacy" ] || echo "devswha.herdr-web-ui 0.0.0" ;;
+  "plugin list") [ ! -e "$SCRATCH/installed" ] || echo "jotyy.ovis 0.0.0"; [ ! -e "$SCRATCH/legacy" ] || echo "devswha.ovis 0.0.0" ;;
   "plugin list --json")
     printf '{"result":{"plugins":['
-    [ ! -e "$SCRATCH/installed" ] || printf '{"plugin_id":"devswha.ovis","plugin_root":"%s"},' "$SCRATCH/plugin"
-    [ ! -e "$SCRATCH/legacy" ] || printf '{"plugin_id":"devswha.herdr-web-ui","plugin_root":"%s"},' "$SCRATCH/legacy-plugin"
+    [ ! -e "$SCRATCH/installed" ] || printf '{"plugin_id":"jotyy.ovis","plugin_root":"%s"},' "$SCRATCH/plugin"
+    [ ! -e "$SCRATCH/legacy" ] || printf '{"plugin_id":"devswha.ovis","plugin_root":"%s"},' "$SCRATCH/legacy-plugin"
     printf '{"plugin_id":"someone.else","plugin_root":"/nowhere"}]}}\\n' ;;
-  # under the id the ref's manifest names
+  # under the id the ref's manifest names (upstream's id for an upstream ref)
   "plugin install "*)
-    if [ "$(cat "$SCRATCH/ref-id" 2>/dev/null)" = devswha.herdr-web-ui ]; then
+    if [ "$(cat "$SCRATCH/ref-id" 2>/dev/null)" = devswha.ovis ]; then
       : > "$SCRATCH/legacy"
       mkdir -p "$SCRATCH/legacy-plugin/scripts"
       cp "$SCRATCH/plugin/scripts/plugin.ts" "$SCRATCH/legacy-plugin/scripts/plugin.ts"
-      echo "Installed devswha.herdr-web-ui"
+      echo "Installed devswha.ovis"
     else
-      : > "$SCRATCH/installed"; echo "Installed devswha.ovis"
+      : > "$SCRATCH/installed"; echo "Installed jotyy.ovis"
     fi ;;
   "plugin config-dir "*) echo "$SCRATCH/herdr-config/$3" ;;
-  "plugin uninstall devswha.herdr-web-ui") echo "$*" >> "$SCRATCH/herdr.calls"; rm "$SCRATCH/legacy" ;;
+  "plugin uninstall devswha.ovis") echo "$*" >> "$SCRATCH/herdr.calls"; rm "$SCRATCH/legacy" ;;
+  "plugin update "*) echo "$*" >> "$SCRATCH/herdr.calls" ;;
   "status server --json") if [ -e "$SCRATCH/running" ]; then echo '{"running":true}'; else echo '{"running":false}'; fi ;;
   "plugin action invoke "*) ;;
   *) echo "unexpected herdr $*" >&2; exit 1 ;;
@@ -61,9 +62,9 @@ esac`,
   // only the manifest of the ref being installed: what its id is, or a network that blocks the host
   curl: `echo "$*" >> "$SCRATCH/curl.calls"
 case "$*" in
-  *" https://raw.githubusercontent.com/devswha/ovis/$OVIS_REF/herdr-plugin.toml")
+  *" https://raw.githubusercontent.com/jotyy/ovis/$OVIS_REF/herdr-plugin.toml")
     [ ! -e "$SCRATCH/manifest-blocked" ] || { echo "curl: (7) Failed to connect to raw.githubusercontent.com port 443" >&2; exit 7; }
-    printf 'id = "%s"\\nname = "Ovis"\\n' "$(cat "$SCRATCH/ref-id" 2>/dev/null || echo devswha.ovis)" ;;
+    printf 'id = "%s"\\nname = "Ovis"\\n' "$(cat "$SCRATCH/ref-id" 2>/dev/null || echo jotyy.ovis)" ;;
   *) echo "unexpected curl $*" >&2; exit 1 ;;
 esac`,
   // a desktop's openers, which only write down what they were asked to open (renamed into place: a reader never sees half a line)
@@ -121,14 +122,14 @@ class Pc {
 
   /** herdr is running, so the app starts and says where it is */
   running(): this { writeFileSync(join(this.scratch, "running"), ""); return this; }
-  /** the plugin installed under its id from before the rename, with a token in its config */
+  /** upstream Ovis installed under its own id, with a token in its config */
   legacy(options: { stopFails?: boolean } = {}): this {
     writeFileSync(join(this.scratch, "legacy"), "");
     mkdirSync(join(this.scratch, "legacy-plugin", "scripts"), { recursive: true });
     writeFileSync(join(this.scratch, "legacy-plugin", "scripts", "plugin.ts"), options.stopFails
       ? `if (process.argv[2] === "stop") process.exit(1);\n`
       : `if (process.argv[2] === "stop") await Bun.write(process.env.SCRATCH + "/legacy-stopped", "");\n`);
-    const config = join(this.scratch, "herdr-config", "devswha.herdr-web-ui");
+    const config = join(this.scratch, "herdr-config", "devswha.ovis");
     mkdirSync(config, { recursive: true });
     writeFileSync(join(config, "env"), "OVIS_TOKEN=kept-secret\n", { mode: 0o600 });
     return this;
@@ -180,7 +181,7 @@ class Pc {
     return existsSync(file) ? Number(readFileSync(file, "utf8").trim()) : null;
   }
   private environment(extra: Record<string, string> = {}): Record<string, string> {
-    return { PATH: join(this.scratch, "bin"), HOME: this.scratch, SCRATCH: this.scratch, SHELL: "/bin/sh", TERM: "xterm", OVIS_REF: "v0.0.0", ...extra };
+    return { PATH: join(this.scratch, "bin"), HOME: this.scratch, SCRATCH: this.scratch, SHELL: "/bin/sh", TERM: "xterm", OVIS_REF: "studio", ...extra };
   }
 
   /** as a script or an agent runs it: the script on stdin, and no terminal */
@@ -263,70 +264,61 @@ it("extracts only the URL from a PID-bearing Windows status line", () => {
 });
 
 // install.sh is the Linux and macOS installer: Windows has install.ps1 and scripts/windows-install.test.ps1
-describe.skipIf(platform() === "win32")("install.sh over an install under the old plugin id", () => {
+describe.skipIf(platform() === "win32")("install.sh over an install of upstream Ovis", () => {
   it.concurrent("stops it, brings its token to the new id and removes it", async () => {
     const pc = new Pc().legacy();
     const { out, exitCode } = await pc.unattended();
     expect(exitCode, out).toBe(0);
-    expect(out).toContain("Installed devswha.ovis");
+    expect(out).toContain("Installed jotyy.ovis");
     expect(existsSync(join(pc.scratch, "legacy-stopped"))).toBe(true);
-    const moved = join(pc.scratch, "herdr-config", "devswha.ovis", "env");
+    const moved = join(pc.scratch, "herdr-config", "jotyy.ovis", "env");
     expect(readFileSync(moved, "utf8")).toBe("OVIS_TOKEN=kept-secret\n");
     expect(statSync(moved).mode & 0o777).toBe(0o600);
-    expect(readFileSync(join(pc.scratch, "herdr.calls"), "utf8")).toBe("plugin uninstall devswha.herdr-web-ui\n");
+    expect(readFileSync(join(pc.scratch, "herdr.calls"), "utf8")).toBe("plugin uninstall devswha.ovis\n");
   });
 
-  it.concurrent("moves nothing while the old id's server will not stop", async () => {
+  it.concurrent("replaces nothing while upstream's server will not stop", async () => {
     // removed with its server still up, the old checkout would keep serving: the new start finds the port answering
     const pc = new Pc().legacy({ stopFails: true });
     const { out, exitCode } = await pc.unattended();
     expect(exitCode, out).not.toBe(0);
-    expect(out).toContain("could not stop the server of the old id");
-    expect(out).not.toContain("Installed devswha.ovis");
+    expect(out).toContain("could not stop the server of the upstream install");
+    expect(out).not.toContain("Installed jotyy.ovis");
     expect(existsSync(join(pc.scratch, "herdr.calls"))).toBe(false);
-    expect(existsSync(join(pc.scratch, "herdr-config", "devswha.ovis", "env"))).toBe(false);
+    expect(existsSync(join(pc.scratch, "herdr-config", "jotyy.ovis", "env"))).toBe(false);
   });
 });
 
-// releases up to 0.4.13 name the plugin by its old id, and installing one cannot move an install to the new one
-describe.skipIf(platform() === "win32")("install.sh with a release from before the rename", () => {
-  const LEGACY = "devswha.herdr-web-ui";
+// every release tag on the fork is upstream's and names upstream's id: installing one cannot replace an upstream install
+describe.skipIf(platform() === "win32")("install.sh with an upstream release", () => {
+  const LEGACY = "devswha.ovis";
   const OLD_RELEASE = { OVIS_REF: "v0.4.13" };
-  const manifest = "https://raw.githubusercontent.com/devswha/ovis/v0.4.13/herdr-plugin.toml";
+  const manifest = "https://raw.githubusercontent.com/jotyy/ovis/v0.4.13/herdr-plugin.toml";
 
   for (const blocked of [false, true]) {
     const how = blocked ? "by its version when its manifest cannot be read" : "by its manifest";
-    it.concurrent(`installs it under the old id on a fresh PC, told ${how}`, async () => {
+    it.concurrent(`installs it under upstream's id on a fresh PC, told ${how}`, async () => {
       const pc = new Pc().refNames(LEGACY);
       if (blocked) pc.manifestBlocked();
       const { out, exitCode } = await pc.unattended(OLD_RELEASE);
       expect(exitCode, out).toBe(0);
-      expect(out).toContain("Installed devswha.herdr-web-ui");
+      expect(out).toContain("Installed devswha.ovis");
       expect(readFileSync(join(pc.scratch, "curl.calls"), "utf8")).toContain(manifest);
       expect(existsSync(join(pc.scratch, "installed"))).toBe(false);
     });
 
-    it.concurrent(`leaves an install under the old id running, told ${how}`, async () => {
+    it.concurrent(`leaves an upstream install running, told ${how}`, async () => {
       const pc = new Pc().legacy().refNames(LEGACY);
       if (blocked) pc.manifestBlocked();
       const { out, exitCode } = await pc.unattended(OLD_RELEASE);
       expect(exitCode, out).toBe(0);
       expect(out).toContain("already installed as a herdr plugin");
       expect(existsSync(join(pc.scratch, "legacy-stopped"))).toBe(false);
-      expect(existsSync(join(pc.scratch, "herdr-config", "devswha.ovis", "env"))).toBe(false);
+      expect(existsSync(join(pc.scratch, "herdr-config", "jotyy.ovis", "env"))).toBe(false);
       expect(existsSync(join(pc.scratch, "herdr.calls"))).toBe(false);
       expect(existsSync(join(pc.scratch, "legacy"))).toBe(true);
     });
   }
-
-  it.concurrent("moves an install under the old id to a release after the rename, told by its version", async () => {
-    const pc = new Pc().legacy().manifestBlocked();
-    const { out, exitCode } = await pc.unattended({ OVIS_REF: "v0.4.14" });
-    expect(exitCode, out).toBe(0);
-    expect(out).toContain("Installed devswha.ovis");
-    expect(existsSync(join(pc.scratch, "legacy-stopped"))).toBe(true);
-    expect(readFileSync(join(pc.scratch, "herdr.calls"), "utf8")).toBe("plugin uninstall devswha.herdr-web-ui\n");
-  });
 
   it.concurrent("stops nothing for a branch whose manifest cannot be read", async () => {
     const pc = new Pc().legacy().manifestBlocked();
@@ -337,11 +329,11 @@ describe.skipIf(platform() === "win32")("install.sh with a release from before t
     expect(existsSync(join(pc.scratch, "herdr.calls"))).toBe(false);
   });
 
-  it.concurrent("finds the install of a branch whose manifest cannot be read under the old id it named", async () => {
+  it.concurrent("finds the install of a branch whose manifest cannot be read under upstream's id it named", async () => {
     const pc = new Pc().refNames(LEGACY).manifestBlocked();
     const { out, exitCode } = await pc.unattended({ OVIS_REF: "old-branch" });
     expect(exitCode, out).toBe(0);
-    expect(out).toContain("Installed devswha.herdr-web-ui");
+    expect(out).toContain("Installed devswha.ovis");
   });
 });
 
@@ -349,7 +341,7 @@ describe.skipIf(platform() === "win32")("install.sh without a terminal", () => {
   it.concurrent("mentions the star with a link when the PC has no gh", async () => {
     const { out, exitCode } = await new Pc().unattended();
     expect(exitCode).toBe(0);
-    expect(out).toContain("Installed devswha.ovis");
+    expect(out).toContain("Installed jotyy.ovis");
     expect(out).toContain(MENTION);
     expect(out).not.toContain(QUESTION);
     // the last thing said, so that a question after it can be left without losing a line
@@ -361,7 +353,7 @@ describe.skipIf(platform() === "win32")("install.sh without a terminal", () => {
     const { out, exitCode } = await pc.unattended();
     expect(exitCode).toBe(0);
     expect(out).not.toContain(MENTION);
-    expect(pc.ghCalls()).toEqual(["api --hostname github.com --include user/starred/devswha/ovis"]);
+    expect(pc.ghCalls()).toEqual(["api --hostname github.com --include user/starred/jotyy/ovis"]);
   });
 
   it.concurrent("gives the link and asks nothing when the account has not starred", async () => {
@@ -373,11 +365,12 @@ describe.skipIf(platform() === "win32")("install.sh without a terminal", () => {
     expect(pc.stars()).toBe(0);
   });
 
-  it.concurrent("stays quiet on a rerun, and does not ask gh", async () => {
+  it.concurrent("updates the plugin on a rerun, and does not ask gh", async () => {
     const pc = new Pc("not").installed();
     const { out, exitCode } = await pc.unattended();
     expect(exitCode).toBe(0);
-    expect(out).toContain("already installed as a herdr plugin");
+    expect(out).toContain("already installed as a herdr plugin; updating it to the latest studio");
+    expect(readFileSync(join(pc.scratch, "herdr.calls"), "utf8")).toBe("plugin update jotyy.ovis --yes\n");
     expect(out).not.toContain(MENTION);
     expect(pc.ghCalls()).toEqual([]);
   });

@@ -1018,7 +1018,7 @@ function AboutPage({ updates, herdrVersion, bridgesFollow }: { updates: UpdatesM
       <TelemetryControls />
       <SettingsGroup title={t("About")} icon={<Info />} className="settings-about" section="about">
         <SettingsRow label="Ovis" description={<a className="settings-link" href="https://ovis.sh/" target="_blank" rel="noreferrer">ovis.sh</a>} wide>
-          <Button variant="field" size="field" asChild><a href="https://github.com/devswha/ovis" target="_blank" rel="noreferrer"><Star />{t("Star on GitHub")}</a></Button>
+          <Button variant="field" size="field" asChild><a href="https://github.com/jotyy/ovis" target="_blank" rel="noreferrer"><Star />{t("Star on GitHub")}</a></Button>
           <Button variant="field" size="field" asChild><a href={CHANGELOG_URL} target="_blank" rel="noreferrer"><ExternalLink />{t("Full changelog")}</a></Button>
         </SettingsRow>
       </SettingsGroup>

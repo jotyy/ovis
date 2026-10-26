@@ -4,7 +4,7 @@ $installer = Join-Path $PSScriptRoot '..\install.ps1'
 $originalPath = $env:PATH
 $originalLocalAppData = $env:LOCALAPPDATA
 $originalUserProfile = $env:USERPROFILE
-$state = @{ installed = $false; installs = 0; uninstalls = 0; ref = ''; running = $true; started = $false; failInstall = $false; bunVersion = '1.4.2'; failBun = $false; windowsRelease = $true; refId = 'devswha.ovis'; installedId = ''; manifestBlocked = $false; startedLegacy = $false }
+$state = @{ installed = $false; installs = 0; uninstalls = 0; updates = 0; ref = ''; running = $true; started = $false; failInstall = $false; bunVersion = '1.4.2'; failBun = $false; windowsRelease = $true; refId = 'jotyy.ovis'; installedId = ''; manifestBlocked = $false; startedLegacy = $false }
 $global:herdrInstallOpened = @()
 # gh is a stand-in .cmd, first on PATH: the installer runs gh as a process, and no real star is read or given.
 # mode.txt beside it is what it answers: starred, not, refuses (the star itself), upstream, signed-out, hangs or
@@ -29,6 +29,7 @@ function bun {
     $global:LASTEXITCODE = 0
     if ($args[0] -eq '--version') { $state.bunVersion }
     elseif ($args[-1] -eq 'status') { 'running http://127.0.0.1:7317 (pid 1234)'; 'config: none' }
+    elseif ($args[-1] -eq 'stop') { }
     else { throw "Unexpected Bun command: $args" }
 }
 function herdr {
@@ -41,9 +42,11 @@ function herdr {
             @{ result = @{ plugins = $plugins } } | ConvertTo-Json -Depth 4 -Compress
         }
         'status server --json' { @{ running = $state.running } | ConvertTo-Json -Compress }
-        'plugin action invoke devswha.ovis.start-windows' { $state.started = $true; '{}' }
-        'plugin action invoke devswha.herdr-web-ui.start-windows' { $state.started = $true; $state.startedLegacy = $true; '{}' }
+        'plugin action invoke jotyy.ovis.start-windows' { $state.started = $true; '{}' }
+        'plugin action invoke devswha.ovis.start-windows' { $state.started = $true; $state.startedLegacy = $true; '{}' }
+        'plugin uninstall jotyy.ovis' { $state.installed = $false; $state.uninstalls++; 'Uninstalled' }
         'plugin uninstall devswha.ovis' { $state.installed = $false; $state.uninstalls++; 'Uninstalled' }
+        'plugin update jotyy.ovis --yes' { $state.updates++; 'Updated' }
         default {
             if ($args[0] -eq 'plugin' -and $args[1] -eq 'install') {
                 if ($state.failInstall) { $global:LASTEXITCODE = 1; return }
@@ -59,7 +62,7 @@ function herdr {
 }
 function Invoke-WebRequest {
     # the manifest of the ref being installed: what its id is, or a network that blocks the host
-    if ("$($args[-1])" -like 'https://raw.githubusercontent.com/devswha/ovis/*/herdr-plugin.toml') {
+    if ("$($args[-1])" -like 'https://raw.githubusercontent.com/jotyy/ovis/*/herdr-plugin.toml') {
         if ($state.manifestBlocked) { throw 'Unable to connect to the remote server' }
         return @{ Content = "name = `"Ovis`"`nid = `"$($state.refId)`"" }
     }
@@ -129,9 +132,9 @@ exit /b 1
     Set-Content -LiteralPath (Join-Path $ghStandIn 'mode.txt') -Encoding Ascii -Value 'signed-out'
 
     & $installer -Ref ''
-    Assert ($state.installed -and $state.ref -eq 'v1.10.0' -and $state.started) 'Install must choose the highest stable release and start a running server'
+    Assert ($state.installed -and $state.ref -eq 'studio' -and $state.started) 'Install must choose the fork's studio branch and start a running server'
     & $installer -Ref ''
-    Assert ($state.installs -eq 1) 'Rerun must preserve the installed plugin'
+    Assert ($state.installs -eq 1 -and $state.updates -eq 1) 'Rerun must preserve the installed plugin and update it'
     & {
         $ErrorActionPreference = 'Continue'
         Invoke-Expression (Get-Content -Raw $installer)
@@ -168,15 +171,15 @@ exit /b 1
     Assert ($state.uninstalls -eq 1 -and $state.installs -eq $installs + 1 -and $state.started) 'A copy without Windows support must be replaced and started'
     Write-Host 'PASS native installer release selection, rerun, Bun bootstrap, explicit ref, stopped herdr, install failure and a copy without Windows support'
 
-    # Releases up to 0.4.13 name the plugin by its old id: told by the manifest, or by the version when it cannot be read.
+    # Every release tag is an upstream release and names upstream's id: told by the manifest, or by the tag when it cannot be read.
     foreach ($blocked in $false, $true) {
         $state.installed = $false; $state.started = $false; $state.startedLegacy = $false
-        $state.refId = 'devswha.herdr-web-ui'; $state.manifestBlocked = $blocked
+        $state.refId = 'devswha.ovis'; $state.manifestBlocked = $blocked
         & $installer -Ref 'v0.4.13'
-        Assert ($state.installedId -eq 'devswha.herdr-web-ui' -and $state.startedLegacy) "A release that names the old id must install and start under it (manifest blocked: $blocked)"
+        Assert ($state.installedId -eq 'devswha.ovis' -and $state.startedLegacy) "A release that names upstream's id must install and start under it (manifest blocked: $blocked)"
     }
-    $state.installed = $false; $state.started = $false; $state.refId = 'devswha.ovis'; $state.manifestBlocked = $false
-    Write-Host 'PASS a release from before the rename installs under its old id'
+    $state.installed = $false; $state.started = $false; $state.refId = 'jotyy.ovis'; $state.manifestBlocked = $false
+    Write-Host 'PASS an upstream release installs under upstream's id'
 
     # Browser opening is covered through a stand-in; this harness never starts a real browser.
     $savedCi = $env:CI; $savedNoOpen = $env:OVIS_NO_OPEN; $savedSsh = $env:SSH_CONNECTION
@@ -277,7 +280,7 @@ exit /b 1
     $childFile = Join-Path $ghStandIn 'child.txt'
     Remove-Item -LiteralPath $childFile -Force -ErrorAction SilentlyContinue
     $clock = [Diagnostics.Stopwatch]::StartNew()
-    $answer = Invoke-GhApi 'user/starred/devswha/ovis'
+    $answer = Invoke-GhApi 'user/starred/jotyy/ovis'
     $elapsed = $clock.Elapsed.TotalSeconds
     $childPid = [int](Get-Content -LiteralPath $childFile -ErrorAction SilentlyContinue | Select-Object -First 1)
     Assert ($childPid -gt 0) 'control: the lingering stand-in must have started its child and named its PID'
@@ -354,7 +357,7 @@ public static class ImmediateGh {
             try {
                 Invoke-Expression $case.source
                 $clock = [Diagnostics.Stopwatch]::StartNew()
-                $answer = Invoke-GhApi 'user/starred/devswha/ovis'
+                $answer = Invoke-GhApi 'user/starred/jotyy/ovis'
                 Assert ($null -eq $answer -and $clock.Elapsed.TotalSeconds -lt 15) 'regression: immediate child must not keep the call waiting past its deadline'
                 Assert ($ready.WaitOne(0)) 'control: the resumed shim must have started its child'
                 $childPid = [int](Get-Content -LiteralPath $env:HERDR_TEST_GH_CHILD)

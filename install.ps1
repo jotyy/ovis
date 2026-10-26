@@ -60,51 +60,45 @@ if (-not (Get-Command bun -ErrorAction SilentlyContinue)) { throw 'Bun did not i
 $bunVersion = Run-Tool bun @('--version')
 if ([version]($bunVersion -replace '-.*$', '') -lt [version]'1.4.0') { throw "Needs Bun 1.4 or newer; this is $bunVersion." }
 
-$pluginId = 'devswha.ovis'
-# the id before the rename: an install under it moves to $pluginId, keeping its config
-$legacyId = 'devswha.herdr-web-ui'
+$pluginId = 'jotyy.ovis'
+# the branch this fork is published from: it has no releases of its own
+$defaultRef = 'studio'
+# upstream Ovis, which this fork replaces: an install under it moves to $pluginId, keeping its config
+$legacyId = 'devswha.ovis'
 function Find-Plugin([string]$Id = $pluginId) {
     (Run-Tool herdr @('plugin', 'list', '--json') | ConvertFrom-Json).result.plugins |
         Where-Object { $_.plugin_id -eq $Id } | Select-Object -First 1
 }
-# the highest vX.Y.Z tag, as the updater picks it
-function Get-LatestRef {
-    $latest = Run-Tool git @('ls-remote', '--tags', '--refs', 'https://github.com/devswha/ovis.git', 'v*') |
-        ForEach-Object { if ($_ -match 'refs/tags/(v\d+\.\d+\.\d+)$') { $Matches[1] } } |
-        Sort-Object { [version]$_.Substring(1) } | Select-Object -Last 1
-    if (-not $latest) { throw 'Could not find the latest app release on GitHub. Check your connection and run this again.' }
-    $latest
-}
-# The ref to install is settled before anything moves: a release from before the rename still names
-# the plugin by its old id, and installing it cannot move an install to the new one
+# the fork's branch: every vX.Y.Z tag on the fork is an upstream release
+function Get-LatestRef { $defaultRef }
+# The ref to install is settled before anything moves: an upstream ref names upstream's id, and
+# installing it cannot replace an upstream install with the fork
 $move = $true
 if (-not (Find-Plugin)) {
     if (-not $Ref) { $Ref = Get-LatestRef }
     # the id the manifest at $Ref names
     $refId = try {
-        $manifest = (Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 "https://raw.githubusercontent.com/devswha/ovis/$Ref/herdr-plugin.toml").Content
+        $manifest = (Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 "https://raw.githubusercontent.com/jotyy/ovis/$Ref/herdr-plugin.toml").Content
         if ($manifest -match '(?m)^id\s*=\s*"([^"]+)"') { $Matches[1] }
     } catch { $null }
-    # raw.githubusercontent.com can be blocked where github.com is not: a release tag's version tells it too
-    if (-not $refId -and $Ref -match '^v(\d+\.\d+\.\d+)$') {
-        $refId = if ([version]$Matches[1] -ge [version]'0.4.14') { $pluginId } else { $legacyId }
-    }
-    # That release (0.4.13 and older) installs, runs and updates under the old id: the move waits for
-    # a release that names the new one. With the id unknown (a branch whose manifest cannot be read),
-    # an install under the old id is left running, since the ref may not be able to move it.
+    # raw.githubusercontent.com can be blocked where github.com is not: a release tag tells it too
+    if (-not $refId -and $Ref -match '^v\d+\.\d+\.\d+$') { $refId = $legacyId }
+    # An upstream ref installs, runs and updates under upstream's id: nothing of the fork comes with
+    # it. With the id unknown (a branch whose manifest cannot be read), an upstream install is left
+    # running, since the ref may not be able to replace it.
     if ($refId -eq $legacyId) { $pluginId = $legacyId } elseif (-not $refId) { $move = $false }
 }
 $legacy = if ($pluginId -ne $legacyId -and $move) { Find-Plugin $legacyId } else { $null }
 if (-not $move -and (Find-Plugin $legacyId)) {
-    Write-Host "Ovis: could not read the plugin id at $Ref, so the install under $legacyId is left as it is; run this again to move it"
+    Write-Host "Ovis: could not read the plugin id at $Ref, so the install under $legacyId is left as it is; run this again to replace it"
 }
 if ($legacy) {
-    Write-Host "Ovis: moving the installed plugin to its Ovis id; its settings and token come along"
+    Write-Host "Ovis: replacing the upstream Ovis install ($legacyId) with this fork; its settings and token come along"
     # stopped first: under both ids, each would start a server on herdr's next start
     & bun (Join-Path $legacy.plugin_root 'scripts\plugin.ts') stop | Out-Null
     # removed with its server up, the old checkout would keep serving, and the new id's start would
     # find the port answering and leave it
-    if ($LASTEXITCODE -ne 0) { throw "Could not stop the server of the old id, so nothing was moved. Stop it (herdr plugin action invoke $legacyId.stop, or restart herdr), then run this again." }
+    if ($LASTEXITCODE -ne 0) { throw "Could not stop the server of the upstream install, so nothing was replaced. Stop it (herdr plugin action invoke $legacyId.stop, or restart herdr), then run this again." }
 }
 function Test-WindowsPlugin($Plugin) {
     $Plugin.plugin_root -and (Test-Path -LiteralPath (Join-Path $Plugin.plugin_root 'scripts\plugin.ps1'))
@@ -120,7 +114,7 @@ if ($plugin -and -not (Test-WindowsPlugin $plugin)) {
 if (-not $plugin) {
     if (-not $Ref) { $Ref = Get-LatestRef }
     Write-Host "Ovis: installing the plugin at $Ref"
-    Run-Tool herdr @('plugin', 'install', 'devswha/ovis', '--ref', $Ref, '--yes')
+    Run-Tool herdr @('plugin', 'install', 'jotyy/ovis', '--ref', $Ref, '--yes')
     $newInstall = $true
     $plugin = Find-Plugin $pluginId
     # the id unknown before the install: the ref may have named the old one
@@ -131,7 +125,17 @@ if (-not $plugin) {
     if (-not $plugin.plugin_root) { throw 'herdr does not list the plugin after installing it. See: herdr plugin list' }
     # herdr installs a release without Windows build steps as a success that cannot start.
     if (-not (Test-WindowsPlugin $plugin)) { throw "Ovis $Ref does not support Windows yet. Run this again after the next release." }
-} else { Write-Host 'Ovis: already installed; Settings > Updates keeps it current' }
+} elseif ($pluginId -eq $legacyId) {
+    # upstream's install has upstream's releases to update from
+    Write-Host 'Ovis: already installed; Settings > Updates keeps it current'
+} else {
+    # the fork has no release tags for Settings > Updates to offer: a rerun is the update. The app is
+    # stopped first so that the start below runs the new code; a pull that fails leaves the old one
+    Write-Host "Ovis: already installed; updating it to the latest $defaultRef (herdr pulls and builds it)"
+    & bun (Join-Path $plugin.plugin_root 'scripts\plugin.ts') stop | Out-Null
+    try { Run-Tool herdr @('plugin', 'update', $pluginId, '--yes') | Out-Null }
+    catch { Write-Host "Ovis: could not update the plugin; the installed version stays. See: herdr plugin update $pluginId" }
+}
 if ($legacy) {
     # herdr keeps a plugin's config by its id: the old id's env files (the token among them) go to the new id's dir unless it has its own
     $oldConfig = Run-Tool herdr @('plugin', 'config-dir', $legacyId)
@@ -433,15 +437,15 @@ function Read-Answer {
 # GitHub says the account has not (404), only at a terminal, and stars only on "y".
 if ($newInstall) {
     try {
-        $starred = Invoke-GhApi 'user/starred/devswha/ovis'
+        $starred = Invoke-GhApi 'user/starred/jotyy/ovis'
         if (-not $starred -or $starred.status -ne '204') {
             Write-Host ''
-            Write-Host 'Ovis: if it helps you, a GitHub star helps other herdr users find it: https://github.com/devswha/ovis'
+            Write-Host 'Ovis: if it helps you, a GitHub star helps other herdr users find it: https://github.com/jotyy/ovis'
             if ($starred -and $starred.status -eq '404' -and (Test-Terminal)) {
                 Write-Host -NoNewline 'Ovis: star it now with the GitHub account gh is signed in to? [y/N] '
                 $answer = Read-Answer
                 if ("$answer".Trim() -match '^(y|yes)$') {
-                    $given = Invoke-GhApi '--method PUT user/starred/devswha/ovis'
+                    $given = Invoke-GhApi '--method PUT user/starred/jotyy/ovis'
                     if ($given -and $given.code -eq 0) { Write-Host 'Ovis: starred. Thank you!' }
                     else { Write-Host 'Ovis: gh could not star it; the page above can' }
                 }
