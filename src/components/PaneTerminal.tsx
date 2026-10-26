@@ -911,7 +911,7 @@ export function PaneTerminal({
           <Alert tone="notice" role="status" className="terminal-banner terminal-banner-warning">
             <span>{t("Another app has this pane open. It connects here as soon as that app lets go.")}</span>
             {!observing && socketRef.current?.canTakeOver() && (
-              <Button variant="accent" size="sm" className="terminal-banner-action" title={t("Take this pane from another web app or terminal attach. That connection will close.")} onClick={() => { if (paneId !== null) socketRef.current?.takeOver(paneId); }}>{t("Open here")}</Button>
+              <Button variant="ghost" size="sm" className="terminal-banner-action" title={t("Take this pane from another web app or terminal attach. That connection will close.")} onClick={() => { if (paneId !== null) socketRef.current?.takeOver(paneId); }}>{t("Open here")}</Button>
             )}
           </Alert>
         )}
@@ -923,10 +923,10 @@ export function PaneTerminal({
         {paneId !== null && outputError && !noticesDocked && (
           <Alert tone="danger" role="status" className="terminal-banner terminal-banner-warning terminal-banner-output-error">
             <span>{outputError}</span>
-            <Button variant="field" size="sm" className="terminal-banner-action" onClick={() => reattachRef.current()}>{t("Reconnect")}</Button>
+            <Button variant="ghost" size="sm" className="terminal-banner-action" onClick={() => reattachRef.current()}>{t("Reconnect")}</Button>
           </Alert>
         )}
-        {!chatView && inputError && <Alert tone="neutral" role="status" className="terminal-banner">{inputError}<Button variant="field" size="sm" className="terminal-banner-action" onClick={() => setInputError(null)}>{t("Dismiss")}</Button></Alert>}
+        {!chatView && inputError && <Alert tone="neutral" role="status" className="terminal-banner">{inputError}<Button variant="ghost" size="sm" className="terminal-banner-action" onClick={() => setInputError(null)}>{t("Dismiss")}</Button></Alert>}
         {/* one element either way: a live region that appears with its words is not read */}
         <Alert tone="neutral" role="status" className={waitingWords === null ? "visually-hidden" : "terminal-banner"}>{waitingWords}</Alert>
         {paneId !== null && !chatView && released && <Alert tone="neutral" role="status" className="terminal-banner">{t(watching ? "View only while you use another window · click to type" : "Paused while you use another window")}</Alert>}

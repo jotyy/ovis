@@ -598,10 +598,13 @@
   }
 }
 
+/* the tools' glyphs (add, the microphone) are a step under the icon size: 16px, as a 14px line's
+   glyphs are, so the row reads as text-sized controls and not as a toolbar */
 .composer-attach svg,
-.composer-new-session svg {
-  width: 18px;
-  height: 18px;
+.composer-new-session svg,
+.composer-surface .voice-mic svg {
+  width: 16px;
+  height: 16px;
   stroke-width: 1.75;
 }
 
@@ -1433,7 +1436,7 @@
   background-image: none;
   box-shadow: none;
   color: var(--text);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   font-weight: var(--fw-regular);
   line-height: calc(var(--quick-h) - 2 * var(--hairline));
   text-overflow: ellipsis;

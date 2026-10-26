@@ -19,9 +19,9 @@ describe("terminal font stack", () => {
   });
 
   it("takes none of the faces the app bundles for its own text: xterm would size its cells from one", () => {
-    const sheets = ["../fonts/fonts.css", "../fonts/inter/inter.css", "../fonts/pretendard/pretendardvariable-dynamic-subset.css"].map((file) => readFileSync(new URL(file, import.meta.url), "utf8")).join("\n");
+    const sheets = ["../fonts/fonts.css", "../fonts/geist/geist.css", "../fonts/pretendard/pretendardvariable-dynamic-subset.css"].map((file) => readFileSync(new URL(file, import.meta.url), "utf8")).join("\n");
     const bundled = new Set([...sheets.matchAll(/font-family:\s*["']([^"']+)["']/g)].map((match) => match[1]!));
-    expect([...bundled].sort()).toEqual(["Inter Display", "Inter Variable", "JetBrains Mono Web", "Pretendard Variable"]);
+    expect([...bundled].sort()).toEqual(["Geist Variable", "JetBrains Mono Web", "Pretendard Variable"]);
     const named = TERMINAL_FONT_STACK.split(",").map((name) => name.trim().replace(/["']/g, ""));
     for (const family of bundled) expect(named).not.toContain(family);
     // the chat's and the chrome's code face does take it, after the icon font

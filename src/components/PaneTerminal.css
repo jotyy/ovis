@@ -190,16 +190,23 @@
   left: 0;
 }
 
-/* a banner is an Alert row (components/ui/alert.tsx: a tinted surface with a ring of its tone)
-   sized to its words, not the column's width: the column keeps it at the pane's top-right */
+/* A banner is an Alert row (components/ui/alert.tsx) sized to its words, not the column's width:
+   the column keeps it at the pane's top-right. It is the quiet row the chat lens's notices are
+   (ComposerNotices.css), not the tone's tinted banner: the elevated colour under a hairline edge
+   with the card's small fall of shadow, one line of 13px text at the control height. */
 .terminal-banner {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   width: auto;
   min-height: var(--control-h);
-  padding: var(--space-1) var(--space-3);
-  font-size: var(--fs-xs);
+  padding: calc(var(--space-1) / 2) var(--space-3);
+  background: var(--bg-elevated);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lift);
+  color: var(--text);
+  font-size: var(--fs-sm);
   line-height: var(--lh-base);
   /* a narrow pane (a phone, or a split on a desktop) wraps a banner's sentences instead of letting
      it run past the pane's edge; held input (.draft-held, .draft-text) stays on one line instead */
@@ -219,9 +226,29 @@
   overflow-wrap: normal;
 }
 
-/* a banner's own action takes clicks back from the pass-through column */
+/* A banner's own action (Open here, Reconnect, Dismiss) takes clicks back from the pass-through
+   column. It is the outline button a composer notice's is: a hairline edge, no face, a line
+   shorter than the row. */
 .terminal-banner-action {
+  height: calc(var(--control-h) - var(--space-1));
+  padding-inline: var(--space-3);
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: var(--fs-xs);
   pointer-events: auto;
+}
+
+@media (hover: hover) {
+  .terminal-banner-action:hover {
+    border-color: var(--border-strong);
+    color: var(--text-strong);
+  }
+}
+
+/* a banner that has a tone (another app holds the pane, the stream failed) shows it in its glyph alone */
+.terminal-banner-warning > svg {
+  color: var(--notice);
 }
 
 /* the selection's quote button: a banner that is a field button, in the words' own size */
@@ -234,11 +261,9 @@
   white-space: nowrap;
 }
 
-/* not a fault: a lens herdr does not offer on this PC yet, so the accent ring, not a warning's */
+/* not a fault: a lens herdr does not offer on this PC yet, so the accent's edge, not a warning's */
 .terminal-banner-soon {
-  color: var(--text);
-  background: var(--accent-tint);
-  box-shadow: 0 0 0 1px var(--accent), var(--edge-highlight);
+  border-color: var(--accent);
 }
 
 .terminal-banner-output-error {

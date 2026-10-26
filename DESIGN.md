@@ -33,9 +33,10 @@ colors under the same surfaces, shadows and type. Amber stays the base every the
 overrides (its values are frozen by `src/lib/themes.parity.test.ts`); the saved theme, not amber,
 is the page's first frame (see Rules).
 
-The type is Inter: Inter Variable at 500 for everything read (a dark surface thins a face, and 500
-reads there as 400 does on paper), 550 for labels, titles and the chosen item, 600 for emphasis,
-and Inter Display at 500 for the few large figures; the whole interface is tracked -0.01em.
+The type is Geist, the face of the product's own site: Geist Variable at 500 for everything read
+on a dark surface (which thins a face, so 500 reads there as 400 does on paper; Studio light sets
+400), 550 for labels, titles and the chosen item, 600 for emphasis, and the same face tracked
+-0.02em for the few large figures; the whole interface is tracked -0.01em.
 Every glyph is a Tabler icon through `src/lib/icons.ts`, stroked at 1.75; a glyph that names a
 state or an identity (an alert, a done or failed step, a pinned row, a folder, a PC, a Settings
 page) takes the filled face, an action or a toggle stays outlined.
@@ -548,8 +549,8 @@ The values are the ones in `src/styles.css`. Every token but `--fs-input` is `ca
 | Token | Value | Usage |
 |-------|-------|-------|
 | `--ui-scale` | `1`; Settings → Appearance → Interface font size over the density's body size, written on `<html>` | Multiplies every `--fs-*` token but `--fs-input` |
-| `--font-ui` | `"Inter Variable", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif` | Chrome and chat prose |
-| `--font-display` | `"Inter Display", var(--font-ui)` | The display cut, for the few large figures: the pairing code, a meter's number (`font-display`) |
+| `--font-ui` | `"Geist Variable", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif` | Chrome and chat prose |
+| `--font-display` | `var(--font-ui)` | The few large figures: the pairing code, a meter's number (`font-display`); Geist has no display cut, so the same face under `--tracking-display` |
 | `--font-mono` | `"Symbols Nerd Font Mono", "JetBrains Mono Web", ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "D2Coding", monospace` | Code, paths, keys, terminal-adjacent metadata |
 | `--lh-tight` | `1.2` | Titles |
 | `--lh-base` | `1.45` | Body copy (`1.4` compact) |
@@ -567,12 +568,12 @@ The values are the ones in `src/styles.css`. Every token but `--fs-input` is `ca
 - The app ships its typefaces (`src/fonts/`, licenses in `THIRD_PARTY_NOTICES.md`) and loads
   nothing from another host: it is served from the user's PC, often with no internet route.
   All are `font-display: swap`.
-- Inter Variable (`src/fonts/inter/`), the first name in `--font-ui`, is one file for every weight
-  the app sets (500, 550, 600, 700), so a weight step costs no request; it covers Latin, Greek and
-  Cyrillic. Inter Display Medium is `--font-display`, for large figures only (a pairing code, a
-  meter's number), as the editor sets its stat cards.
-- Pretendard Variable follows Inter in the stack for Hangul: its Latin is cut to Inter's metrics,
-  so a mixed line keeps one rhythm. It is upstream's dynamic subset: 92 chunks split by
+- Geist Variable (`src/fonts/geist/`, the `geist` package's one variable file), the first name in
+  `--font-ui`, is one file for every weight the app sets (400, 500, 550, 600, 700), so a weight
+  step costs no request; it covers Latin and Latin Extended. There is no display cut: the large
+  figures (a pairing code, a meter's number) are the same face under `--tracking-display`.
+- Pretendard Variable follows Geist in the stack for Hangul, so a Korean line keeps one face for
+  its Hangul. It is upstream's dynamic subset: 92 chunks split by
   `unicode-range`, so the browser fetches only those whose characters a page draws. The service
   worker precaches none and keeps each one once fetched.
 - What the chunks cover (their `unicode-range`s): all 11,172 Hangul syllables, hiragana and
