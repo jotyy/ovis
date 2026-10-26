@@ -336,7 +336,8 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-panel);
+  border: var(--hairline) solid var(--border);
+  box-shadow: var(--shadow-lift);
 }
 
 /* a README's centered logo and badges (lib/markdownHtml.ts) */
@@ -1344,10 +1345,10 @@
   display: block;
   padding: 0;
   overflow: hidden;
-  border: 0;
+  border: var(--hairline) solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
-  box-shadow: var(--shadow-panel);
+  box-shadow: var(--shadow-lift);
   cursor: zoom-in;
 }
 
@@ -1531,9 +1532,10 @@
 .chat-task-results {
   margin: var(--space-4) 0;
   overflow: hidden;
+  border: var(--hairline) solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
-  box-shadow: var(--shadow-panel);
+  box-shadow: var(--shadow-lift);
 }
 .chat-task-results-head {
   display: flex;

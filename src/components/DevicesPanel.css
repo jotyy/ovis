@@ -51,8 +51,9 @@
   gap: var(--space-4);
   padding: var(--space-4);
   background: var(--bg-elevated);
+  border: var(--hairline) solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-panel), inset var(--rail-w) 0 0 var(--accent);
+  box-shadow: var(--shadow-lift), inset var(--rail-w) 0 0 var(--accent);
 }
 
 .devices-pairing .settings-label {

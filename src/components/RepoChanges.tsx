@@ -274,7 +274,7 @@ export function RepoChanges({ paneId, directory, onOpenDiff }: RepoChangesProps)
 
   return (
     <TooltipProvider>
-      <div className="repo-changes flex flex-col overflow-clip rounded-lg bg-[color-mix(in_srgb,var(--bg)_40%,var(--bg-elevated))] shadow-panel" role="group" aria-label={t("Changes")} aria-busy={load.status === "pending" && !awaitingBase}>
+      <div className="repo-changes flex flex-col overflow-clip rounded-lg border border-border bg-[color-mix(in_srgb,var(--bg)_40%,var(--bg-elevated))] shadow-lift" role="group" aria-label={t("Changes")} aria-busy={load.status === "pending" && !awaitingBase}>
         <div className="repo-changes-bar flex items-center justify-between gap-2 p-1 divider-b">
           <ToggleGroup type="single" className="repo-changes-scopes" value={scope} aria-label={t("Compare")} onValueChange={(value) => { if (value) choose(value as RepoDiffScope); }}>
             <ToggleGroupItem value="workspace">{t("Working tree")}</ToggleGroupItem>

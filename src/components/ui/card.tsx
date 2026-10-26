@@ -1,13 +1,14 @@
 /**
- * shadcn Card as the editor's section card: a surface a step above its panel with a ring and
- * an inner edge of light; its header a shade lighter with an icon badge, parted by an etched
+ * shadcn Card as the editor's section card: a surface a step above its panel with a drawn
+ * hairline border and a lift shadow (never an outside ring: the transcript and other positioned
+ * neighbours paint over a ring, and cut the card's edge); its header a shade lighter with an icon badge, parted by an etched
  * divider (settings-section.tsx of the editor).
  */
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "../../lib/cn.ts";
 
 export function Card({ className, ...props }: ComponentProps<"section">) {
-  return <section data-slot="card" className={cn("relative min-w-0 overflow-clip rounded-xl bg-[color-mix(in_srgb,var(--bg)_40%,var(--bg-elevated))] text-text shadow-panel", className)} {...props} />;
+  return <section data-slot="card" className={cn("relative min-w-0 overflow-clip rounded-xl border border-border bg-[color-mix(in_srgb,var(--bg)_40%,var(--bg-elevated))] text-text shadow-lift", className)} {...props} />;
 }
 
 export function CardHeader({ className, icon, title, description, action, ...props }: Omit<ComponentProps<"div">, "title"> & { icon?: ReactNode; title: ReactNode; description?: ReactNode; action?: ReactNode }) {

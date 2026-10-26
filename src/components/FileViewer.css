@@ -258,7 +258,7 @@
   flex: 0 0 var(--file-panel-shown-w, min(42vw, 560px));
   min-width: 0;
   min-height: 0;
-  box-shadow: var(--shadow-panel);
+  border-left: var(--hairline) solid var(--border);
   background: var(--bg);
   /* the header yields by the panel's width, not the window's */
   container: file-panel / inline-size;

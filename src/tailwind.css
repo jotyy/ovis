@@ -145,6 +145,7 @@
   --shadow-tab: var(--shadow-tab);
   --shadow-chip: var(--shadow-chip);
   --shadow-panel: var(--shadow-panel);
+  --shadow-lift: var(--shadow-lift);
   --shadow-canvas: var(--shadow-canvas);
   --shadow-popover: var(--shadow-popover);
   --shadow-dialog: var(--shadow-dialog);

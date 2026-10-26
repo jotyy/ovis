@@ -47,6 +47,12 @@
   --fs-xl: var(--chat-fs-xl);
 }
 
+/* the card stands clear of what is under it: the quick replies or the input card (their rows take
+   back their own breath of padding, so the gap is this margin) */
+.prompt-dock:not(:empty) {
+  margin-bottom: var(--space-3);
+}
+
 /* with no composer under it (a view-only pane) the card keeps the composer's bottom space */
 .prompt-dock:not(:empty):last-child {
   margin-bottom: var(--space-4);

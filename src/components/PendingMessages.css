@@ -23,16 +23,17 @@
   margin-top: 0;
 }
 
-/* a held message is a card as the user's sent turn is (ChatView.css .chat-bubble): the panel ring,
-   no drawn edge; a row on its way sits quieter until it is in the transcript */
+/* a held message is a card as the user's sent turn is (ChatView.css .chat-bubble): a drawn hairline
+   edge and the lift shadow, never an outside ring (the transcript paints over one); a row on its way sits quieter until it is in the transcript */
 .pending-message-bubble {
   display: block;
   max-width: 80%;
   min-height: var(--control-h);
   padding: var(--space-3) var(--space-4);
+  border: var(--hairline) solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
-  box-shadow: var(--shadow-panel);
+  box-shadow: var(--shadow-lift);
   color: var(--text-strong);
   font: inherit;
   line-height: var(--lh-prose);

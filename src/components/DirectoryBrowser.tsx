@@ -170,7 +170,7 @@ export function DirectoryBrowser({ start, onPick, onOpenFile, onFolder }: Direct
 
   return (
     <TooltipProvider>
-      <div className="dir-browser flex flex-col overflow-clip rounded-lg bg-[color-mix(in_srgb,var(--bg)_40%,var(--bg-elevated))] shadow-panel" role="group" aria-label={t("Choose a folder")} aria-busy={loading}>
+      <div className="dir-browser flex flex-col overflow-clip rounded-lg border border-border bg-[color-mix(in_srgb,var(--bg)_40%,var(--bg-elevated))] shadow-lift" role="group" aria-label={t("Choose a folder")} aria-busy={loading}>
         <div className="dir-browser-bar flex items-center gap-1 p-1 divider-b">
           <IconButton label={t("Parent folder")} className="coarse:size-touch" disabled={!listing?.parent || loading} onClick={() => listing?.parent && void open(listing.parent, hidden, false)}>
             <ArrowUp aria-hidden="true" />

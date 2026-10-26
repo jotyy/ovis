@@ -1167,7 +1167,9 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   zone (a dialog's header and footer, a card's header, the tab strip's floor) rather than an
   element between them.
 - `<Card>` is the editor's section card: a `rounded-xl` surface a step above its panel (`--bg`
-  mixed 40% into `--bg-elevated`) with `shadow-panel` (a ring and the inner light). `<CardHeader
+  mixed 40% into `--bg-elevated`) with a drawn hairline `border-border` and `shadow-lift`: never
+  an outside ring, which a positioned neighbour (the transcript over the prompt card) paints over
+  and cuts the card's edge. `<CardHeader
   icon title description action>`: a shade lighter (`bg-elevated`), parted from the body by
   `divider-b`, with an `<IconBadge>` (a 40px raised `rounded-[11px]` tile, the glyph 22px with a
   drop shadow: the filled page marks of Settings, the prompt card's alert), the title at 16/550
@@ -2331,7 +2333,7 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 - Type: the card follows Settings → Chat font size and Chat font, as the transcript does. The dock
   scales the `--fs-*` tokens by `--chat-scale` and sets `--font-chat`; the reference text, the
   keycaps and the step numbers stay `--font-mono`. The height limit does not scale.
-- Look: a `<Card>` with a `<CardHeader>` (`--radius-xl`, `shadow-panel`, the header an
+- Look: a `<Card>` with a `<CardHeader>` (`--radius-xl`, a hairline border with `shadow-lift`, the header an
   `<IconBadge>` holding the filled alert glyph in `--status-blocked`). The title is
   the card's one red (`--status-blocked`, `--fs-sm`, semibold); the "input needed" badge is read
   by assistive tech and not drawn. Confirm, Submit and a custom answer's Send are the card's
@@ -3258,8 +3260,8 @@ own: the pane is a card by its ring, the sidebar by its darker panel.
 | `--shadow-sunken` | A well: the segmented track, a switch's track |
 | `--shadow-tab` | The chosen option of a segmented control |
 | `--shadow-chip` | A tag, a badge, the connection chip |
-| `--shadow-panel` | A card on its panel |
-| `--shadow-lift` | The lift alone, under a card whose edge is a drawn border (the chat's work and code cards), so nothing beside it can cover a ring |
+| `--shadow-panel` | A floating surface that nothing in the flow touches (the file panel's popovers); an in-flow card draws a border and takes `--shadow-lift` |
+| `--shadow-lift` | The lift alone, under a card whose edge is a drawn border (`<Card>`, the prompt card, the chat's work, code and image cards, held messages, the pairing card), so nothing beside it can cover a ring |
 | `--shadow-canvas` | The pane's canvas card inset in the chrome (`.pane-column`): a ring of ink in dark, a soft lift in light |
 | `--shadow-popover` | A menu, a select's list, a popover, the palette (`menuSurface`, with `--popover-blur` behind it) |
 | `--shadow-dialog` | A dialog (over `--scrim` and `--scrim-blur`) |
