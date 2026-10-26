@@ -731,7 +731,7 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   margin-top: auto;
 }
 
-/* Install app: a row of the list, its glyph in the leading cell and its words in the rows' type */
+/* the footer's controls are rows of the list: the rows' height, corner and type */
 .sidebar-footer-action {
   justify-content: flex-start;
   gap: 0;
@@ -769,9 +769,23 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
 
 .sidebar-footer-settings svg { margin-inline: 0; }
 
+/* Install app stands beside the gear, a glyph and its words, and gives way to the plan meters:
+   its words are cut before the meters are */
+.sidebar-footer-row > .sidebar-footer-install {
+  flex: 0 1 auto;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 0 var(--space-2) 0 var(--space-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-footer-install svg { margin-inline: 0; }
+
 .sidebar-install-help {
   margin: 0;
-  padding: 0 var(--space-2) var(--space-1) var(--side-box);
+  padding: var(--space-1) var(--space-2) 0 var(--side-box);
   color: var(--text-dim);
   font-size: var(--fs-xs);
 }

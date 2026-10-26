@@ -54,7 +54,7 @@ export async function checkUsageMeters(browser: Browser, origin: string): Promis
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(origin);
     const strip = page.locator(".usage-strip");
-    const settingsButton = page.locator(".sidebar-footer-row .sidebar-footer-action");
+    const settingsButton = page.locator(".sidebar-footer-row .sidebar-footer-settings");
     const toggle = page.getByRole("switch", { name: "Show plan limits", exact: true });
 
     // off until chosen: nothing is shown and no sign-in is sent anywhere
@@ -80,7 +80,7 @@ export async function checkUsageMeters(browser: Browser, origin: string): Promis
     assert.deepEqual((await page.locator(".usage-chip-value").allTextContents()).slice(0, 4), ["58%", "88%", "70%", "80%"]);
     assert.equal(await page.locator(".usage-chip.is-high").count(), 0, "no session is near its end");
     assert.equal(await strip.evaluate((el) => el.scrollWidth <= el.clientWidth), true, "the chips fit beside Settings");
-    const [settings, meters] = await Promise.all([page.locator(".sidebar-footer-row .sidebar-footer-action").boundingBox(), strip.boundingBox()]);
+    const [settings, meters] = await Promise.all([page.locator(".sidebar-footer-row .sidebar-footer-settings").boundingBox(), strip.boundingBox()]);
     assert.ok(settings && meters && settings.x + settings.width <= meters.x, "Settings and the meters do not overlap");
 
     await strip.click();
@@ -169,7 +169,7 @@ export async function checkUsageMeters(browser: Browser, origin: string): Promis
 
     // Settings on the phone: every account row fits its card, controls included
     await page.keyboard.press("Escape");
-    await page.locator(".sidebar-footer-row .sidebar-footer-action").click();
+    await page.locator(".sidebar-footer-row .sidebar-footer-settings").click();
     await openSettingsPage(page, "Subscription usage");
     const accounts = page.locator(".usage-accounts");
     await accounts.first().scrollIntoViewIfNeeded();

@@ -109,19 +109,19 @@ export function MachineSidebar(props: Props) {
     </div>
     <AgentSidebar machines={props.machines} selectedMachineId={props.selectedMachineId} selectedPaneId={props.selectedPaneId} stateWord={(machine) => t(STATE_WORD[machine.state])} watching={props.watching} onSelect={props.onSelect} />
     <footer className="sidebar-footer">
-      {/* browsers without an install prompt (iOS, plain HTTP) get the steps instead */}
-      {!installed && <Button variant="ghost" size="block" className="sidebar-footer-action" aria-expanded={canInstall ? undefined : installHelpOpen} onClick={() => { if (canInstall) void install(); else setInstallHelpOpen(!installHelpOpen); }}><Download aria-hidden="true" />{t("Install app")}</Button>}
-      {!installed && !canInstall && installHelpOpen && <p className="sidebar-install-help" role="status">{help}</p>}
       <div className="sidebar-footer-row">
-        {/* both class names stay: the regression scripts click the footer's action by them */}
+        {/* both class names stay: the regression scripts click the footer's controls by them */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="sidebar-footer-action sidebar-footer-settings" aria-label={t("Settings")} onClick={props.actions.openSettings}><Settings aria-hidden="true" /></Button>
           </TooltipTrigger>
           <TooltipContent side="top" align="start">{t("Settings (⌘⇧,)")}</TooltipContent>
         </Tooltip>
+        {/* beside the gear, on the same row; browsers without an install prompt (iOS, plain HTTP) get the steps instead */}
+        {!installed && <Button variant="ghost" size="sm" className="sidebar-footer-action sidebar-footer-install" aria-expanded={canInstall ? undefined : installHelpOpen} onClick={() => { if (canInstall) void install(); else setInstallHelpOpen(!installHelpOpen); }}><Download aria-hidden="true" />{t("Install app")}</Button>}
         <UsageMeters />
       </div>
+      {!installed && !canInstall && installHelpOpen && <p className="sidebar-install-help" role="status">{help}</p>}
     </footer>
   </div></SidebarFilterProvider></SidebarActivityProvider>;
 }

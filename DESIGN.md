@@ -1537,10 +1537,11 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 - Rows use only shared theme tokens in dark and light. Touch keeps row menus and folds visible,
   with `--touch-target` controls, and draws no hover fill; reduced motion removes row transitions
   and keeps the working dot's breath (opacity only).
-- Footer holds the contextual **Install app** action (a ghost `block` Button) and Settings, its
-  gear alone (a ghost `icon` Button, `.sidebar-footer-settings`, named **Settings** to screen
-  readers and in its tooltip), with the plan meters filling the rest of its row, as rows on the
-  same grid with no rule above. **New workspace** in an empty PC's box is a `field`-size field
+- Footer is one row: Settings, its gear alone (a ghost `icon` Button, `.sidebar-footer-settings`,
+  named **Settings** to screen readers and in its tooltip), then the contextual **Install app**
+  action beside it (a ghost `sm` Button with the download glyph, `.sidebar-footer-install`, its
+  words cut before the meters are), with the plan meters filling the rest, as rows on the same
+  grid with no rule above; the install steps, when a browser has no prompt, open under the row. **New workspace** in an empty PC's box is a `field`-size field
   Button with the plus glyph.
   It carries no product name or version: the running versions are read in Settings.
 
