@@ -152,7 +152,7 @@ Normal and bright slots may share a colour to preserve the palette while keeping
 | 4 | `blue` | `#155a72` | `#0b6e8a` | `#0b6e8a` | `#1447e6` | `#1750bf` | `#1750bf` | `#004db6` | `#076678` | `#2f64dd` | `#006baf` | `#4d699b` | `#286983` |
 | 5 | `magenta` | `#8a3f7a` | `#6f42c1` | `#6f42c1` | `#8200db` | `#712fc6` | `#712fc6` | `#7847bd` | `#8f3f71` | `#a626a4` | `#c12073` | `#624c83` | `#755f8d` |
 | 6 | `cyan` | `#0f6b6f` | `#0f6f74` | `#0f6f74` | `#005f78` | `#0e6b70` | `#0e6b70` | `#005f4a` | `#316b48` | `#0072a9` | `#00746d` | `#216276` | `#33717c` |
-| 7 | `white` | `#685e52` | `#5f5b56` | `#5f5b56` | `#737373` | `#5c5f77` | `#5c5f77` | `#41508a` | `#504945` | `#686b77` | `#5a6a6c` | `#43436c` | `#605b78` |
+| 7 | `white` | `#685e52` | `#5f5b56` | `#5f5b56` | `#6b6b6b` | `#5c5f77` | `#5c5f77` | `#41508a` | `#504945` | `#686b77` | `#5a6a6c` | `#43436c` | `#605b78` |
 | 8 | `brightBlack` | `#5a5045` | `#4e4b47` | `#4e4b47` | `#525252` | `#64677d` | `#64677d` | `#41508a` | `#504945` | `#686b77` | `#586e75` | `#43436c` | `#605b78` |
 | 9 | `brightRed` | `#c42b2b` | `#c92d24` | `#c92d24` | `#e7000b` | `#c41545` | `#c41545` | `#90001b` | `#9d0006` | `#a51110` | `#b60006` | `#95002b` | `#873a52` |
 | 10 | `brightGreen` | `#3b741c` | `#277d3f` | `#277d3f` | `#497d00` | `#2f7620` | `#2f7620` | `#405b1f` | `#676200` | `#287c2a` | `#5d6e00` | `#4a6228` | `#286983` |
@@ -3242,6 +3242,7 @@ own: the pane is a card by its ring, the sidebar by its darker panel.
 | `--well` | `color-mix(in srgb, var(--bg) 78%, black)` | `color-mix(in srgb, var(--bg) 95%, black)` | A recess: the segmented track |
 | `--divider-h` | `2px` | | An etched divider's height |
 | `--field-face` | `none` | | A fall of shade down a field button's face; Studio light draws it |
+| `--bg-active` | `color-mix(in srgb, var(--bg-elevated) 80%, var(--bg))` | | A field button's face under the press |
 
 | Shadow | Usage |
 |--------|-------|

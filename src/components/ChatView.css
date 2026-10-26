@@ -130,7 +130,8 @@
   max-width: 80%;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
+  /* the field's floor, not the raised face: on paper the user's words sit in a grey bubble */
+  background: var(--bg-input);
   box-shadow: var(--shadow-panel);
   color: var(--text-strong);
   font-size: var(--chat-fs-body);

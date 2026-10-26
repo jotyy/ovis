@@ -70,6 +70,7 @@
   --color-panel: var(--bg-panel);
   --color-elevated: var(--bg-elevated);
   --color-hover: var(--bg-hover);
+  --color-active: var(--bg-active);
   --color-input: var(--bg-input);
   --color-well: var(--well);
   --color-border: var(--border);

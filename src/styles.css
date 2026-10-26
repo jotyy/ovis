@@ -264,6 +264,8 @@
   --edge-highlight: inset 0 1px 0 var(--edge-light), inset 0 0 0 1px var(--edge-light);
   /* a fall of shade down a field button's face (Blob0's outline button); none unless a palette draws it */
   --field-face: none;
+  /* a field button's face under the pointer's press: a step below its surface */
+  --bg-active: color-mix(in srgb, var(--bg-elevated) 80%, var(--bg));
   --shadow-surface: 0 2px 4px -1px rgba(0, 0, 0, 0.08), 0 1px 1px -1px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--ink-1), var(--edge-highlight);
   --shadow-raised: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.16), var(--edge-highlight);
   --shadow-sunken: 0 0 0 1px var(--ink-2), 0 1px 1px rgba(0, 0, 0, 0.05), inset 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -679,7 +681,7 @@
   --border: #ebebeb;
   --border-strong: #d4d4d4;
   --text: #171717;
-  --text-dim: #737373;
+  --text-dim: #6b6b6b;
   --text-strong: #0a0a0a;
   --accent: #155dfc;
   --accent-tint: rgba(21, 93, 252, 0.1);
@@ -687,7 +689,7 @@
   --primary-hover: #2b7fff;
   --primary-text: #ffffff;
   --primary-tint: rgba(21, 93, 252, 0.12);
-  --status-idle: #737373;
+  --status-idle: #6b6b6b;
   --status-working: #193cb8;
   --status-blocked: #c70036;
   --status-done: #3c6300;
@@ -709,7 +711,7 @@
   --term-blue: #1447e6;
   --term-magenta: #8200db;
   --term-cyan: #005f78;
-  --term-white: #737373;
+  --term-white: #6b6b6b;
   --term-bright-black: #525252;
   --term-bright-red: #e7000b;
   --term-bright-green: #497d00;
@@ -751,6 +753,14 @@ html[data-theme="light"][data-palette="studio"] {
   --well: color-mix(in srgb, var(--bg) 92%, black);
   --edge-highlight: inset 0 1px 0 var(--edge-light);
   --field-face: linear-gradient(to bottom, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.045) 100%);
+  --bg-active: #ebebeb;
+  /* Blob0's type on paper: 400 for what is read (the dark surface's 500 would set heavy on white),
+     500 for labels and buttons, no tightening of the body; its controls' 10px corners and 14px blocks */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --tracking-tight: 0;
+  --radius-md: 10px;
+  --radius-lg: 14px;
   --shadow-surface: 0 0 0 1px var(--ink-1), 0 1px 2px rgba(0, 0, 0, 0.05), var(--edge-highlight);
   --shadow-raised: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0 3px 3px -1.5px rgba(0, 0, 0, 0.06), var(--edge-highlight);
   --shadow-sunken: inset 0 1px 1px rgba(0, 0, 0, 0.03);
@@ -2515,7 +2525,7 @@ button {
 }
 
 .btn:active:not(:disabled) {
-  background: color-mix(in srgb, var(--bg-elevated) 80%, var(--bg));
+  background: var(--bg-active);
 }
 
 .btn:disabled {
