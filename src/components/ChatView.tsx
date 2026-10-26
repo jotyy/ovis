@@ -1,7 +1,7 @@
 import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { createPortal } from "react-dom";
 import {
-  ArrowDown, BookOpen, Brain, Check, ChevronDown, Circle, CircleAlert, CircleCheck, CircleDot, CircleQuestionMark, CircleSlash, CircleX, Copy, Layers, SquareTerminal, Target, Undo2,
+  ArrowDown, BookOpen, Braces, Brain, Check, ChevronDown, Circle, CircleAlert, CircleCheck, CircleDot, CircleQuestionMark, CircleSlash, CircleX, Copy, FileText, Layers, LoaderCircle, Pencil, SquareTerminal, Target, Terminal, Undo2,
   type IconProps,
 } from "../lib/icons.ts";
 import { Badge, Button, Collapsible, CollapsibleContent, CollapsibleTrigger, IconButton, TooltipProvider } from "./ui/index.ts";
@@ -33,7 +33,7 @@ import { copyText } from "../lib/clipboard.ts";
 import { attachmentFileName, mentionFileName, type GalleryImage } from "../lib/imageViewer.ts";
 import { useMachineApi } from "../lib/machineContext.tsx";
 import { toTranscriptMessages, type TranscriptMessage } from "../lib/transcript.ts";
-import { isLiveWorkTurn, isWaitingWorkTurn, formatWorkDuration, splitTurn, todoGroups, visibleWorkParts, workFailed, workStartsOpen, workSummary, type TodoAttempt, type TodoGroup, type ToolPart as ToolPartType } from "../lib/workBlocks.ts";
+import { categorize, isLiveWorkTurn, isWaitingWorkTurn, formatWorkDuration, splitTurn, todoGroups, visibleWorkParts, workFailed, workStartsOpen, workSummary, type TodoAttempt, type TodoGroup, type ToolPart as ToolPartType } from "../lib/workBlocks.ts";
 import { phaseRows, planRows, taskRows, todoRows, type ChecklistRow } from "../lib/checklist.ts";
 import { isTodoTool, parseTodoAnswer, todoCallSummary, type TodoItem, type TodoStatus } from "../lib/todos.ts";
 import { formatGoalTime, turnGoal, type GoalState, type GoalStatus } from "../lib/goals.ts";
@@ -485,8 +485,10 @@ function WorkRow({ paneId, part, stateKey, state }: { paneId: string; part: Tool
   // an attempt inside a todo run says how it went, in the transcript's words; a failure already says "failed"
   const stateWord = state === undefined || part.error ? null
     : state === "ok" ? t("succeeded") : state === "pending" ? t("pending") : state === "error" ? t("failed") : t("outcome not recorded");
-  // the call's state as a filled glyph: failed in the alert colour, still pending in the working one, else done
-  const Glyph = part.error || state === "error" ? CircleX : state === "pending" ? CircleDot : CircleCheck;
+  // the row's glyph names what the call did (a pencil, a page, a prompt) as Claude.ai's log does; only a
+  // failure takes the alert mark, and a call still pending a turning ring
+  const category = categorize(part.name);
+  const Glyph = part.error || state === "error" ? CircleX : state === "pending" ? LoaderCircle : category === "edit" ? Pencil : category === "read" ? FileText : category === "command" ? Terminal : Braces;
   const glyphTone = part.error || state === "error" ? "is-blocked" : state === "pending" ? "is-working" : state === "unknown" ? "is-idle" : "is-done";
   return <Collapsible open={open} onOpenChange={setOpen} className={`work-row${part.error ? " is-error" : ""}`}>
     <CollapsibleTrigger asChild>

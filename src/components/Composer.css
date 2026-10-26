@@ -235,8 +235,8 @@
    surface, not a control: no border, no hover, no cursor, and the ring inside it is the only
    thing to press. It shrinks before its neighbours do, so a name that does not fit is measured
    clipped inside it (Composer.tsx) and the label steps out */
-/* the model pill: a quiet disc-ended chip the height of the round controls less the air, the
-   mark at its start, a hairline of light along its top */
+/* the model pill: a ghost chip (no face, no ring: the row's one faced control is Send) the height
+   of the round controls less the air, the mark at its start */
 .composer-pill {
   display: flex;
   flex: 0 1 auto;
@@ -246,8 +246,8 @@
   height: calc(var(--control-h) - var(--space-1));
   padding: 0 var(--space-2) 0 calc(var(--space-1) + 2px);
   border-radius: var(--radius-pill);
-  background: var(--fill-2);
-  box-shadow: 0 0 0 1px var(--ink-1), inset 0 1px 0 var(--edge-light);
+  background: transparent;
+  box-shadow: none;
   font-size: var(--fs-xs);
   overflow: hidden;
 }
@@ -600,8 +600,8 @@
 
 .composer-attach svg,
 .composer-new-session svg {
-  width: var(--icon-size);
-  height: var(--icon-size);
+  width: 18px;
+  height: 18px;
   stroke-width: 1.75;
 }
 
@@ -856,20 +856,25 @@
   gap: var(--space-2);
   /* a tile's ring lies outside it: a breath under the row inside the scroll box, taken back below */
   margin-bottom: calc(-1 * var(--space-1));
-  padding: var(--space-3) var(--space-4) var(--space-1);
+  padding: var(--space-3) var(--space-3) var(--space-1);
   overflow-x: auto;
 }
 
-/* a tile per file: a raised chip's surface, its thumbnail (or glyph and name) inside the ring */
+/* a tile per file, as ChatGPT's and Claude.ai's: a square with a hairline edge, its thumbnail (or
+   glyph and name) inside, the word Attached left unsaid (the tile says it) */
 .composer-attachment {
   position: relative;
   flex: 0 0 auto;
   width: calc(var(--control-h) * 2);
   height: calc(var(--control-h) * 2);
   overflow: visible;
-  border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow-chip);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+}
+
+.composer-attachment:not(.is-uploading):not(.is-error):not(.is-no-room) .composer-attachment-state {
+  display: none;
 }
 
 .composer-attachment img {
@@ -896,7 +901,7 @@
 
 .composer-attachment.is-error,
 .composer-attachment.is-no-room {
-  box-shadow: 0 0 0 1px var(--status-blocked), var(--shadow-chip);
+  border-color: var(--status-blocked);
 }
 
 /* a path with no room or a failed upload: the badge is a warning glyph alone (its words are for
@@ -919,23 +924,26 @@
   height: var(--fs-xs);
 }
 
-/* the X on the tile's top trailing corner: a ghost icon button on its own small disc, so it reads
-   over a thumbnail of any colour */
+/* the X on the tile's top trailing corner: a small disc of the page's ink with the surface colour
+   on it (ChatGPT's), so it reads over a thumbnail of any colour; a hairline of the surface parts
+   it from the tile */
 .composer-attachment-remove {
   position: absolute;
-  top: calc(-1 * var(--space-2));
-  right: calc(-1 * var(--space-2));
-  width: var(--chip-h);
-  height: var(--chip-h);
+  top: calc(-1 * var(--space-1) - 2px);
+  right: calc(-1 * var(--space-1) - 2px);
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--bg-elevated);
   border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow-chip);
-  color: var(--text-strong);
+  background: var(--text-strong);
+  box-shadow: none;
+  color: var(--bg);
 }
 
 .composer-attachment-remove svg {
-  width: var(--fs-sm);
-  height: var(--fs-sm);
+  width: 10px;
+  height: 10px;
+  stroke-width: 2.5;
 }
 
 /* a mouse's floor: the X keeps its --chip-h circle and takes a --pointer-target hit area through an

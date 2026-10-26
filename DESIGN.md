@@ -2035,9 +2035,12 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   never behind the fold.
 - Space separates exchanges, not a rule: the transcript's gap is `--space-3`, so an answer sits
   close under its prompt, and a user turn that follows an assistant turn takes `--space-5` more.
-  An exchange's work block is a quiet log, not a card: one dim line says how long and how much,
-  and the calls hang off a hairline rail under it, each a glyph and a line of mono; nothing is
-  boxed or ruled between rows, and a row's chevron shows only under the pointer or once open.
+  An exchange's work block is a quiet log, not a card, as Claude.ai's: one dim line says how long
+  and how much, and under it one line per call in the interface face at `--fs-sm`, 28px tall, led
+  by a 16px glyph of what the call did (a pencil for an edit, a page for a read, a prompt for a
+  command, braces for any other tool; the alert mark for a failure, a turning ring while pending);
+  no rail, nothing boxed or ruled between rows, and a row's chevron shows only under the pointer or
+  once open.
 - Meta (time, copy) fades in on hover or focus and takes no click or tap while unseen; with any
   coarse pointer (a phone, or a touch screen beside a mouse) it is always visible. With a mouse and no touch screen (`(hover: hover) and
   (pointer: fine) and (not (any-pointer: coarse))`): from 481px a user turn's time and copy sit
@@ -2186,11 +2189,13 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   `forceMount`ed where its reads must survive the fold); its state words (`failed`, `N pending`)
   are `<Badge>`s in the state's tone. A row is caret + verb + object: `▸ Read src/metrics.ts`,
   `▸ Edited src/pages/Reports.tsx`,
-  `▸ Ran pnpm test`. The caret is always shown; there is no per-tool icon and no separator. The
-  verb (Read, Edited, Wrote, Ran; `lib/toolVerbs.ts`, by exact tool id) is in the interface face,
-  `--fs-sm`, `--text-dim`; the object is mono `--fs-xs`. A tool the table does not know, a call
-  with no object, or a call summed up by something other than its own command or path (omp's
-  `intent`: `bash Checking ports`) keeps its id in mono `--text` in the verb's place. A failed row
+  `Ran pnpm test`, led by the glyph of what the call did (`categorize` in `lib/workBlocks.ts`: a
+  pencil, a page, a prompt, braces) and with the chevron at its end shown only under the pointer or
+  once open. The verb (Read, Edited, Wrote, Ran; `lib/toolVerbs.ts`, by exact tool id) is in the
+  interface face, `--fs-sm`, `--text-dim`; the object follows in `--text`, the same face. A tool
+  the table does not know, a call with no object, or a call summed up by something other than its
+  own command or path (omp's `intent`: `bash Checking ports`) keeps its id in `--text` at
+  `--fw-medium` in the verb's place, its object dim. A failed row
   turns the verb or id `--status-blocked` and adds the word "failed": after the object under a
   verb (`▸ Ran pnpm test [failed]`), after the id otherwise.
 - A row expands to the typed input (command, diff, file, checklist, raw) and an Output pane. Under
@@ -2474,8 +2479,9 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   (`.visually-hidden`): the header names the pane, and the state is told by Stop, the live row
   and the prompt card. No state word is drawn in the chat composer.
 - The model pill (`.composer-pill`) holds the agent mark, the model, the reasoning level and the
-  context ring in one quiet surface: `--bg-hover` fill, `--radius-pill`, `--control-h` tall,
-  `--space-3` inline padding, `--space-2` between its parts. The model is in `--text` at
+  context ring as one ghost chip: no fill and no ring at rest (the row's one faced control is
+  Send), `--radius-pill`, `--control-h` less `--space-1` tall, `--space-2` inline padding and
+  between its parts. The model is in `--text` at
   `--fw-medium`; the level follows a middle dot in `--text-dim`, as the agent's own words with
   only the first letter drawn as a capital (`::first-letter`, the text is not rewritten); a pane
   that records no level draws no dot and no dash, only the name. On the

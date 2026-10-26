@@ -370,15 +370,20 @@
 }
 
 .markdown p,
+.markdown blockquote,
+.markdown-list {
+  margin: 0 0 var(--space-3);
+}
+
+/* a heading opens a section: more air above it than under it, so it binds to what follows */
 .markdown-h1,
 .markdown-h2,
 .markdown-h3,
 .markdown-h4,
 .markdown-h5,
-.markdown-h6,
-.markdown blockquote,
-.markdown-list {
-  margin: 0 0 var(--space-3);
+.markdown-h6 {
+  margin: var(--space-5) 0 var(--space-2);
+  letter-spacing: var(--tracking-tight);
 }
 
 [data-conversation-source="hermes-transcript"] .markdown p {
@@ -388,8 +393,8 @@
 /* Every agent heading is an h3 (Markdown.tsx: an agent's markdown must not shadow the app's own
    h1/h2 outline), so the tag says nothing about the level and the level class is what these
    rules key off — the same drawing as before the remap, level by level. */
-.markdown-h1 { font-size: var(--fs-xl); }
-.markdown-h2 { font-size: var(--fs-lg); }
+.markdown-h1 { font-size: calc(var(--chat-fs-body) * 1.35); }
+.markdown-h2 { font-size: calc(var(--chat-fs-body) * 1.2); }
 /* h3 is the prose size, and below it the size stops shrinking: the weight, then the dim colour,
    tell the levels apart */
 .markdown-h3,
@@ -400,11 +405,16 @@
 .markdown-h2,
 .markdown-h3,
 .markdown-h4,
-.markdown-h5 { color: inherit; font-weight: var(--fw-semibold); line-height: var(--lh-tight); }
-.markdown-h6 { color: var(--text-dim); font-weight: var(--fw-semibold); line-height: var(--lh-tight); }
+.markdown-h5 { color: var(--text-strong); font-weight: var(--fw-semibold); line-height: 1.3; }
+.markdown-h6 { color: var(--text-dim); font-weight: var(--fw-semibold); line-height: 1.3; }
 
 .markdown-list {
-  padding-left: var(--space-5);
+  padding-left: calc(var(--space-5) + var(--space-1));
+}
+
+/* the marker is a quiet mark, not a word */
+.markdown-list li::marker {
+  color: var(--text-dim);
 }
 
 .markdown-list .markdown-list {
@@ -445,7 +455,11 @@
 }
 
 .markdown-list li + li {
-  margin-top: var(--space-1);
+  margin-top: calc(var(--space-1) + 2px);
+}
+
+.markdown-list li > p:last-child {
+  margin-bottom: 0;
 }
 
 /* emphasis is semibold: at the prose size the bold weight shouts */
@@ -461,22 +475,23 @@
   margin: var(--space-1) 0;
 }
 
-/* a quote hangs off a rail of light, not a drawn rule */
+/* a quote hangs off a hairline rule in the strong edge colour */
 .markdown blockquote {
-  padding-left: var(--space-3);
-  border-left: var(--rail-w) solid var(--fill-4);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--border-strong);
   color: var(--text-dim);
 }
 
 /* code sits under the line it is in, at any size of that line: a chip in a heading, in settled
    narration and in an answer are each a step below their own text; a chip's ring, as a Badge has */
 .markdown :not(pre) > code {
-  padding: var(--hairline) var(--space-1);
+  padding: 0.125em 0.4em;
   border-radius: var(--radius-sm);
-  background: var(--fill-3);
+  background: var(--fill-2);
   color: var(--text-strong);
   font-family: var(--font-mono);
-  font-size: 0.87em;
+  font-size: 0.875em;
+  overflow-wrap: anywhere;
 }
 
 .chat-bubble .markdown :not(pre) > code {
@@ -487,8 +502,9 @@
 .markdown a {
   color: var(--accent);
   text-decoration: underline;
-  text-decoration-color: var(--text-dim);
-  text-underline-offset: var(--space-1);
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 .markdown a:hover,
@@ -496,12 +512,12 @@
   text-decoration-color: currentColor;
 }
 
-/* a rule in the prose is etched, as the dividers are */
+/* a rule in the prose is one hairline */
 .markdown hr {
-  height: var(--divider-h);
-  margin: var(--space-4) 0;
+  height: var(--hairline);
+  margin: var(--space-5) 0;
   border: 0;
-  background: var(--divider);
+  background: var(--border);
 }
 
 /* a code block is AI Elements' CodeBlock: a bordered card on the content surface, its language
@@ -566,6 +582,8 @@
   width: 100%;
   margin-bottom: var(--space-3);
   overflow-x: auto;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-md);
 }
 
 .markdown table {
@@ -579,8 +597,6 @@
    `overflow-wrap: anywhere` counts toward a cell's narrowest width: with it a table squeezed
    every column down to a letter or two and never overflowed. */
 .markdown table {
-  border-radius: var(--radius-md);
-  box-shadow: 0 0 0 1px var(--ink-1);
   overflow: hidden;
 }
 
@@ -590,12 +606,13 @@
   padding: var(--space-2) var(--space-3);
   overflow-wrap: normal;
   text-align: left;
-  box-shadow: inset 0 -1px 0 var(--ink-1);
+  border-bottom: var(--hairline) solid var(--border);
 }
 
 .markdown th {
-  background: var(--fill-2);
-  color: var(--text-strong);
+  background: var(--bg-panel);
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
   font-weight: var(--fw-medium);
 }
 
@@ -688,15 +705,24 @@
    running breathes in the working one */
 .work-row-glyph {
   flex: 0 0 auto;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   color: var(--text-dim);
+  stroke-width: 1.75;
 }
 
 .work-row-glyph.is-done { color: var(--text-dim); }
 .work-row-glyph.is-blocked { color: var(--status-blocked); }
-.work-row-glyph.is-working { color: var(--status-working); animation: pulse var(--dur-pulse) var(--ease-pulse) infinite; }
+.work-row-glyph.is-working { color: var(--status-working); animation: work-row-turn var(--dur-spin) linear infinite; }
 .work-row-glyph.is-idle { color: var(--text-dim); }
+
+@keyframes work-row-turn {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-row-glyph.is-working { animation: none; }
+}
 
 /* the line over the log: settled, a footnote in the dim colour; live, the state colour with a
    breathing dot before it. It wraps only when the row cannot hold it beside a failure count */
@@ -756,18 +782,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: var(--space-1) 0 var(--space-1) var(--space-4);
-}
-
-.work-block-rows::before {
-  content: "";
-  position: absolute;
-  top: var(--space-1);
-  bottom: var(--space-1);
-  left: 2px;
-  width: 2px;
-  border-radius: var(--radius-pill);
-  background: var(--fill-4);
+  padding: var(--space-1) 0 var(--space-2);
 }
 
 .work-row {
@@ -775,22 +790,20 @@
   flex-direction: column;
 }
 
+/* a row is one line in the interface face, as Claude.ai's "Read file.ts": the verb dim, its object
+   in the text colour; a tool the verb table does not know leads with its own name instead */
 .work-row-head {
   min-height: calc(var(--control-h) - var(--space-1));
-  font-family: var(--font-mono);
-  font-size: var(--fs-xs);
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
 }
 
-/* the call's name, in the interface face, a step over the line it leads */
 .work-row-name {
   flex: none;
   color: var(--text);
-  font-family: var(--font-ui);
-  font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
 }
 
-/* a tool the verb table knows: "Ran" as the title, its object after it in mono */
 .work-row-name.is-verb {
   color: var(--text-dim);
   font-weight: var(--fw-regular);
@@ -799,8 +812,13 @@
 .work-row-summary {
   min-width: 0;
   overflow: hidden;
+  color: var(--text-dim);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.work-row-name.is-verb + .work-row-summary {
+  color: var(--text);
 }
 
 .work-row-head[aria-expanded="true"] .work-row-summary {
@@ -847,7 +865,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-1) 0 var(--space-3) calc(14px + var(--space-2));
+  padding: var(--space-1) 0 var(--space-3) calc(16px + var(--space-2));
 }
 
 .work-row-detail[hidden] {

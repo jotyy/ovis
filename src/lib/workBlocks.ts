@@ -45,7 +45,7 @@ export const CATEGORY_LABEL: Record<WorkCategory, [singular: string, plural: str
   other: ["{n} other tool", "{n} other tools"],
 };
 
-function categorize(name: string): WorkCategory {
+export function categorize(name: string): WorkCategory {
   const lower = name.toLowerCase();
   if (/edit|write|patch|create_file|multiedit/.test(lower)) return "edit";
   if (/^(read|glob|grep|ls|list|search|find|cat)/.test(lower)) return "read";
