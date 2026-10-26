@@ -286,6 +286,14 @@
   --primary-sheen: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.1) 100%);
   --scrim-blur: blur(3px);
   --popover-blur: blur(12px);
+  /* the input card: the one resting surface that floats over the chat, so it carries an ambient
+     shadow under its ring; focused, the ring takes a breath of the accent and no hard rectangle */
+  --shadow-composer: 0 16px 40px -12px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--ink-2), var(--edge-highlight);
+  --shadow-composer-focus: 0 16px 40px -12px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.2), 0 0 0 1px color-mix(in srgb, var(--accent) 32%, var(--ink-2)), 0 0 0 4px color-mix(in srgb, var(--accent) 7%, transparent), var(--edge-highlight);
+  /* a content image's edge: pure white or black at a tenth, never a tinted neutral, so no colour fringes the photo */
+  --image-outline: rgba(255, 255, 255, 0.1);
+  /* a card that holds round controls at a 12px inset: 12 + 12 (ChatGPT's and Claude's composers) */
+  --radius-card: 24px;
   /* a switch's thumb and a QR code's field: white in either mode, like a PDF page; a QR code's
      modules black, so any phone camera reads it on any theme */
   --thumb: #ffffff;
@@ -382,6 +390,9 @@
   --surface-sheen: linear-gradient(178deg, rgba(255, 255, 255, 0.7) 4%, rgba(255, 255, 255, 0) 75%);
   --raised-face: linear-gradient(to bottom, color-mix(in srgb, var(--bg-elevated) 40%, white) 0%, var(--bg-elevated) 100%);
   --primary-sheen: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.12) 100%);
+  --shadow-composer: 0 16px 40px -12px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--ink-1), var(--edge-highlight);
+  --shadow-composer-focus: 0 16px 40px -12px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.06), 0 0 0 1px color-mix(in srgb, var(--accent) 32%, var(--ink-1)), 0 0 0 4px color-mix(in srgb, var(--accent) 7%, transparent), var(--edge-highlight);
+  --image-outline: rgba(0, 0, 0, 0.1);
 }
 
 /* Charcoal in light: plain paper with ink for the accent and the cursor */
@@ -2357,7 +2368,16 @@ button {
   transition:
     background-color var(--dur-fast) var(--ease-in-out),
     color var(--dur-fast) var(--ease-in-out),
-    box-shadow var(--dur-fast) var(--ease-in-out);
+    box-shadow var(--dur-fast) var(--ease-in-out),
+    scale var(--dur-fast) var(--ease-out);
+}
+
+/* a press is felt: the control scales to 0.96 and back, never when it is disabled */
+@media (prefers-reduced-motion: no-preference) {
+  .icon-button:not(:disabled):active,
+  .btn:not(:disabled):active {
+    scale: 0.96;
+  }
 }
 
 /* outlined: a field-like face, the way the editor's toolbar buttons sit */
@@ -2421,7 +2441,8 @@ button {
     background-color var(--dur-fast) var(--ease-in-out),
     color var(--dur-fast) var(--ease-in-out),
     box-shadow var(--dur-fast) var(--ease-in-out),
-    opacity var(--dur-fast) var(--ease-in-out);
+    opacity var(--dur-fast) var(--ease-in-out),
+    scale var(--dur-fast) var(--ease-out);
 }
 
 .btn svg {
@@ -2785,6 +2806,7 @@ button {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--space-4) var(--space-5);
 }
 
@@ -2989,6 +3011,7 @@ button {
 .menu {
   display: flex;
   flex-direction: column;
+  overscroll-behavior: contain;
   padding: calc(var(--space-1) + 2px);
   background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
   -webkit-backdrop-filter: var(--popover-blur);

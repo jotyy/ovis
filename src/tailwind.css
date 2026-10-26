@@ -103,6 +103,7 @@
   --color-ink-3: var(--ink-3);
   --color-edge: var(--edge-light);
   --color-thumb: var(--thumb);
+  --color-image-outline: var(--image-outline);
 
   --font-*: initial;
   --font-sans: var(--font-ui);
@@ -133,6 +134,7 @@
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
   --radius-2xl: var(--radius-2xl);
+  --radius-card: var(--radius-card);
   --radius-full: var(--radius-pill);
 
   --shadow-*: initial;
@@ -149,6 +151,8 @@
   --shadow-focus: var(--shadow-focus);
   --shadow-edge: var(--edge-highlight);
   --shadow-card: var(--shadow-card);
+  --shadow-composer: var(--shadow-composer);
+  --shadow-composer-focus: var(--shadow-composer-focus);
   --shadow-pop: var(--shadow-pop);
 
   --ease-*: initial;

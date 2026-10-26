@@ -1820,3 +1820,13 @@
 .chat-abandoned { margin: var(--space-2) 0; }
 .chat-abandoned > summary { font-style: italic; }
 .chat-abandoned-note { margin: var(--space-2) 0 0; color: var(--text-dim); }
+
+/* a content image's edge: a tenth of white (dark) or black (light) inset on the image, so a photo
+   that matches the surface still reads as a photo, and no palette colour fringes it */
+.chat-user-image img,
+.markdown img,
+.composer-attachment img,
+.image-slot img {
+  outline: 1px solid var(--image-outline);
+  outline-offset: -1px;
+}

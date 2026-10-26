@@ -10,7 +10,7 @@ import type { ComponentProps } from "react";
 import { cn } from "../../lib/cn.ts";
 
 export const buttonVariants = cva(
-  "group inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium outline-none transition-[background-color,color,box-shadow,opacity] duration-150 ease-in-out focus-visible:ring-2 focus-visible:ring-accent/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "group inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent font-medium outline-none transition-[background-color,color,box-shadow,opacity,scale] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-accent/60 motion-safe:enabled:active:scale-[0.96] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -23,13 +23,13 @@ export const buttonVariants = cva(
         /** no box at rest, a fill of light under the pointer */
         ghost: "bg-transparent text-text hover:bg-fill-2 active:bg-fill-3",
         /** a quiet word in a path (a breadcrumb) */
-        crumb: "rounded-sm font-regular text-dim text-engraved hover:text-text",
+        crumb: "rounded-sm font-regular text-dim text-engraved hover:text-text enabled:active:scale-100",
         /** a destructive action: neutral until hovered, then its tint and ring */
         danger: "bg-danger-tint text-danger-text shadow-[0_0_0_1px_var(--status-blocked)] hover:shadow-[0_0_0_1px_var(--status-blocked),inset_0_0_0_1px_var(--status-blocked)]",
         /** the editor's pill buttons (a marketing page's): bold words on the ink */
-        primary: "rounded-full bg-strong text-bg font-bold transition-[scale] active:scale-[0.98]",
-        secondary: "rounded-full font-bold shadow-[inset_0_0_0_2px_var(--text-strong)] transition-[scale] active:scale-[0.98]",
-        bare: "",
+        primary: "rounded-full bg-strong text-bg font-bold",
+        secondary: "rounded-full font-bold shadow-[inset_0_0_0_2px_var(--text-strong)]",
+        bare: "enabled:active:scale-100",
       },
       size: {
         xs: "h-6 px-2 text-xs",

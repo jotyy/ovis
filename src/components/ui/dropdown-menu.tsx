@@ -10,7 +10,7 @@ export const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 export const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 export const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 
-export const menuSurface = "z-30 min-w-[180px] overflow-x-hidden overflow-y-auto rounded-lg bg-[color-mix(in_srgb,var(--bg-elevated)_92%,transparent)] p-1.5 text-text shadow-popover backdrop-popover outline-none data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out motion-reduce:animate-none";
+export const menuSurface = "z-30 min-w-[180px] overflow-x-hidden overflow-y-auto overscroll-contain rounded-lg bg-[color-mix(in_srgb,var(--bg-elevated)_92%,transparent)] p-1.5 text-text shadow-popover backdrop-popover outline-none data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out motion-reduce:animate-none";
 
 export const menuItem = "relative flex h-control cursor-pointer select-none items-center gap-2 rounded-md px-2 text-sm text-text outline-none transition-colors duration-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-40 data-[highlighted]:bg-fill-3 data-[highlighted]:text-strong [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-dim data-[highlighted]:[&>svg]:text-text";
 

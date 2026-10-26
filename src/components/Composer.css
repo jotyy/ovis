@@ -163,7 +163,7 @@
   gap: var(--space-1);
   min-width: 0;
   min-height: var(--chip-h);
-  padding: var(--space-1) var(--space-2) var(--space-3);
+  padding: 0 var(--space-2) var(--space-3);
   color: var(--text-dim);
   font-size: var(--fs-xs);
   white-space: nowrap;
@@ -229,6 +229,8 @@
    surface, not a control: no border, no hover, no cursor, and the ring inside it is the only
    thing to press. It shrinks before its neighbours do, so a name that does not fit is measured
    clipped inside it (Composer.tsx) and the label steps out */
+/* the model pill: a quiet disc-ended chip the height of the round controls less the air, the
+   mark at its start, a hairline of light along its top */
 .composer-pill {
   display: flex;
   flex: 0 1 auto;
@@ -236,9 +238,11 @@
   gap: var(--space-2);
   min-width: 0;
   height: var(--control-h);
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-3) 0 var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--fill-2);
+  box-shadow: 0 0 0 1px var(--ink-1), inset 0 1px 0 var(--edge-light);
+  font-size: var(--fs-sm);
   overflow: hidden;
 }
 
@@ -447,20 +451,24 @@
     "attachments attachments attachments"
     "text text text"
     "left status right";
-  background: var(--bg-input);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-surface);
+  /* the card floats a step over the chat: an elevated surface under an ambient shadow, its
+     corners 24px for the 36px round controls at a 12px inset, a transparent border under the ring
+     so forced-colors mode still draws an edge */
+  background: var(--bg-elevated);
+  border: 1px solid transparent;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-composer);
   transition:
-    background-color var(--dur-fast) var(--ease-in-out),
-    box-shadow var(--dur-fast) var(--ease-in-out);
+    background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
-/* focus is the frame's: the accent inside the edge and its halo outside, not a rectangle on the
-   textarea inside it (the global :focus-visible ring is suppressed below); a file dragged over
-   the card lights the same ring */
+/* focus is the frame's: the ring takes a breath of the accent and a soft halo, never a hard
+   rectangle (the global :focus-visible ring is suppressed below); a file dragged over the card
+   lights the same ring */
 .composer-surface:focus-within,
 .composer-surface.is-dragging {
-  box-shadow: var(--shadow-focus);
+  box-shadow: var(--shadow-composer-focus);
 }
 
 .composer-text,
@@ -468,9 +476,9 @@
   grid-area: text;
   width: 100%;
   min-width: 0;
-  min-height: calc(1lh + var(--space-5));
+  min-height: calc(1lh + var(--space-6));
   max-height: 10lh;
-  padding: var(--space-4) var(--space-4) var(--space-1);
+  padding: var(--space-4) var(--space-5) var(--space-2);
   resize: none;
   overflow-x: hidden;
   overflow-y: auto;
@@ -538,21 +546,54 @@
   cursor: not-allowed;
 }
 
+/* the card's last row: 36px round controls at a 12px inset, air between them */
 .composer-controls {
+  --composer-round: 36px;
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: var(--control-h);
+  min-height: var(--composer-round);
 }
 
 .composer-controls-left {
   grid-area: left;
-  padding: var(--space-1) 0 var(--space-3) var(--space-3);
+  padding: 0 0 var(--space-3) var(--space-3);
 }
 
 .composer-controls-right {
   grid-area: right;
-  padding: var(--space-1) var(--space-3) var(--space-3) 0;
+  padding: 0 var(--space-3) var(--space-3) 0;
+}
+
+/* the round controls: attach and new tab as a ringed disc (ChatGPT's +), the mic a bare disc */
+.composer-attach,
+.composer-new-session,
+.composer-action {
+  width: var(--composer-round);
+  height: var(--composer-round);
+  border-radius: var(--radius-pill);
+}
+
+.composer-attach,
+.composer-new-session {
+  background: var(--bg-input);
+  box-shadow: var(--shadow-surface);
+  color: var(--text);
+}
+
+@media (hover: hover) {
+  .composer-attach:hover:not(:disabled),
+  .composer-new-session:hover:not(:disabled) {
+    background: var(--bg-hover);
+    color: var(--text-strong);
+  }
+}
+
+.composer-attach svg,
+.composer-new-session svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.75;
 }
 
 .composer-action,
@@ -560,21 +601,58 @@
   flex: none;
 }
 
-/* the one square button at the row's end: Send is the card's accent action (components/ui/button.tsx),
-   Stop a field face in the same place at the same size with the filled stop glyph, so only the
-   face changes when the agent starts and ends a turn. Both keep their colour while busy or off:
-   a sending arrow and a Stop that cannot stop (offline) fade as any disabled control does */
-.composer-stop svg {
-  color: var(--text-strong);
-  transition: color var(--dur-fast) var(--ease-in-out);
+/* the one round button at the row's end: Send is the accent disc with a heavier arrow, and with
+   nothing to send a quiet disc of the fill (no fade: an empty box is the normal state, not a
+   fault); Stop is the inverse disc, the page's strongest colour with the filled stop glyph in
+   the surface colour, as ChatGPT draws it, so only the face changes when a turn starts and ends */
+.composer-send svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.25;
 }
 
-.composer-stop:is(:hover, :focus-visible):not(:disabled) svg {
-  color: var(--status-blocked);
-}
-
-.composer-send[aria-busy="true"] {
+.composer-send:disabled {
   opacity: 1;
+  background: var(--fill-3);
+  background-image: none;
+  box-shadow: none;
+  color: var(--text-dim);
+}
+
+.composer-send:disabled[aria-busy="true"] {
+  color: var(--text);
+}
+
+.composer-stop {
+  background: var(--text-strong);
+  background-image: none;
+  box-shadow: var(--shadow-raised);
+  color: var(--bg);
+  text-shadow: none;
+}
+
+.composer-stop svg {
+  width: 14px;
+  height: 14px;
+  color: inherit;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .composer-stop:hover:not(:disabled) {
+    background: var(--text-strong);
+    color: var(--bg);
+  }
+
+  .composer-stop:hover:not(:disabled) svg {
+    color: var(--status-blocked);
+  }
+}
+
+.composer-stop:disabled {
+  background: var(--fill-3);
+  color: var(--text-dim);
+  box-shadow: none;
 }
 
 .composer-send-progress {
@@ -593,7 +671,7 @@
    each a filled glyph and a crumb word in --text-dim at --fs-xs, and nothing in it is pressed. Composer.tsx
    draws it only with a folder or a branch to name; a name that does not fit is cut short */
 .composer-strip {
-  --composer-strip-inset: max(var(--radius-2xl), var(--space-5));
+  --composer-strip-inset: max(var(--radius-card), var(--space-5));
   position: relative;
   display: flex;
   align-items: center;
@@ -601,10 +679,10 @@
   gap: var(--space-2);
   width: calc(min(100%, var(--chat-w)) - 2 * var(--composer-strip-inset));
   margin: calc(-1 * var(--space-4)) auto 0;
-  padding: var(--space-5) var(--space-3) var(--space-1);
+  padding: var(--space-5) var(--space-4) var(--space-1);
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow-panel);
+  background: color-mix(in srgb, var(--bg-elevated) 55%, var(--bg));
+  box-shadow: 0 0 0 1px var(--ink-1), inset 0 1px 0 var(--edge-light);
   color: var(--text-dim);
   font-size: var(--fs-xs);
   font-weight: var(--fw-regular);
@@ -984,8 +1062,10 @@
     min-height: calc(var(--touch-target) + var(--space-1));
   }
 
-  /* a finger's size for the one action at the row's end */
-  .composer-action {
+  /* a finger's size for the round controls, which stay round */
+  .composer-action,
+  .composer-attach,
+  .composer-new-session {
     width: var(--touch-target);
     height: var(--touch-target);
   }
@@ -999,6 +1079,10 @@
   .composer-surface,
   .composer-stop svg {
     transition: none;
+  }
+
+  .composer-surface:focus-within {
+    box-shadow: var(--shadow-composer-focus);
   }
 }
 

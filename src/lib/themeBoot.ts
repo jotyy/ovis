@@ -86,9 +86,24 @@ export function savedThemeEntry(storage: () => Pick<Storage, "getItem">): ThemeE
 
 /** Puts a row on the document: the attributes src/styles.css keys its tokens on, and the browser's own colors. */
 export function applyThemeEntry(root: HTMLElement, entry: ThemeEntry): void {
+  // a swap after the first paint turns every colour transition off for a frame: fired together
+  // they smear the switch (better-ui's theme-switch rule); the first paint has nothing to smear
+  const swap = root.dataset["theme"] !== undefined && (root.dataset["theme"] !== entry.mode || root.dataset["palette"] !== entry.id);
+  // only in a real document: the tests apply a theme to a bare root with no head to put a style in
+  const canStill = swap && typeof document !== "undefined" && typeof document.createElement === "function" && document.head instanceof HTMLElement;
+  const still = canStill ? document.createElement("style") : null;
+  if (still) {
+    still.textContent = "*,*::before,*::after{transition:none !important}";
+    document.head.append(still);
+  }
   root.dataset["theme"] = entry.mode;
   root.dataset["palette"] = entry.id;
   root.style.colorScheme = entry.mode;
+  if (still) {
+    void root.offsetHeight; // a synchronous style flush, so the new colours commit under the stop
+    const frame = typeof requestAnimationFrame === "function" ? requestAnimationFrame : (run: () => void) => setTimeout(run, 16);
+    frame(() => frame(() => still.remove()));
+  }
   // `<meta name="theme-color">` follows the panel surface so the PWA title bar matches
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", entry.bgPanel);
 }

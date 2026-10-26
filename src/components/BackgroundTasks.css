@@ -12,19 +12,34 @@
   align-items: center;
   gap: var(--space-1);
   min-width: 0;
-  min-height: var(--chip-h);
-  padding: 0 var(--space-2);
+  min-height: var(--control-h);
+  padding: 0 var(--space-3);
   background: var(--status-working-tint);
   border: 0;
   border-radius: var(--radius-pill);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--status-working) 25%, transparent);
   color: var(--status-working);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
   cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .bg-tasks-toggle:hover {
+    background: color-mix(in srgb, var(--status-working-tint) 70%, var(--status-working));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bg-tasks-toggle:active {
+    scale: 0.96;
+  }
 }
 
 .bg-tasks-toggle svg {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   flex: none;
 }
 

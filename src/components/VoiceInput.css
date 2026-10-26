@@ -13,7 +13,7 @@
 .voice-mic-ring {
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   background: var(--status-blocked);
   opacity: 0;
   pointer-events: none;
@@ -45,15 +45,27 @@
   animation: pulse var(--dur-pulse) var(--ease-pulse) infinite;
 }
 
+/* a bare disc the size of the composer's round controls */
 .voice-mic {
   position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
   color: var(--text-dim);
   touch-action: manipulation;
 }
 
+@media (pointer: coarse) {
+  .voice-mic {
+    width: var(--touch-target);
+    height: var(--touch-target);
+  }
+}
+
 .voice-mic svg {
-  width: var(--icon-size);
-  height: var(--icon-size);
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.75;
 }
 
 /* recording: the filled stop glyph in the blocked colour on the pressed fill */
