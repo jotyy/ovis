@@ -1033,10 +1033,10 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 
 ### Menu and popover (`<DropdownMenu>`, `<Popover>`, `menuSurface`, `menuItem`; `ui/dropdown-menu.tsx`, `ui/popover.tsx`)
 - `menuSurface`: glass a step above its panel (`--bg-elevated` at 92% under `backdrop-popover`,
-  `blur(12px)`), `rounded-lg`, `p-1.5`, `shadow-popover` (a deep shadow, a ring of `--ink-2` and the
+  `blur(12px)`), `rounded-lg`, `p-1`, `shadow-popover` (a deep shadow, a ring of `--ink-2` and the
   inner light), arriving by `animate-pop-in` from its trigger's corner
   (`origin-(--radix-…-transform-origin)`), at most the room Radix measures. `menuItem`: an
-  `h-control` `rounded-md` row of `text-sm`, its glyph dim, `bg-fill-3` and `text-strong` while
+  28px `rounded-sm` row of `text-sm`, its glyph dim at a 1.75 stroke, `bg-fill-2` and `text-strong` while
   highlighted, 40% while disabled. Labels are 12/500 dim; separators a `--border` hairline;
   shortcuts (`DropdownMenuShortcut`) dim at the end. A destructive item is `variant="destructive"`:
   danger text, the danger tint when highlighted. The same two class strings dress the surfaces that

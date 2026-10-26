@@ -9,8 +9,9 @@
   flex: 0 0 auto;
   min-height: var(--input-h);
   padding: 0 var(--space-2);
-  /* a tab stands on the strip's foot, a breath under its top */
-  --tab-h: calc(var(--input-h) - var(--space-1));
+  /* a tab stands on the strip's foot, 8px under its top: 28px, the + beside it and a chip's
+     height, so the open tab's ⋯ square is the + 's size */
+  --tab-h: calc(var(--input-h) - var(--space-2));
   /* the strip's surface, which the + that covers the scrolling tabs paints too, and the canvas
      colour the open tab takes (the media rule below sets both to the pane's own) */
   --strip-bg: var(--bg-input);
