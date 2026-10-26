@@ -510,9 +510,9 @@
   width: 100%;
   margin-bottom: var(--space-3);
   overflow: hidden;
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--bg-elevated);
-  box-shadow: 0 0 0 1px var(--ink-1);
   color: var(--text);
 }
 
@@ -612,9 +612,12 @@
   width: 100%;
   display: flex;
   flex-direction: column;
+  /* the edge is a drawn border, as AI Elements draws it: a ring in a shadow was covered at the
+     card's foot by what followed it, a border never is */
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--bg-elevated);
-  box-shadow: var(--shadow-panel);
+  box-shadow: var(--shadow-lift);
 }
 
 .work-block-head,

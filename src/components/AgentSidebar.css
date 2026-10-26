@@ -57,7 +57,7 @@
   flex: none;
   width: var(--space-4);
   height: var(--space-4);
-  margin-inline: calc((var(--side-box) - var(--space-4)) / 2);
+  margin-right: var(--space-1);
   opacity: 0;
 }
 

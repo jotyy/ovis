@@ -2,20 +2,21 @@
   /* One grid for every row: a leading cell that says who or what the row is, the title, and a
      trailing cell that says how it is. The two cells are the columns of the header zone's own
      buttons above the list. Aliases of existing tokens only. */
-  --side-gutter: var(--space-3);
+  --side-gutter: var(--space-2);
   --side-box: var(--control-h);
-  /* a row is a field's height (the editor's nav rows), its corner between a control's and a card's */
-  --side-row: var(--input-h);
-  --side-row-2: calc(var(--input-h) + var(--space-2));
-  --side-radius: calc(var(--radius-md) + var(--hairline) * 2);
+  /* a row is a control's height (Blob0's nav rows: 32px, an 8px corner), a two-line row a breath more */
+  --side-row: var(--control-h);
+  --side-row-2: calc(var(--control-h) + var(--space-3));
+  --side-radius: var(--radius-md);
   --side-action: var(--space-6);
   /* hover is the fill the colour of light every surface takes under the pointer (styles.css) */
   --side-hover: var(--fill-2);
-  /* the selected row is the chosen nav row of the surface language: a raised face lit from
-     above, in a ring of ink with the light along its top edge, never a flat fill */
-  --side-selected: var(--bg-elevated);
-  --side-selected-face: var(--raised-face);
-  --side-selected-edge: var(--shadow-raised);
+  /* the selected row is Blob0's: the primary face, lit from above and rimmed in its own lighter
+     tone (the accent button's edge), its words and marks in the primary text colour */
+  --side-selected: var(--primary);
+  --side-selected-face: var(--primary-sheen);
+  --side-selected-edge: var(--shadow-primary);
+  --side-selected-text: var(--primary-text);
   /* a breath between rows, so a raised face never touches its neighbour's fill */
   --side-row-gap: calc(var(--hairline) * 2);
   /* a row's glyphs (marks, folders, carets, the footer's) one step under the app's icons: the
@@ -39,7 +40,7 @@
   min-width: 0;
   min-height: var(--side-row);
   margin: 0;
-  padding: 0;
+  padding: 0 var(--space-2);
   border: 0;
   background: transparent;
   color: var(--text-dim);
@@ -228,15 +229,15 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   list-style: none;
 }
 
-/* Pinned rows, agents and workspaces alike, stand first as a group of rows under a caption in
-   the title column, set as a section head is; no edge, no fill, so the rows read as any other.
-   The list carries the name for screen readers, so the caption is hidden from them. The rest
-   follow a breath below. */
+/* Pinned rows, agents and workspaces alike, stand first as a group of rows under a caption set
+   as a section head is (Blob0's "Folders": 12/500, dim, on the rows' inset); no edge, no fill,
+   so the rows read as any other. The list carries the name for screen readers, so the caption
+   is hidden from them. The rest follow a breath below. */
 .sidebar-pinned + ul { margin-top: var(--space-3); }
 
 .sidebar-pinned-label {
   margin: 0;
-  padding: var(--space-1) 0 var(--space-1) var(--side-box);
+  padding: var(--space-2) var(--space-2) var(--space-1);
   color: var(--text-dim);
   font-size: var(--fs-xs);
   font-weight: var(--fw-medium);
@@ -256,23 +257,23 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   border-radius: var(--side-radius);
 }
 
-/* The chosen row is told twice, as the editor's nav tells it: the raised face (below), and a
-   short bar of light at the sidebar's own edge, centred on the row, glowing a little into the
-   panel. Drawn by the row's list item, whose header already lends its pseudo-elements to the
-   worktree tree lines; it sits in the list's gutter, which the scroll container does not clip. */
-.workspace-group.is-selected::before,
-.agent-item.is-selected::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: calc(-1 * var(--side-gutter));
-  width: calc(var(--hairline) * 2);
-  height: var(--space-5);
-  transform: translateY(-50%);
-  border-radius: 0 var(--space-1) var(--space-1) 0;
-  background: var(--text-strong);
-  box-shadow: calc(var(--hairline) * 2) 0 var(--space-2) var(--hairline) color-mix(in srgb, var(--text-strong) 25%, transparent);
-  pointer-events: none;
+/* The chosen row is told once, by its filled face (below): no bar at the sidebar's edge. Inside
+   it every word, mark and state takes the primary text colour: the row sets the text and state
+   tokens its children read, so a count, a dim place and a status dot all read on the fill. */
+.workspace-group.is-selected > .workspace-header,
+.agent-item.is-selected {
+  --text: var(--side-selected-text);
+  --text-strong: var(--side-selected-text);
+  --text-dim: color-mix(in srgb, var(--side-selected-text) 72%, transparent);
+  --status-idle: var(--side-selected-text);
+  --status-working: var(--side-selected-text);
+  --status-blocked: var(--side-selected-text);
+  --status-done: var(--side-selected-text);
+  --indicator-working: var(--side-selected-text);
+  --indicator-blocked: var(--side-selected-text);
+  --indicator-done: var(--side-selected-text);
+  --indicator-idle: var(--side-selected-text);
+  --indicator-unknown: var(--side-selected-text);
 }
 
 /* the trailing padding keeps the status cell, which the selector draws at the row's right edge */
@@ -378,6 +379,16 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   .workspace-toggle-fold { display: flex; }
 }
 
+/* A row leads with one mark, the pane's own (its agent's brand or the shell glyph): the folder
+   that stood before it said nothing more and cost a column. The folder stays where it is the
+   fold of a worktree group (the toggle above) and where a project has its own icon. */
+.workspace-header > .sidebar-mark.workspace-folder { display: none; }
+
+/* a project with its own icon shows it in place of the shell glyph; an agent's brand mark wins
+   over the icon, so every row still leads with exactly one mark */
+.workspace-header > .workspace-favicon + .pane-select > .sidebar-mark:not(:has(.agent-mark)) { display: none; }
+.workspace-header:has(> .pane-select > .sidebar-mark > .agent-mark) > .workspace-favicon { display: none; }
+
 /* how many worktrees a folded group holds: the face alone looks like any workspace's */
 .workspace-fold-count {
   flex: none;
@@ -387,9 +398,9 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   line-height: var(--lh-tight);
 }
 
-/* hover first, selection after it: one neutral fill at two strengths */
+/* hover is the fill of light; the selected row keeps its own face under the pointer */
 @media (hover: hover) {
-  .workspace-header:hover {
+  .workspace-group:not(.is-selected) > .workspace-header:hover {
     background: var(--side-hover);
   }
 }
@@ -436,12 +447,17 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
    on the height and in the type of an agent's row. */
 .machine-workspaces.is-two-line .workspace-header { min-height: var(--side-row-2); }
 
-/* One line: as in herdr's sidebar, a top-level git workspace says its branch under its name, on
-   the same height as a two-line row; worktrees and folders outside git stay one line. */
-.workspace-header:has(.workspace-copy.is-branch-line) { min-height: var(--side-row-2); }
-
-.workspace-copy.is-two-line,
+/* One line is one line: a git workspace says its branch after its name, dim, on the row's own
+   height (Blob0's rows), and the branch gives way first. Two lines (the setting) stacks them. */
 .workspace-copy.is-branch-line {
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.workspace-copy.is-branch-line > .workspace-line { flex: 0 1 auto; }
+.workspace-copy.is-branch-line > .workspace-branch { flex: 1 1 0; }
+
+.workspace-copy.is-two-line {
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
@@ -717,13 +733,15 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   overflow-wrap: anywhere;
 }
 
-/* the footer's actions are rows on the same grid: ghost Buttons (ui/button.tsx) set on it */
+/* the footer's actions are rows on the same grid: ghost Buttons (ui/button.tsx) set on it, parted
+   from the lists above by a divider */
 .sidebar-footer {
   position: relative;
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
   padding: var(--space-2) var(--side-gutter) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  background: var(--divider) top / 100% var(--divider-h) no-repeat;
 }
 
 /* Keep the footer at the bottom when both lists are short after the upper section folds. */

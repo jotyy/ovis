@@ -10,3 +10,5 @@
 ### Changed
 
 - The chat is drawn after AI Elements (shadcn's chat components): the user's words in a neutral bubble on the secondary surface, the agent's work as a bordered tool card whose head and rows carry a glyph, a medium title and the chevron at the row's end, thinking as a brain row, a call's input and output as blocks on the muted surface, code blocks as bordered cards with their language and copy strip always drawn, quick replies as pills, and the message box as a card with ghost tools and one square accent submit button.
+- The sidebar is redrawn after Blob0's app sidebar: 32px rows with one mark each (the pane's agent, the project's icon, or the shell glyph), a workspace's branch dim after its name on the same line, the PC's name as a section label, the chosen row on the primary face with its words and state in the primary text colour and no bar at the edge, section labels on the rows' inset, and the footer parted by a divider.
+- The chat's work and code cards draw a real border, so nothing beside them can cover the edge a shadow ring used to draw.

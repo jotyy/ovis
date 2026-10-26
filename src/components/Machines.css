@@ -44,18 +44,17 @@
   padding: 0 var(--side-gutter);
 }
 
-/* the PC's name is set a step above its rows and the section heads: the row's size, semibold and
-   tight, in the strong text, so the head of a group reads as one at a glance */
+/* the PC's name is the head of its group, set as a section label is (Blob0's "Folders"): 12/500 in
+   the dim text, so the rows under it carry the weight */
 .machine-title {
   display: flex;
   align-items: center;
   flex: 1 1 auto;
   min-width: 0;
   min-height: var(--side-row);
-  color: var(--text-strong);
-  font-size: var(--fs-md);
-  font-weight: var(--fw-semibold);
-  letter-spacing: var(--tracking-tight);
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
   line-height: var(--lh-tight);
 }
 
@@ -68,10 +67,9 @@
   white-space: nowrap;
 }
 
-/* Host: a small-caps tag in a hairline ring, as the filter's Selected note (Sidebar.css) */
+/* Host: the tag is for the title (the Badge's tooltip); the head keeps to the name alone */
 .machine-kind {
-  flex: none;
-  margin-left: var(--space-2);
+  display: none;
 }
 
 /* the state on the monitor's lower corner, cut out of the panel by a ring of it */

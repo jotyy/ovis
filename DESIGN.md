@@ -45,10 +45,14 @@ mark, else the place's own glyph), a title, and a trailing cell that says how it
 and Agents are independent lists, as in herdr's Spaces and Agents panels; tab and pane navigation
 stays over the terminal and in the palette. Sections are parted by space and a dim head, never by
 a rule; the Agents list's workspace cards are an edge around rows, not a line between sections.
-Hover is the quiet fill of light every surface takes under the pointer; the selected row is the
-surface language's chosen nav row, a raised face lit from above in a ring of ink. Brand marks are the only color
-there that is not a state, and a ready row draws no state at all. The accent connects focus, the chosen
-lens glyph and the terminal cursor.
+The rows are Blob0's app sidebar: 32px each, one mark per row (the pane's agent, the project's
+own icon, or the shell glyph), a workspace's branch dim after its name on the same line, the
+PC's name set as a section label over its rows, and the footer parted by a divider. Hover is
+the quiet fill of light every surface takes under the pointer; the selected row is the primary
+face, lit from above and rimmed in its own lighter tone, with its words, marks and state in the
+primary text colour and no bar at the sidebar's edge. Brand marks are the only other color
+there that is not a state, and a ready row draws no state at all. The accent connects focus, the
+chosen lens glyph and the terminal cursor.
 
 Messages say only what the person needs now, not everything the app knows:
 - Something to do: one sentence and the control that does it ("Couldn't attach [Try again]").
@@ -3254,6 +3258,7 @@ own: the pane is a card by its ring, the sidebar by its darker panel.
 | `--shadow-tab` | The chosen option of a segmented control |
 | `--shadow-chip` | A tag, a badge, the connection chip |
 | `--shadow-panel` | A card on its panel |
+| `--shadow-lift` | The lift alone, under a card whose edge is a drawn border (the chat's work and code cards), so nothing beside it can cover a ring |
 | `--shadow-canvas` | The pane's canvas card inset in the chrome (`.pane-column`): a ring of ink in dark, a soft lift in light |
 | `--shadow-popover` | A menu, a select's list, a popover, the palette (`menuSurface`, with `--popover-blur` behind it) |
 | `--shadow-dialog` | A dialog (over `--scrim` and `--scrim-blur`) |
