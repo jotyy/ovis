@@ -296,8 +296,8 @@
   --popover-blur: blur(12px);
   /* the input card: the one resting surface that floats over the chat, so it carries an ambient
      shadow under its ring; focused, the ring takes a breath of the accent and no hard rectangle */
-  --shadow-composer: 0 16px 40px -12px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--ink-2), var(--edge-highlight);
-  --shadow-composer-focus: 0 16px 40px -12px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.2), 0 0 0 1px color-mix(in srgb, var(--accent) 32%, var(--ink-2)), 0 0 0 4px color-mix(in srgb, var(--accent) 7%, transparent), var(--edge-highlight);
+  --shadow-composer: 0 2px 6px rgba(0, 0, 0, 0.2), var(--edge-highlight);
+  --shadow-composer-focus: 0 3px 8px rgba(0, 0, 0, 0.24), var(--edge-highlight);
   /* a content image's edge: pure white or black at a tenth, never a tinted neutral, so no colour fringes the photo */
   --image-outline: rgba(255, 255, 255, 0.1);
   /* a card that holds round controls at a 12px inset: 12 + 12 (ChatGPT's and Claude's composers) */
@@ -402,8 +402,8 @@
   --surface-sheen: linear-gradient(178deg, rgba(255, 255, 255, 0.7) 4%, rgba(255, 255, 255, 0) 75%);
   --raised-face: linear-gradient(to bottom, color-mix(in srgb, var(--bg-elevated) 40%, white) 0%, var(--bg-elevated) 100%);
   --primary-sheen: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.12) 100%);
-  --shadow-composer: 0 16px 40px -12px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--ink-1), var(--edge-highlight);
-  --shadow-composer-focus: 0 16px 40px -12px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.06), 0 0 0 1px color-mix(in srgb, var(--accent) 32%, var(--ink-1)), 0 0 0 4px color-mix(in srgb, var(--accent) 7%, transparent), var(--edge-highlight);
+  --shadow-composer: 0 2px 6px rgba(0, 0, 0, 0.06), var(--edge-highlight);
+  --shadow-composer-focus: 0 3px 8px rgba(0, 0, 0, 0.08), var(--edge-highlight);
   --image-outline: rgba(0, 0, 0, 0.1);
 }
 
@@ -781,8 +781,8 @@ html[data-theme="light"][data-palette="studio"] {
   --surface-sheen: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 100%);
   --raised-face: linear-gradient(to bottom, var(--bg-elevated) 0%, color-mix(in srgb, var(--bg-elevated) 95%, black) 100%);
   --primary-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 100%);
-  --shadow-composer: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0 3px 3px -1.5px rgba(0, 0, 0, 0.06), 0 6px 6px -3px rgba(0, 0, 0, 0.06), 0 12px 12px -6px rgba(0, 0, 0, 0.04);
-  --shadow-composer-focus: 0 0 0 1px color-mix(in srgb, var(--accent) 60%, var(--ink-1)), 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0 3px 3px -1.5px rgba(0, 0, 0, 0.06), 0 6px 6px -3px rgba(0, 0, 0, 0.06), 0 12px 12px -6px rgba(0, 0, 0, 0.04);
+  --shadow-composer: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 6px -2px rgba(0, 0, 0, 0.06);
+  --shadow-composer-focus: 0 1px 2px rgba(0, 0, 0, 0.05), 0 3px 8px -2px rgba(0, 0, 0, 0.08);
 }
 
 /* Catppuccin (catppuccin.com/palette): Mocha in dark, Latte in light, mapped by the

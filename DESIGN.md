@@ -2406,10 +2406,15 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   transcript's end as an iPhone's input bar does: the composer rises `--composer-over`
   (`--space-8`) into the transcript, whose last lines fade into `--bg` and blur behind the card on
   `--card-glass` and `--glass-blur`.
-  The input box is a field surface: `--bg-input`, `--radius-lg`, `--shadow-surface` (a ring and the
-  inner light, no drawn border; the one card on this surface is the prompt card docked over it,
-  while an agent asks); focus within it turns the ring to `--shadow-focus` (the accent inside its
-  edge, a halo outside). Above it the notices (below), the
+  The input box is a chat composer as Claude.ai's and Linear's: `--bg-elevated`, `--radius-xl`, a
+  drawn `--border` hairline under `--shadow-composer` (a soft fall of shadow, no ring: the chips and
+  the context line sit against it; the one card on this surface is the prompt card docked over
+  it, while an agent asks); focus within it, or a file dragged over it, darkens the edge to
+  `--border-strong` and deepens the shadow to `--shadow-composer-focus`, with no coloured ring.
+  Quick replies over it (`.composer-quick-reply`) are suggestion chips as ChatGPT's: hairline
+  `--border` outline pills on the page, no face and no shadow, `--fs-xs` in `--text`, `--control-h`
+  less `--space-1` tall (`--touch-target` on a coarse pointer); hover darkens the edge to
+  `--border-strong` on `--bg-hover`. Above it the notices (below), the
   completion popover and the background-task list; inside, the image strip is its own row at the top, then the auto-growing
   message box as a row of its own at the card's full width (each tile's X is an `icon-sm`
   `IconButton` drawn as a `--chip-h` circle
@@ -2420,17 +2425,15 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   voice input shows it (see Voice input), and the background-task chip; on the right the status
   content and ONE round Send/Stop button.
   The message's text starts `--space-4` in (`--space-3` on a phone, `480px` and below).
-- The strip (`.composer-strip`) tucked under the card, as t3code's composer context strip: the
-  card's own `--bg-elevated` with a `--border` hairline, inset on each side by the card's radius
-  (`--radius-2xl`, never under `--space-5`) so it stays under the card's straight bottom edge,
-  its top `--space-4` under the card, where the card's ring and `--shadow-surface` part the two,
-  and only its bottom corners rounded (`--radius-xl`); `--space-5` top padding (so `--space-1`
-  shows under the card), `--space-3` at the sides, `--space-1` under. It names the pane's
+- The context line (`.composer-strip`) under the card, as Claude.ai names a chat's project under
+  its box: one caption on the card's column with no surface of its own (a box tucked under the
+  card read as a second card with a seam), `--space-1` under the card, inset `--space-4` to the
+  card's text edge. It names the pane's
   working folder at its start (Tabler `Folder`, the folder's last name, the whole path in its
   `title`) and the branch at its end (Tabler `GitBranch`), each a glyph the text's size and a
   name in `--text-dim` at `--fs-xs`, `--chip-h` tall; a name that does not fit is cut short.
-  A linked worktree's folder takes Tabler `FolderGit2` and the word Worktree after its name, in
-  a `--border` hairline box with `--radius-sm` corners.
+  A linked worktree's folder takes Tabler `FolderGit2` and the word Worktree after its name, on
+  a `--fill-2` tag with `--radius-sm` corners.
   Nothing in it is pressed. `composerStrip` (`src/lib/composerStrip.ts`) decides what it draws from
   the composer's optional `cwd` and `branch`: a blank one is absent, and with neither there is no
   strip at all. A phone (`640px` and below, or a coarse pointer) draws no strip: the screen is the
@@ -2455,7 +2458,10 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 - The round button (`.composer-action`, an `icon` Button rounded to a `--space-8` / `32px` circle
   with a `--space-4` glyph) is
   Send or Stop in the same place at the same size, so only the glyph changes: Send is
-  `variant="accent"` with Tabler `ArrowUp`; Stop is `variant="field"` with a `--bg` square, and turns
+  `variant="accent"` with Tabler `ArrowUp`, and with words in the box it keeps that face: faded
+  (`opacity: 0.5`) while something holds it back, at full strength with the spinner on it while
+  the message is on its way, so the arrow and the spinner are white on the accent, never grey on
+  grey; only an empty box shows the quiet `--fill-3` square with a `--text-dim` arrow. Stop is `variant="field"` with a `--bg` square, and turns
   `--status-blocked` on hover and focus. Not connected, Stop is disabled and loses its fill
   (`--border-strong` outline, `--text-dim` glyph). A coarse pointer keeps that compact visible
   circle inside a transparent `--touch-target` / `44px` button, so tapping remains easy.

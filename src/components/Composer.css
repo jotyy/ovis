@@ -457,23 +457,25 @@
     "attachments attachments attachments"
     "text text text"
     "left status right";
-  /* the card is AI Elements' PromptInput: an elevated surface under an ambient shadow, its
-     corners a card's (16px) for the square controls at an 8px inset, a transparent border under
-     the ring so forced-colors mode still draws an edge */
+  /* the card is a chat composer as Claude.ai's and Linear's: an elevated surface with a drawn
+     hairline edge under a soft fall of shadow (never a ring: the strip and the chips sit against
+     it), its corners a card's (16px) for the square controls at an 8px inset */
   background: var(--bg-elevated);
-  border: 1px solid transparent;
+  border: var(--hairline) solid var(--border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-composer);
   transition:
     background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out);
 }
 
-/* focus is the frame's: the ring takes a breath of the accent and a soft halo, never a hard
-   rectangle (the global :focus-visible ring is suppressed below); a file dragged over the card
-   lights the same ring */
+/* focus is the frame's, told quietly as a text field's: the edge a step darker and the shadow a
+   touch deeper, never a coloured ring or a hard rectangle (the global :focus-visible ring is
+   suppressed below); a file dragged over the card lights the same edge */
 .composer-surface:focus-within,
 .composer-surface.is-dragging {
+  border-color: var(--border-strong);
   box-shadow: var(--shadow-composer-focus);
 }
 
@@ -627,8 +629,24 @@
   color: var(--text-dim);
 }
 
-.composer-send:disabled[aria-busy="true"] {
-  color: var(--text);
+/* with words in the box Send keeps its accent face whatever holds it back (the bridge away, an
+   upload), faded as any disabled button, and while the message is on its way at full strength
+   with the spinner on it: the arrow and the spinner are always white on the accent, never grey
+   on grey */
+.composer-surface:has(.composer-text:not(:placeholder-shown)) .composer-send:disabled {
+  background: var(--primary);
+  background-image: var(--primary-sheen);
+  box-shadow: var(--shadow-primary);
+  color: var(--primary-text);
+  opacity: 0.5;
+}
+
+.composer-surface .composer-send.composer-action:disabled[aria-busy="true"] {
+  background: var(--primary);
+  background-image: var(--primary-sheen);
+  box-shadow: var(--shadow-primary);
+  color: var(--primary-text);
+  opacity: 1;
 }
 
 .composer-stop {
@@ -671,30 +689,24 @@
   to { transform: rotate(360deg); }
 }
 
-/* The strip tucked under the card, as t3code's composer context strip: a quieter surface than the card,
-   inset on each side by the card's radius (never less than --space-5, for a sharp palette), so it
-   stays under the card's straight bottom edge; its top --space-4 under the card, where the card's
-   ring and shadow part the two (the seam), and only its bottom corners rounded. It names the
-   pane's working folder (the whole path in its title) at its start and the branch at its end,
-   each a filled glyph and a crumb word in --text-dim at --fs-xs, and nothing in it is pressed. Composer.tsx
-   draws it only with a folder or a branch to name; a name that does not fit is cut short */
+/* The context line under the card, as Claude.ai names a chat's project under its box: one quiet
+   caption on the card's column, no surface of its own (a box tucked under the card read as a
+   second card with a seam). It names the pane's working folder (the whole path in its title) at
+   its start and the branch at its end, each a filled glyph and a crumb word in --text-dim at
+   --fs-xs, inset to the card's own text edge, and nothing in it is pressed. Composer.tsx draws it
+   only with a folder or a branch to name; a name that does not fit is cut short */
 .composer-strip {
-  --composer-strip-inset: max(var(--radius-xl), var(--space-5));
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  width: calc(min(100%, var(--chat-w)) - 2 * var(--composer-strip-inset));
-  margin: calc(-1 * var(--space-4)) auto 0;
-  padding: var(--space-5) var(--space-4) var(--space-1);
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-  background: color-mix(in srgb, var(--bg-elevated) 55%, var(--bg));
-  box-shadow: 0 0 0 1px var(--ink-1), inset 0 1px 0 var(--edge-light);
+  width: min(100%, var(--chat-w));
+  margin: var(--space-1) auto 0;
+  padding: 0 var(--space-4);
   color: var(--text-dim);
   font-size: var(--fs-xs);
   font-weight: var(--fw-regular);
-  text-shadow: var(--text-shadow-engraved);
 }
 
 .composer-strip-item {
@@ -712,7 +724,6 @@
   padding: 0 var(--space-1);
   border-radius: var(--radius-sm);
   background: var(--fill-2);
-  box-shadow: 0 0 0 1px var(--ink-1);
 }
 
 .composer-strip-branch {
@@ -1398,22 +1409,48 @@
   display: none;
 }
 
-/* a reply is AI Elements' Suggestion: a field button (components/ui/button.tsx) as a pill, its
-   words cut short past 16em */
+/* a reply is a suggestion chip as ChatGPT's and Claude.ai's: a hairline outline pill on the
+   page, no face, no shadow, a step shorter than a control (it is a hint, not the action), its
+   words cut short past 16em; hover darkens its edge and fills it a shade */
 .composer-quick-reply {
+  --quick-h: calc(var(--control-h) - var(--space-1));
   display: block;
+  height: var(--quick-h);
   max-width: 16em;
-  padding-inline: var(--space-4);
+  padding-inline: var(--space-3);
   overflow: hidden;
+  border: var(--hairline) solid var(--border);
   border-radius: var(--radius-pill);
-  line-height: var(--control-h);
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  color: var(--text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-regular);
+  line-height: calc(var(--quick-h) - 2 * var(--hairline));
   text-overflow: ellipsis;
+  text-shadow: none;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .composer-quick-reply:hover {
+    border-color: var(--border-strong);
+    background: var(--bg-hover);
+    color: var(--text-strong);
+  }
+}
+
+.composer-quick-reply:active:not(:disabled) {
+  background: var(--bg-active);
 }
 
 @media (pointer: coarse) {
   .composer-quick-reply {
-    height: calc(var(--touch-target) + var(--space-1));
-    line-height: calc(var(--touch-target) + var(--space-1));
+    --quick-h: var(--touch-target);
   }
 }
 
