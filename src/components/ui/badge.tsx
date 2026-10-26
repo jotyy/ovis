@@ -1,5 +1,5 @@
 /**
- * shadcn Badge as the editor's Tag: a small raised chip with a sheen down it, 12/550, its words
+ * shadcn Badge as the editor's Tag: a small raised chip with a sheen down it, 12/500, its words
  * in the tone's colour with a glow of the colour under them. The agent states take their tones.
  */
 import { cva, type VariantProps } from "class-variance-authority";

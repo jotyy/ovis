@@ -102,13 +102,11 @@
   --syntax-meta: #b49dd6;
 
   /* type (comfortable density; compact overrides below) */
-  /* Geist Variable is the interface face (fonts/geist/geist.css), the face of the product's own
-     site; Pretendard follows it for Hangul, then the system faces for the CJK scripts Geist has
-     no glyphs for */
-  --font-ui: "Geist Variable", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
-  /* the few large figures (a pairing code, a plan meter's number): Geist has no display cut, so
-     the same face, tracked --tracking-display */
-  --font-display: var(--font-ui);
+  /* Inter Variable is the interface face (fonts/inter/inter.css); Pretendard, cut to Inter's Latin
+     metrics, follows it for Hangul, then the system faces for the CJK scripts Inter has no glyphs for */
+  --font-ui: "Inter Variable", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  /* the display cut, for the few large figures (a pairing code, a plan meter's number): Inter Display at 500 */
+  --font-display: "Inter Display", var(--font-ui);
   /* "JetBrains Mono Web" is the bundled face (fonts/fonts.css): after the icon font, which draws
      the private use area alone, and never in the terminal's own stack (lib/fontFamily.ts) */
   --font-mono: "Symbols Nerd Font Mono", "JetBrains Mono Web", ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "D2Coding", monospace;
@@ -131,11 +129,11 @@
   --lh-base: 1.45;
   --lh-code: 1.6;
   --lh-prose: 1.65;
-  /* Geist at 500 for everything read on a dark surface, which thins a face (500 reads there as
-     400 does on paper; Studio light sets 400). Labels, titles and the chosen item step to 550;
-     600 and 700 are for emphasis alone */
-  --fw-regular: 500;
-  --fw-medium: 550;
+  /* Inter at 450 for everything read, on paper as on a dark surface: 400 thins the CJK faces the
+     stack falls through to, and 450 asks them for their 500 cut. Labels, titles and the chosen
+     item step to 500; 600 and 700 are for emphasis alone */
+  --fw-regular: 450;
+  --fw-medium: 500;
   --fw-semibold: 600;
   --fw-bold: 700;
   --tracking-tight: -0.01em;
@@ -760,10 +758,9 @@ html[data-theme="light"][data-palette="studio"] {
   --edge-highlight: inset 0 1px 0 var(--edge-light);
   --field-face: linear-gradient(to bottom, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.045) 100%);
   --bg-active: #ebebeb;
-  /* Blob0's type on paper: 400 for what is read (the dark surface's 500 would set heavy on white),
-     500 for labels and buttons, no tightening of the body; its controls' 10px corners and 14px blocks */
-  --fw-regular: 400;
-  --fw-medium: 500;
+  /* Blob0's controls' 10px corners and 14px blocks, and no tightening of the body. Its 400 body
+     weight is not taken: Chinese and Korean lines fall through to the device's faces, which set
+     thin at 400 on white, so the 450 and 500 of every theme stand here too */
   --tracking-tight: 0;
   --radius-md: 10px;
   --radius-lg: 14px;
@@ -2405,7 +2402,7 @@ button {
 /* ---------- primitives ---------- */
 
 /* Every glyph is a Tabler icon (lib/icons.ts): one stroke for the whole set, a touch lighter than
-   the package's own, so an 18px glyph sits beside 14px Geist at the same weight. A filled face
+   the package's own, so an 18px glyph sits beside 14px Inter at the same weight. A filled face
    has no stroke and keeps its shape. */
 .tabler-icon {
   flex: 0 0 auto;

@@ -53,7 +53,7 @@ export function DropdownMenuLabel({ className, inset, ...props }: ComponentProps
 }
 
 export function DropdownMenuSeparator({ className, ...props }: ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
-  return <DropdownMenuPrimitive.Separator data-slot="dropdown-menu-separator" className={cn("-mx-1.5 my-1.5 h-0.5 bg-[image:var(--divider)]", className)} {...props} />;
+  return <DropdownMenuPrimitive.Separator data-slot="dropdown-menu-separator" className={cn("-mx-1.5 my-1.5 h-px bg-border", className)} {...props} />;
 }
 
 export function DropdownMenuShortcut({ className, ...props }: ComponentProps<"span">) {

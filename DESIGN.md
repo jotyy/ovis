@@ -33,10 +33,10 @@ colors under the same surfaces, shadows and type. Amber stays the base every the
 overrides (its values are frozen by `src/lib/themes.parity.test.ts`); the saved theme, not amber,
 is the page's first frame (see Rules).
 
-The type is Geist, the face of the product's own site: Geist Variable at 500 for everything read
-on a dark surface (which thins a face, so 500 reads there as 400 does on paper; Studio light sets
-400), 550 for labels, titles and the chosen item, 600 for emphasis, and the same face tracked
--0.02em for the few large figures; the whole interface is tracked -0.01em.
+The type is Inter: Inter Variable at 450 for everything read (on paper as on a dark surface:
+400 thins the CJK faces the stack falls through to, and 450 asks them for their 500 cut), 500 for
+labels, titles and the chosen item, 600 for emphasis, and Inter Display at 500 for the few large
+figures; the whole interface is tracked -0.01em.
 Every glyph is a Tabler icon through `src/lib/icons.ts`, stroked at 1.75; a glyph that names a
 state or an identity (an alert, a done or failed step, a pinned row, a folder, a PC, a Settings
 page) takes the filled face, an action or a toggle stays outlined.
@@ -549,15 +549,15 @@ The values are the ones in `src/styles.css`. Every token but `--fs-input` is `ca
 | Token | Value | Usage |
 |-------|-------|-------|
 | `--ui-scale` | `1`; Settings → Appearance → Interface font size over the density's body size, written on `<html>` | Multiplies every `--fs-*` token but `--fs-input` |
-| `--font-ui` | `"Geist Variable", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif` | Chrome and chat prose |
-| `--font-display` | `var(--font-ui)` | The few large figures: the pairing code, a meter's number (`font-display`); Geist has no display cut, so the same face under `--tracking-display` |
+| `--font-ui` | `"Inter Variable", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif` | Chrome and chat prose |
+| `--font-display` | `"Inter Display", var(--font-ui)` | The display cut, for the few large figures: the pairing code, a meter's number (`font-display`) |
 | `--font-mono` | `"Symbols Nerd Font Mono", "JetBrains Mono Web", ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "D2Coding", monospace` | Code, paths, keys, terminal-adjacent metadata |
 | `--lh-tight` | `1.2` | Titles |
 | `--lh-base` | `1.45` | Body copy (`1.4` compact) |
 | `--lh-code` | `1.6` | Code blocks; the message box with a mouse |
 | `--lh-prose` | `1.65` | Chat prose and the user's bubble |
-| `--fw-regular` | `500` | Body |
-| `--fw-medium` | `550` | Controls |
+| `--fw-regular` | `450` | Body |
+| `--fw-medium` | `500` | Controls |
 | `--fw-semibold` | `600` | Labels and titles |
 | `--fw-bold` | `700` | Brand |
 | `--tracking-tight` | `-0.01em` | Brand and primary titles |
@@ -568,12 +568,12 @@ The values are the ones in `src/styles.css`. Every token but `--fs-input` is `ca
 - The app ships its typefaces (`src/fonts/`, licenses in `THIRD_PARTY_NOTICES.md`) and loads
   nothing from another host: it is served from the user's PC, often with no internet route.
   All are `font-display: swap`.
-- Geist Variable (`src/fonts/geist/`, the `geist` package's one variable file), the first name in
-  `--font-ui`, is one file for every weight the app sets (400, 500, 550, 600, 700), so a weight
-  step costs no request; it covers Latin and Latin Extended. There is no display cut: the large
-  figures (a pairing code, a meter's number) are the same face under `--tracking-display`.
-- Pretendard Variable follows Geist in the stack for Hangul, so a Korean line keeps one face for
-  its Hangul. It is upstream's dynamic subset: 92 chunks split by
+- Inter Variable (`src/fonts/inter/`), the first name in `--font-ui`, is one file for every weight
+  the app sets (450, 500, 600, 700), so a weight step costs no request; it covers Latin, Greek and
+  Cyrillic. Inter Display Medium is `--font-display`, for large figures only (a pairing code, a
+  meter's number), as the editor sets its stat cards.
+- Pretendard Variable follows Inter in the stack for Hangul: its Latin is cut to Inter's metrics,
+  so a mixed line keeps one rhythm. It is upstream's dynamic subset: 92 chunks split by
   `unicode-range`, so the browser fetches only those whose characters a page draws. The service
   worker precaches none and keeps each one once fetched.
 - What the chunks cover (their `unicode-range`s): all 11,172 Hangul syllables, hiragana and
@@ -939,7 +939,7 @@ skip between neighbours) through `<IconButton>`, under one `<TooltipProvider>` p
   `animate-sheet-in` / `animate-sheet-out`); the caller picks by its width (`SHEET_QUERY`,
   `<=640px`). `DialogHeader` (at least 64px, title and description, an etched `divider-b`),
   `DialogBody` (the one part that scrolls), `DialogFooter` (actions trailing, `divider-t`),
-  `DialogTitle` (16/550, `text-strong`, engraved, balanced) and `DialogDescription` (13px dim).
+  `DialogTitle` (16/500, `text-strong`, engraved, balanced) and `DialogDescription` (13px dim).
   Radix holds the focus, stacks one dialog under another (a confirm over Settings) and takes the
   scrim's click; `onInteractOutside` is told that a `.modal-scrim`, a `[role="dialog"]` or a native
   `<dialog>` opened from inside the dialog is not outside it.
@@ -991,7 +991,7 @@ skip between neighbours) through `<IconButton>`, under one `<TooltipProvider>` p
   breath lighter under the pointer, focused the accent inside its edge and a halo of it outside
   (`shadow-focus`). `<Input>` is `h-input`, `text-field` (16px, the size iOS Safari does not zoom)
   until `sm:` where it is `text-sm`, `tabular-nums`; `<Textarea>` is `rounded-lg`, at least 120px,
-  no resize grip. `<Field label htmlFor hint action>` stacks a 12/550 dim label (and an optional
+  no resize grip. `<Field label htmlFor hint action>` stacks a 12/500 dim label (and an optional
   control at its end) over the field and a 12px hint under it; `<Label>` is that label alone.
   `fieldSurface` is the class string for a field that is not an input: the agent picker's trigger
   (`AgentPicker.css`), the native `<select>` of the New workspace dialog (`nativeSelect`: the OS
@@ -1016,7 +1016,7 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 - A `fieldSurface` trigger (`h-input`, the chosen value truncating, a dim chevron that turns while
   open, `shadow-focus` while open) that opens the menu surface below (`position="popper"`, as wide
   as the trigger at least), its items `h-control` rows on `bg-fill-3` when highlighted, the chosen
-  one marked by an accent check at its start; groups under `SelectLabel` (12/550 dim), parted by an
+  one marked by an accent check at its start; groups under `SelectLabel` (12/500 dim), parted by an
   etched `SelectSeparator`. Settings uses it for five or more choices (`SettingsSelect`: theme,
   language, modes), following the editor's `select-field`. The New workspace dialog's Effort keeps
   the native select on `fieldSurface` (above), and the agent picker is its own combobox (below).
@@ -1037,7 +1037,7 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   inner light), arriving by `animate-pop-in` from its trigger's corner
   (`origin-(--radix-…-transform-origin)`), at most the room Radix measures. `menuItem`: an
   `h-control` `rounded-md` row of `text-sm`, its glyph dim, `bg-fill-3` and `text-strong` while
-  highlighted, 40% while disabled. Labels are 12/550 dim; separators etched (`--divider`);
+  highlighted, 40% while disabled. Labels are 12/500 dim; separators a `--border` hairline;
   shortcuts (`DropdownMenuShortcut`) dim at the end. A destructive item is `variant="destructive"`:
   danger text, the danger tint when highlighted. The same two class strings dress the surfaces that
   are not Radix menus: the command palette, the select's list, the base-branch listbox of Changes,
@@ -1115,7 +1115,7 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 
 ### Badge (`<Badge tone>`, `ui/badge.tsx`)
 - The editor's Tag: a 24px `rounded-md` chip with a sheen down it (`bg-sheen`), `shadow-chip` (a
-  ring and the inner light), 12/550 `tabular-nums` words in the tone's colour with a glow of the
+  ring and the inner light), 12/500 `tabular-nums` words in the tone's colour with a glow of the
   colour under them. Tones: **neutral** (`bg-fill-2`, `text-text`: Host, a plan's name), **idle**
   (`bg-fill-2`, dim: READY, Terminal in the completion menu, Resume unavailable, a stale pill),
   **accent** (Already open, Recommended, soon), **working**, **blocked**, **done** (the agent states
@@ -1173,7 +1173,7 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   and cuts the card's edge. `<CardHeader
   icon title description action>`: a shade lighter (`bg-elevated`), parted from the body by
   `divider-b`, with an `<IconBadge>` (a 40px raised `rounded-[11px]` tile, the glyph 22px with a
-  drop shadow: the filled page marks of Settings, the prompt card's alert), the title at 16/550
+  drop shadow: the filled page marks of Settings, the prompt card's alert), the title at 16/500
   engraved, the sentence 13px dim and a control at its end (a PC's state Badge). `<CardContent>`
   stacks the body. `<CardRow title description htmlFor>` is one setting: a title and its sentence
   on a field's own surface (`bg-fill-1`, `rounded-lg`, a ring of `--ink-1` and the inner light),
@@ -2805,7 +2805,7 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   as Zed's settings search lands on the setting rather than its page. Titles rank before words
   found only in aliases, and a page before its groups. A search closed without picking leaves no
   request behind.
-- Rows are grouped as herdr's Goto picker groups them: a dim 12/550 heading per PC/workspace (PC
+- Rows are grouped as herdr's Goto picker groups them: a dim 12/500 heading per PC/workspace (PC
   name when multiple PCs are registered, workspace name, a linked worktree's branch in mono when
   the name does not say it, the row count), Recent (up to
   three, an unsearched and unfiltered list only) before the workspaces, Actions last. The
@@ -2879,7 +2879,7 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 - Every page is built from the same parts (`components/SettingsControls.tsx`, the editor's
   `settings-section`). A group is a `<Card>` (`.settings-section`, the class the regression scripts
   read) with a `<CardHeader>`: the group's filled Tabler mark in an `<IconBadge>`, its name at
-  16/550, one dim sentence, and a control at its end where the group has one (a PC's state
+  16/500, one dim sentence, and a control at its end where the group has one (a PC's state
   `<Badge>`). A row is a `<CardRow>`: a title (`text-sm font-medium text-strong`) with at most one
   dim sentence under it (no wider than `54ch`) and one control at the end of the line, on a
   field's own surface. The controls are a `<Switch>`, a `<ToggleGroup>` for two to four short

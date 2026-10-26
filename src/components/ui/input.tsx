@@ -1,7 +1,7 @@
 /**
  * shadcn Input and Textarea, as the editor's fields: a shallow well with a ring, a breath lighter
  * than its panel at rest, the accent inside its edge with a halo outside when focused. The Field
- * wrapper sets a label (12/550, dim) over it and a hint under it.
+ * wrapper sets a label (12/500, dim) over it and a hint under it.
  */
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "../../lib/cn.ts";

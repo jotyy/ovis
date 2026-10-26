@@ -1407,7 +1407,8 @@
    stay on the column's edge with their edges whole */
 .composer-quick {
   display: flex;
-  gap: var(--space-2);
+  /* a breath tighter than the 8px grid: the chips read as one row of choices, not as buttons */
+  gap: calc(var(--space-1) + 2px);
   /* the column's width plus the breath on each side (the shared rule above sets the column) */
   width: calc(min(100%, var(--chat-w)) + 2 * var(--space-1));
   margin-block: calc(-1 * var(--space-1)) calc(var(--space-2) - var(--space-1));
@@ -1437,7 +1438,7 @@
   box-shadow: none;
   color: var(--text);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-regular);
+  font-weight: var(--fw-medium);
   line-height: calc(var(--quick-h) - 2 * var(--hairline));
   text-overflow: ellipsis;
   text-shadow: none;

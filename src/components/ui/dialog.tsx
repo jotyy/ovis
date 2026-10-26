@@ -1,6 +1,6 @@
 /**
  * shadcn Dialog on Radix: a card centred under a blurred scrim (variant="modal"), or a sheet up
- * from the bottom edge for a phone (variant="sheet"; the caller picks by its width). Title at 16/550, set into
+ * from the bottom edge for a phone (variant="sheet"; the caller picks by its width). Title at 16/500, set into
  * the surface; the zones part on etched dividers (DialogHeader / DialogFooter).
  */
 import { Dialog as DialogPrimitive } from "radix-ui";
