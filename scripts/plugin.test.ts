@@ -296,14 +296,14 @@ describe("port", () => {
 
 describe("stop", () => {
   it("stops the server an install started under its old id after herdr updated the plugin to the new id", async () => {
-    // herdr hands the updated plugin plugins/devswha.ovis while the running server's record is under devswha.herdr-web-ui
+    // herdr hands the updated plugin plugins/jotyy.ovis while the running server's record is under upstream's devswha.ovis
     const plugins = join(scratch, "plugins");
-    const legacy = join(plugins, "devswha.herdr-web-ui");
+    const legacy = join(plugins, "devswha.ovis");
     mkdirSync(legacy, { recursive: true });
     const server = spawn("sleep", ["30"], { detached: true, stdio: "ignore" });
     try {
       writeFileSync(join(legacy, "server.pid"), `${server.pid}\n`);
-      const stopped = await run("stop", { HERDR_PLUGIN_STATE_DIR: join(plugins, "devswha.ovis"), PORT: "1" });
+      const stopped = await run("stop", { HERDR_PLUGIN_STATE_DIR: join(plugins, "jotyy.ovis"), PORT: "1" });
       expect(stopped.exitCode, stopped.err).toBe(0);
       expect(existsSync(join(legacy, "server.pid"))).toBe(false);
       expect(() => process.kill(server.pid!, 0)).toThrow();
@@ -353,7 +353,7 @@ describe("stop", () => {
 
 describe("the state dir when run by hand", () => {
   const legacy = () => join(scratch, ".local", "state", "herdr-web-ui");
-  const managed = (base = join(scratch, ".local", "state")) => join(base, "herdr", "plugins", "devswha.ovis");
+  const managed = (base = join(scratch, ".local", "state")) => join(base, "herdr", "plugins", "jotyy.ovis");
   const pidFile = (dir: string, pid: number) => { mkdirSync(dir, { recursive: true }); writeFileSync(join(dir, "server.pid"), `${pid}\n`); };
   const byHand = (extra: Record<string, string | undefined> = {}) => run("status", { HERDR_PLUGIN_STATE_DIR: undefined, PORT: "1", ...extra });
 
