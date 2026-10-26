@@ -1181,10 +1181,11 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 
 ### Alert and progress (`<Alert tone>`, `<Progress>`; `ui/alert.tsx`, `ui/progress.tsx`)
 - `<Alert>` is the editor's notice: one sentence and the control that acts on it, `rounded-lg`, 13px,
-  on a tinted surface with a ring of its tone. Tones: **neutral** (`bg-fill-1`, a ring of `--ink-1`:
+  on a tinted surface with a drawn hairline edge of its tone, never an outside ring (the chips
+  under a composer notice paint over a ring). Tones: **neutral** (`bg-fill-1`, a `--border` edge:
   the terminal banners, the composer's notices), **notice** (the warning yellow at 8%: another app
   holds the pane, a device Tailscale does not know), **danger** (the danger tint and a
-  `--status-blocked` ring: a failed upload, a refused form, a save the server refused) and **done**.
+  `--status-blocked` edge: a failed upload, a refused form, a save the server refused) and **done**.
   It is `role="alert"` unless told `role="status"` (a banner that is a state, not a failure).
   `AlertTitle` / `AlertDescription` set the words.
 - `<Progress>`: a 6px sunken track (`bg-well`), the value a `bg-accent` bar with a light edge moving
@@ -2209,14 +2210,14 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 - Mid-work narration sits between rows. While the turn runs it is the agent's voice: answer prose
   (`--text`, `--fs-chat` on `--lh-prose`) on the prose edge. Once the turn settles it is a quiet
   row again: `--text-dim`, `--fs-sm`.
-- Only the running turn's block is open (working or blocked). A settled turn folds to its header
-  with a hairline under it, and the header reads as a footnote: `--text-dim`, regular weight (the
-  live one keeps medium weight and its state color). The answer is outside the fold. A settled
-  turn stays open when its work holds text the answer does not end on: text with no answer at all
-  (an action or Codex commentary came last) or text recorded after the answer, so the agent's
-  words are never behind the fold. A block the reader opened or folded stays as they left it, and
+- Every block starts folded, the running turn's too (`workStartsOpen` is always false): the
+  transcript reads as the answers under one `Working…` or `Worked for` line, and the reader opens
+  a log when they want it. The header reads as a footnote: `--text-dim`, regular weight (the live
+  one keeps its state color and a breathing dot). The answer is outside the fold; narration inside
+  it is told by the line's counts. A block the reader opened or folded stays as they left it, and
   so does one they focused or clicked inside: the fold at the end of a turn never takes the rows
-  from under them.
+  from under them. A folded row keeps nothing of its detail (`.work-row-detail[hidden]` is
+  `display: none`: Radix hides it with the attribute, which a `display: flex` would override).
 - The header is one line: the counts (`.work-block-summary`) take the width the title and the
   failure count leave and end in an ellipsis. `· 1 failed` (`.work-block-failed`) is its own item
   and is never cut, because the fold hides the failed row; at the largest chat type on the

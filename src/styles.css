@@ -1837,7 +1837,14 @@ html:lang(ko) :is(.composer-text, .composer-measure, .terminal-input-text)::plac
 
 button {
   font: inherit;
-  color: inherit;
+}
+
+/* in the base layer, under the utilities: a Button's own colour (text-primary-text on the accent
+   face) must win over this, and an unlayered rule beats every layered one whatever its selector */
+@layer base {
+  button {
+    color: inherit;
+  }
 }
 
 /* the offset ring is for controls without a box of their own; a shadcn component (data-slot)

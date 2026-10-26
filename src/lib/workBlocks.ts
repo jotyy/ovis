@@ -26,19 +26,13 @@ export function splitTurn(parts: ConversationPart[]): SplitTurn {
 }
 
 /**
- * A work block is open while its turn runs and folded once the turn settles: the answer stays
- * outside the fold, so a finished turn reads as its answer under one "Worked for" row.
- *
- * A settled turn keeps its block open when explicit commentary comes after the last answer, or
- * when commentary has no answer at all. Folding would hide the newest thing the agent said, or all
- * of it. It takes the turn's parts, not the split: the order decides.
+ * A work block starts folded, while its turn runs and once it settles: the transcript reads as the
+ * answers under one "Working…" or "Worked for" line, and the reader opens the log when they want
+ * it (the choice is kept per row, useChatRowToggle). Commentary inside the fold is told by the
+ * line's count, not by opening the block. The arguments stay so the owner's call reads as before.
  */
-export function workStartsOpen(live: boolean, parts: ConversationPart[]): boolean {
-  if (live) return true;
-  const lastAnswer = splitTurn(parts).answer.at(-1);
-  const after = lastAnswer === undefined ? 0 : parts.lastIndexOf(lastAnswer) + 1;
-  // everything readable after the last answer part is work: it is inside the fold
-  return parts.slice(after).some((part) => part.kind === "text" && part.text.trim().length > 0);
+export function workStartsOpen(_live: boolean, _parts: ConversationPart[]): boolean {
+  return false;
 }
 
 type WorkCategory = "edit" | "read" | "command" | "other";
