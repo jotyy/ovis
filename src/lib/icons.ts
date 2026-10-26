@@ -24,7 +24,7 @@ import {
   IconMessagePlus, IconMicrophone, IconMicrophoneFilled, IconMinus, IconNetwork, IconPackage, IconPalette, IconPaletteFilled, IconPencil,
   IconPhoto, IconPhotoOff, IconPinFilled, IconPinnedOff, IconPlug, IconPlugConnectedX, IconPlus, IconPuzzle, IconPuzzleFilled, IconQuote,
   IconRefresh, IconRobot, IconRotateClockwise, IconScan, IconSearch, IconSelector, IconSend, IconSend2, IconSettingsFilled, IconSitemap,
-  IconSquareFilled, IconStack2, IconTool, IconStarFilled, IconSunMoon, IconTarget, IconTerminal, IconTrash, IconUser, IconVideo,
+  IconSquareFilled, IconStack2, IconStarFilled, IconSunMoon, IconTarget, IconTerminal, IconTrash, IconUser, IconVideo,
   IconWorld, IconX, IconChartBar, IconTypography, IconKey,
 } from "@tabler/icons-react";
 import { TerminalSquare as ReiconTerminalSquare } from "reicon-react";
@@ -179,7 +179,6 @@ export {
   IconStarFilled as Star,
   IconSunMoon as SunMoon,
   IconTarget as Target,
-  IconTool as Wrench,
   IconTerminal as Terminal,
   IconTrash as Trash2,
   IconUser as UserRound,

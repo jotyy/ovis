@@ -11,12 +11,11 @@
   --side-action: var(--space-6);
   /* hover is the fill the colour of light every surface takes under the pointer (styles.css) */
   --side-hover: var(--fill-2);
-  /* the selected row is Blob0's: the primary face, lit from above and rimmed in its own lighter
-     tone (the accent button's edge), its words and marks in the primary text colour */
-  --side-selected: var(--primary);
-  --side-selected-face: var(--primary-sheen);
-  --side-selected-edge: var(--shadow-primary);
-  --side-selected-text: var(--primary-text);
+  /* the selected row is a nav row's, not a button's: the pressed fill of light, a step past hover,
+     its words in the strong text, no face, no ring */
+  --side-selected: var(--fill-3);
+  --side-selected-face: none;
+  --side-selected-edge: none;
   /* a breath between rows, so a raised face never touches its neighbour's fill */
   --side-row-gap: calc(var(--hairline) * 2);
   /* a row's glyphs (marks, folders, carets, the footer's) one step under the app's icons: the
@@ -257,24 +256,7 @@ button.sidebar-section-label:focus-visible { outline-offset: calc(var(--ring-off
   border-radius: var(--side-radius);
 }
 
-/* The chosen row is told once, by its filled face (below): no bar at the sidebar's edge. Inside
-   it every word, mark and state takes the primary text colour: the row sets the text and state
-   tokens its children read, so a count, a dim place and a status dot all read on the fill. */
-.workspace-group.is-selected > .workspace-header,
-.agent-item.is-selected {
-  --text: var(--side-selected-text);
-  --text-strong: var(--side-selected-text);
-  --text-dim: color-mix(in srgb, var(--side-selected-text) 72%, transparent);
-  --status-idle: var(--side-selected-text);
-  --status-working: var(--side-selected-text);
-  --status-blocked: var(--side-selected-text);
-  --status-done: var(--side-selected-text);
-  --indicator-working: var(--side-selected-text);
-  --indicator-blocked: var(--side-selected-text);
-  --indicator-done: var(--side-selected-text);
-  --indicator-idle: var(--side-selected-text);
-  --indicator-unknown: var(--side-selected-text);
-}
+/* The chosen row is told once, by its fill (below): no bar at the sidebar's edge. */
 
 /* the trailing padding keeps the status cell, which the selector draws at the row's right edge */
 .workspace-header {

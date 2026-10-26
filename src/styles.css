@@ -751,8 +751,8 @@ html[data-theme="light"][data-palette="studio"] {
   --ink-1: rgba(10, 10, 10, 0.08);
   --ink-2: rgba(10, 10, 10, 0.12);
   --ink-3: rgba(10, 10, 10, 0.16);
-  --edge-light: rgba(255, 255, 255, 0.8);
-  --edge-light-strong: rgba(255, 255, 255, 1);
+  --edge-light: rgba(255, 255, 255, 0.45);
+  --edge-light-strong: rgba(255, 255, 255, 0.7);
   --well: color-mix(in srgb, var(--bg) 92%, black);
   --edge-highlight: inset 0 1px 0 var(--edge-light);
   --field-face: linear-gradient(to bottom, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.045) 100%);
@@ -775,7 +775,7 @@ html[data-theme="light"][data-palette="studio"] {
   --shadow-popover: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.04), 0 3px 3px rgba(0, 0, 0, 0.04), 0 6px 6px rgba(0, 0, 0, 0.02), 0 12px 12px rgba(0, 0, 0, 0.02), 0 24px 24px rgba(0, 0, 0, 0.02);
   --shadow-dialog: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.06), 0 3px 3px -1.5px rgba(0, 0, 0, 0.06), 0 6px 6px -3px rgba(0, 0, 0, 0.06), 0 12px 12px -6px rgba(0, 0, 0, 0.04), 0 24px 32px -12px rgba(0, 0, 0, 0.03), 0 48px 64px -24px rgba(0, 0, 0, 0.02);
   --shadow-tooltip: 0 0 0 1px var(--ink-1), 0 1px 1px -0.5px rgba(0, 0, 0, 0.04), 0 3px 3px rgba(0, 0, 0, 0.04), 0 6px 6px rgba(0, 0, 0, 0.02), 0 12px 12px rgba(0, 0, 0, 0.02);
-  --shadow-primary: inset 0 2px 0 rgba(255, 255, 255, 0.28), inset 0 -1px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px var(--primary-hover), 0 1px 2px color-mix(in srgb, var(--primary) 22%, transparent), 0 2px 6px -2px color-mix(in srgb, var(--primary) 22%, transparent);
+  --shadow-primary: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.12), inset 0 0 0 1px var(--primary-hover), 0 1px 2px color-mix(in srgb, var(--primary) 22%, transparent), 0 2px 6px -2px color-mix(in srgb, var(--primary) 22%, transparent);
   --shadow-focus: 0 0 0 1px var(--bg), 0 0 0 4px color-mix(in srgb, var(--accent) 24%, transparent), inset 0 0 0 1px var(--accent);
   --divider: linear-gradient(to bottom, var(--ink-1) 0, var(--ink-1) 1px, var(--edge-light) 1px);
   --surface-sheen: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 100%);
@@ -2319,24 +2319,15 @@ button {
     border-right: 0;
   }
 
+  /* the card's edge is a drawn hairline under the lift alone: no ring to clip, no light inside */
   .pane-column {
     position: relative;
+    border: var(--hairline) solid var(--border);
     border-radius: var(--radius-lg);
     background: var(--bg);
-    box-shadow: var(--shadow-canvas);
+    box-shadow: var(--shadow-lift);
     overflow: hidden;
     isolation: isolate;
-  }
-
-  /* the light along the card's top edge, over everything in it and under the pointer's reach */
-  .pane-column::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: var(--z-popover);
-    border-radius: inherit;
-    box-shadow: inset 0 1px 0 var(--edge-light), inset 0 0 0 1px rgba(255, 255, 255, 0.02);
-    pointer-events: none;
   }
 
   .app-header {

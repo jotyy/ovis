@@ -1,17 +1,20 @@
-/* herdr's tab row, over the pane: the tabs in one sunken well as the editor's segmented tabs
-   are, quiet names, the open one the well's raised face (styles.css --shadow-tab, --raised-face),
-   never an underline; the row ends on the etched divider, never a drawn line */
+/* herdr's tab row, over the pane: an editor's tab bar. The strip is a band of the field's floor
+   over the canvas; a tab is a quiet name on it, and the open tab is cut from the canvas itself:
+   its face the canvas colour, a hairline round its top and sides, its foot open onto the canvas
+   it names, so the two read as one sheet. No well, no raised face, no underline. */
 .tab-strip {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--space-1);
   flex: 0 0 auto;
-  min-height: var(--control-h);
+  min-height: var(--input-h);
   padding: 0 var(--space-2);
-  /* a tab's pill: the row less a breath above and below it, and the well's own pixel */
-  --tab-h: calc(var(--control-h) - var(--space-2) - var(--hairline) * 2);
-  /* the strip's surface, which the + that covers the scrolling tabs paints too */
-  --strip-bg: var(--bg-panel);
+  /* a tab stands on the strip's foot, a breath under its top */
+  --tab-h: calc(var(--input-h) - var(--space-1));
+  /* the strip's surface, which the + that covers the scrolling tabs paints too, and the canvas
+     colour the open tab takes (the media rule below sets both to the pane's own) */
+  --strip-bg: var(--bg-input);
+  --tab-active-bg: var(--bg-elevated);
   background: var(--divider) no-repeat bottom / 100% var(--divider-h), var(--strip-bg);
   overflow-x: auto;
   overflow-y: hidden;
@@ -39,16 +42,14 @@
   background: var(--strip-bg);
 }
 
-/* the well: a pixel of dark around the tabs, sunk into the strip */
+/* the tabs' row on the strip's foot: no well around them */
 .tab-strip-well {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  align-self: stretch;
   flex: 0 0 auto;
-  gap: calc(var(--hairline) * 2);
-  padding: var(--hairline);
-  border-radius: calc(var(--radius-md) + var(--hairline));
-  background: var(--well);
-  box-shadow: var(--shadow-sunken);
+  gap: var(--space-1);
+  padding: 0;
 }
 
 .tab-strip-end {
@@ -66,14 +67,17 @@
   align-items: center;
   flex: 0 0 auto;
   height: var(--tab-h);
-  border-radius: var(--radius-md);
-  transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  border: var(--hairline) solid transparent;
+  border-bottom: 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
 }
 
+/* the open tab is a piece of the canvas: its colour, a hairline round its top and sides, and no
+   foot, so it covers the strip's divider and runs into the canvas under it */
 .tab-strip-item.is-active {
-  background: var(--bg-elevated);
-  background-image: var(--raised-face);
-  box-shadow: var(--shadow-tab);
+  background: var(--tab-active-bg);
+  border-color: var(--border);
 }
 
 /* under the pointer a closed tab takes the fill of light every surface does; the open one is lit already */
@@ -105,11 +109,9 @@
 
 .tab-strip-tab:focus-visible { outline-offset: calc(var(--ring-offset) * -1); }
 
-/* the open tab's name, set in the raised face: a step heavier, lit from under */
+/* the open tab's name: the strong text, no heavier */
 .tab-strip-tab[aria-selected="true"] {
   color: var(--text-strong);
-  font-weight: var(--fw-semibold);
-  text-shadow: 0 1px 8px var(--edge-light-strong);
 }
 
 /* the name being typed, in the tab's own place */
@@ -274,14 +276,15 @@
 @media (min-width: 769px) {
   .tab-strip,
   .tab-strip-row {
-    --strip-bg: var(--term-bg);
+    --strip-bg: var(--bg-input);
+    --tab-active-bg: var(--term-bg);
   }
 
   .pane-column.is-chat .tab-strip,
   .pane-column.is-chat .tab-strip-row,
   .pane-slot.is-chat .tab-strip,
   .pane-slot.is-chat .tab-strip-row {
-    --strip-bg: var(--bg);
+    --tab-active-bg: var(--bg);
   }
 }
 

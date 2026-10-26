@@ -48,9 +48,9 @@ a rule; the Agents list's workspace cards are an edge around rows, not a line be
 The rows are Blob0's app sidebar: 32px each, one mark per row (the pane's agent, the project's
 own icon, or the shell glyph), a workspace's branch dim after its name on the same line, the
 PC's name set as a section label over its rows, and the footer parted by a divider. Hover is
-the quiet fill of light every surface takes under the pointer; the selected row is the primary
-face, lit from above and rimmed in its own lighter tone, with its words, marks and state in the
-primary text colour and no bar at the sidebar's edge. Brand marks are the only other color
+the quiet fill of light every surface takes under the pointer; the selected row is the pressed
+fill a step past it, its words in the strong text, no face, no ring, and no bar at the
+sidebar's edge (a filled face is a button's, not a nav row's). Brand marks are the only other color
 there that is not a state, and a ready row draws no state at all. The accent connects focus, the
 chosen lens glyph and the terminal cursor.
 
@@ -2032,8 +2032,9 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   never behind the fold.
 - Space separates exchanges, not a rule: the transcript's gap is `--space-3`, so an answer sits
   close under its prompt, and a user turn that follows an assistant turn takes `--space-5` more.
-  The one card of an exchange is its work block: a bordered tool card (AI Elements' Tool) whose
-  head and rows carry a glyph, a medium title and a chevron at the row's end, parted by dividers.
+  An exchange's work block is a quiet log, not a card: one dim line says how long and how much,
+  and the calls hang off a hairline rail under it, each a glyph and a line of mono; nothing is
+  boxed or ruled between rows, and a row's chevron shows only under the pointer or once open.
 - Meta (time, copy) fades in on hover or focus and takes no click or tap while unseen; with any
   coarse pointer (a phone, or a touch screen beside a mouse) it is always visible. With a mouse and no touch screen (`(hover: hover) and
   (pointer: fine) and (not (any-pointer: coarse))`): from 481px a user turn's time and copy sit

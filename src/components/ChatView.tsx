@@ -1,7 +1,7 @@
 import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { createPortal } from "react-dom";
 import {
-  ArrowDown, BookOpen, Brain, Check, ChevronDown, Circle, CircleAlert, CircleCheck, CircleDot, CircleQuestionMark, CircleSlash, CircleX, Copy, Layers, SquareTerminal, Target, Undo2, Wrench,
+  ArrowDown, BookOpen, Brain, Check, ChevronDown, Circle, CircleAlert, CircleCheck, CircleDot, CircleQuestionMark, CircleSlash, CircleX, Copy, Layers, SquareTerminal, Target, Undo2,
   type IconProps,
 } from "../lib/icons.ts";
 import { Badge, Button, Collapsible, CollapsibleContent, CollapsibleTrigger, IconButton, TooltipProvider } from "./ui/index.ts";
@@ -582,7 +582,7 @@ function ThinkingRow({ text, stateKey }: { text: string; stateKey: string }) {
  */
 function PendingWorkHead({ title, className = "" }: { title: string; className?: string }) {
   return <div className={`work-block is-live is-pending ${className}`} role="status">
-    <div className="work-block-head"><Wrench className="work-block-glyph" aria-hidden="true" /><span className="work-block-title">{title}</span></div>
+    <div className="work-block-head"><span className="work-block-title">{title}</span></div>
   </div>;
 }
 
@@ -607,7 +607,6 @@ function WorkBlockView({ paneId, parts, turnParts, rowKey, duration, live, waiti
     <section className={`work-block${live ? " is-live" : ""}${waiting ? " is-waiting" : ""}${open ? "" : " is-folded"}`}>
       <CollapsibleTrigger asChild>
         <button type="button" className="work-block-head">
-          <Wrench className="work-block-glyph" aria-hidden="true" />
           <span className="work-block-title">{title}</span>
           {summary.length > 0 && <span className="work-block-summary">· {summary}</span>}
           {/* its own badge: the counts before it are cut on a narrow screen, a failure never is */}

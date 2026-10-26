@@ -602,22 +602,16 @@
   box-shadow: none;
 }
 
-/* ---------- work block: "Worked for 7s · 1 edit" over one-line rows ---------- */
+/* ---------- work block: "Worked for 7s · 1 edit" over a quiet log of what ran ---------- */
 
-/* the block is AI Elements' Tool: a bordered card on the content surface whose head is a row
-   (the tool glyph, a medium title, a status badge, the chevron at the row's end) and whose
-   calls stack under it as rows of the same shape, each parted by a divider. Folded, it is the
-   head alone */
+/* The agent's work is a log, not a card: one quiet line says how long and how much, and under it
+   the calls hang off a hairline rail, each a glyph and a line of mono. Nothing is boxed or ruled
+   between rows; a row's chevron shows only under the pointer or once it is open, and its detail
+   is the one block drawn on a surface. Folded, the block is the line alone. */
 .work-block {
   width: 100%;
   display: flex;
   flex-direction: column;
-  /* the edge is a drawn border, as AI Elements draws it: a ring in a shadow was covered at the
-     card's foot by what followed it, a border never is */
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow-lift);
 }
 
 .work-block-head,
@@ -626,56 +620,42 @@
   align-items: center;
   gap: var(--space-2);
   width: 100%;
-  min-height: var(--input-h);
-  padding: 0 var(--space-3);
+  min-height: var(--control-h);
+  padding: 0;
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-dim);
   font-size: var(--fs-sm);
   text-align: left;
   cursor: pointer;
-  transition: background-color var(--dur-fast) var(--ease-in-out), color var(--dur-fast) var(--ease-in-out);
-}
-
-/* rows under an open head keep square top corners against the divider; a row's own corners
-   square too between its neighbours, and only the card's last row rounds at the bottom */
-.work-block-head[aria-expanded="true"],
-.work-block-rows .work-row-head {
-  border-radius: 0;
-}
-
-.work-block-rows > :last-child > .work-row-head:not([aria-expanded="true"]) {
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  transition: color var(--dur-fast) var(--ease-in-out);
 }
 
 @media (hover: hover) {
   .work-block-head:hover,
   .work-row-head:hover {
-    background: var(--fill-1);
     color: var(--text);
   }
-}
-
-.work-block-head:active,
-.work-row-head:active {
-  background: var(--fill-3);
 }
 
 .work-block-head:focus-visible,
 .work-row-head:focus-visible {
   outline: var(--ring);
-  outline-offset: calc(-1 * var(--ring-offset));
+  outline-offset: var(--ring-offset);
 }
 
-/* the chevron at the row's end, turning over when the row opens (AI Elements' Tool, Reasoning, Task) */
+/* the chevron at the line's end, seen under the pointer, by the keyboard, or while the line is open;
+   it turns over when the line opens */
 .work-row-caret {
   flex: none;
   display: inline-flex;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   margin-left: auto;
   color: var(--text-dim);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
 }
 
 .work-row-caret svg {
@@ -684,47 +664,45 @@
   transition: transform var(--dur-fast) var(--ease-out);
 }
 
+.work-block-head[aria-expanded="true"] > .work-row-caret,
+.work-row-head[aria-expanded="true"] > .work-row-caret,
+.work-block-head:focus-visible > .work-row-caret,
+.work-row-head:focus-visible > .work-row-caret {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .work-block-head:hover > .work-row-caret,
+  .work-row-head:hover > .work-row-caret {
+    opacity: 1;
+  }
+}
+
 .work-block-head[aria-expanded="true"] > .work-row-caret svg,
 .work-row-head[aria-expanded="true"] > .work-row-caret svg {
   transform: rotate(180deg);
 }
 
-/* the block's own glyph: the tool, in the dim colour; live, it takes the title's state colour */
-.work-block-glyph {
-  flex: none;
-  width: 16px;
-  height: 16px;
-  color: var(--text-dim);
-}
-
-.work-block.is-live:not(.is-waiting) .work-block-glyph {
-  color: var(--status-working);
-}
-
-/* a row's state as a filled glyph in the state's colour, on the row's first line */
+/* a row's state as a small glyph in the dim colour: only a failure takes a colour, and a call still
+   running breathes in the working one */
 .work-row-glyph {
   flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   color: var(--text-dim);
 }
 
-.work-row-glyph.is-done { color: var(--status-done); }
+.work-row-glyph.is-done { color: var(--text-dim); }
 .work-row-glyph.is-blocked { color: var(--status-blocked); }
 .work-row-glyph.is-working { color: var(--status-working); animation: pulse var(--dur-pulse) var(--ease-pulse) infinite; }
 .work-row-glyph.is-idle { color: var(--text-dim); }
 
-[data-density="compact"] .work-row-glyph {
-  width: 14px;
-  height: 14px;
-}
-
-/* the title is the tool card's name: medium, in the text colour; live it takes the state colour.
-   It wraps only when the row cannot hold it beside a failure count (largest type, narrowest phone) */
+/* the line over the log: settled, a footnote in the dim colour; live, the state colour with a
+   breathing dot before it. It wraps only when the row cannot hold it beside a failure count */
 .work-block-title {
   flex: 0 1 auto;
-  color: var(--text);
-  font-weight: var(--fw-medium);
+  color: var(--text-dim);
+  font-weight: var(--fw-regular);
 }
 
 .work-block.is-live .work-block-title {
@@ -772,29 +750,37 @@
   margin-left: var(--space-1);
 }
 
-/* rows hang under the header, each parted from the one above by a divider (the first from the
-   head). The dividers are the rows' own: they open and fold with them */
+/* the log hangs off a hairline rail under the line's dot, the rows set in from it */
 .work-block-rows {
+  position: relative;
   display: flex;
   flex-direction: column;
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+}
+
+.work-block-rows::before {
+  content: "";
+  position: absolute;
+  top: var(--space-1);
+  bottom: var(--space-1);
+  left: 2px;
+  width: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--fill-4);
 }
 
 .work-row {
   display: flex;
   flex-direction: column;
-  background-image: var(--divider);
-  background-repeat: no-repeat;
-  background-size: 100% var(--divider-h);
-  background-position: top;
 }
 
 .work-row-head {
-  min-height: var(--input-h);
+  min-height: calc(var(--control-h) - var(--space-1));
   font-family: var(--font-mono);
   font-size: var(--fs-xs);
 }
 
-/* the call's name is the row's title: medium, in the text colour, the interface face */
+/* the call's name, in the interface face, a step over the line it leads */
 .work-row-name {
   flex: none;
   color: var(--text);
@@ -805,7 +791,8 @@
 
 /* a tool the verb table knows: "Ran" as the title, its object after it in mono */
 .work-row-name.is-verb {
-  color: var(--text);
+  color: var(--text-dim);
+  font-weight: var(--fw-regular);
 }
 
 .work-row-summary {
@@ -821,8 +808,8 @@
 }
 
 .work-row-thinking .work-row-name {
-  font-style: italic;
   color: var(--text-dim);
+  font-weight: var(--fw-regular);
 }
 
 /* what the agent said mid-work: once the turn settles, a quiet row again (dim, --fs-sm) */
@@ -853,13 +840,13 @@
   overflow-wrap: anywhere;
 }
 
-/* the opened detail is the tool card's content: the call's input and output stacked under the
-   row with the card's own inset, each block on the muted surface */
+/* the opened detail: the call's input and output stacked under the row's words, set in past
+   the glyph, each block on the muted surface */
 .work-row-detail {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-1) var(--space-3) var(--space-3);
+  gap: var(--space-2);
+  padding: var(--space-1) 0 var(--space-3) calc(14px + var(--space-2));
 }
 
 .work-thinking-text {
