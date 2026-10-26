@@ -451,12 +451,12 @@
     "attachments attachments attachments"
     "text text text"
     "left status right";
-  /* the card floats a step over the chat: an elevated surface under an ambient shadow, its
-     corners 24px for the 36px round controls at a 12px inset, a transparent border under the ring
-     so forced-colors mode still draws an edge */
+  /* the card is AI Elements' PromptInput: an elevated surface under an ambient shadow, its
+     corners a card's (16px) for the square controls at an 8px inset, a transparent border under
+     the ring so forced-colors mode still draws an edge */
   background: var(--bg-elevated);
   border: 1px solid transparent;
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-composer);
   transition:
     background-color var(--dur-fast) var(--ease-out),
@@ -546,7 +546,7 @@
   cursor: not-allowed;
 }
 
-/* the card's last row: 36px round controls at a 12px inset, air between them */
+/* the card's last row: the controls at an 8px inset, air between them */
 .composer-controls {
   --composer-round: var(--control-h);
   display: flex;
@@ -557,34 +557,35 @@
 
 .composer-controls-left {
   grid-area: left;
-  padding: 0 0 calc(var(--space-2) + 2px) calc(var(--space-2) + 2px);
+  padding: 0 0 var(--space-2) var(--space-2);
 }
 
 .composer-controls-right {
   grid-area: right;
-  padding: 0 calc(var(--space-2) + 2px) calc(var(--space-2) + 2px) 0;
+  padding: 0 var(--space-2) var(--space-2) 0;
 }
 
-/* the round controls: attach and new tab as a ringed disc (ChatGPT's +), the mic a bare disc */
+/* the tools are AI Elements' PromptInputButtons: ghost squares (attach, new tab, the mic) in the
+   dim colour that take a fill under the pointer; only the submit at the row's end has a face */
 .composer-attach,
 .composer-new-session,
 .composer-action {
   width: var(--composer-round);
   height: var(--composer-round);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
 }
 
 .composer-attach,
 .composer-new-session {
-  background: var(--bg-input);
-  box-shadow: var(--shadow-surface);
-  color: var(--text);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-dim);
 }
 
 @media (hover: hover) {
   .composer-attach:hover:not(:disabled),
   .composer-new-session:hover:not(:disabled) {
-    background: var(--bg-hover);
+    background: var(--fill-2);
     color: var(--text-strong);
   }
 }
@@ -601,10 +602,11 @@
   flex: none;
 }
 
-/* the one round button at the row's end: Send is the accent disc with a heavier arrow, and with
-   nothing to send a quiet disc of the fill (no fade: an empty box is the normal state, not a
-   fault); Stop is the inverse disc, the page's strongest colour with the filled stop glyph in
-   the surface colour, as ChatGPT draws it, so only the face changes when a turn starts and ends */
+/* the one faced button at the row's end (AI Elements' PromptInputSubmit): Send is the accent
+   square with a heavier arrow, and with nothing to send a quiet square of the fill (no fade: an
+   empty box is the normal state, not a fault); Stop is the inverse square, the page's strongest
+   colour with the filled stop glyph in the surface colour, so only the face changes when a turn
+   starts and ends */
 .composer-send svg {
   width: var(--icon-size);
   height: var(--icon-size);
@@ -671,7 +673,7 @@
    each a filled glyph and a crumb word in --text-dim at --fs-xs, and nothing in it is pressed. Composer.tsx
    draws it only with a folder or a branch to name; a name that does not fit is cut short */
 .composer-strip {
-  --composer-strip-inset: max(var(--radius-card), var(--space-5));
+  --composer-strip-inset: max(var(--radius-xl), var(--space-5));
   position: relative;
   display: flex;
   align-items: center;
@@ -1390,11 +1392,14 @@
   display: none;
 }
 
-/* a reply is a field button (components/ui/button.tsx), its words cut short past 16em */
+/* a reply is AI Elements' Suggestion: a field button (components/ui/button.tsx) as a pill, its
+   words cut short past 16em */
 .composer-quick-reply {
   display: block;
   max-width: 16em;
+  padding-inline: var(--space-4);
   overflow: hidden;
+  border-radius: var(--radius-pill);
   line-height: var(--control-h);
   text-overflow: ellipsis;
 }

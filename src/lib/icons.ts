@@ -12,7 +12,7 @@
 import {
   IconAdjustmentsHorizontal, IconAlertCircleFilled, IconAlertTriangleFilled, IconArrowBackUp, IconArrowDown, IconArrowLeft,
   IconArrowRight, IconArrowUp, IconArrowsLeftRight, IconArrowsMaximize, IconArrowsMinimize, IconBellFilled, IconBellOff, IconBook,
-  IconBraces, IconCameraRotate, IconCheck, IconChevronDown, IconChevronLeft, IconChevronRight, IconChevronUp, IconCircle,
+  IconBraces, IconBrain, IconCameraRotate, IconCheck, IconChevronDown, IconChevronLeft, IconChevronRight, IconChevronUp, IconCircle,
   IconCircleCheckFilled, IconCircleDot, IconCircleOff, IconCircleXFilled, IconClipboard, IconClipboardCheck, IconClockFilled,
   IconCode, IconColumns2, IconCopy, IconCopyOff, IconCornerDownLeft, IconCornerLeftUp, IconCursorText, IconDeviceDesktop,
   IconDeviceDesktopFilled, IconDeviceMobile, IconDeviceMobileFilled, IconDots, IconDownload, IconEraser, IconExternalLink, IconEye,
@@ -24,7 +24,7 @@ import {
   IconMessagePlus, IconMicrophone, IconMicrophoneFilled, IconMinus, IconNetwork, IconPackage, IconPalette, IconPaletteFilled, IconPencil,
   IconPhoto, IconPhotoOff, IconPinFilled, IconPinnedOff, IconPlug, IconPlugConnectedX, IconPlus, IconPuzzle, IconPuzzleFilled, IconQuote,
   IconRefresh, IconRobot, IconRotateClockwise, IconScan, IconSearch, IconSelector, IconSend, IconSend2, IconSettingsFilled, IconSitemap,
-  IconSquareFilled, IconStack2, IconStarFilled, IconSunMoon, IconTarget, IconTerminal, IconTrash, IconUser, IconVideo,
+  IconSquareFilled, IconStack2, IconTool, IconStarFilled, IconSunMoon, IconTarget, IconTerminal, IconTrash, IconUser, IconVideo,
   IconWorld, IconX, IconChartBar, IconTypography, IconKey,
 } from "@tabler/icons-react";
 import { TerminalSquare as ReiconTerminalSquare } from "reicon-react";
@@ -68,6 +68,7 @@ export {
   IconBellFilled as Bell,
   IconBellOff as BellOff,
   IconBook as BookOpen,
+  IconBrain as Brain,
   IconBraces as Braces,
   IconCameraRotate as SwitchCamera,
   IconCheck as Check,
@@ -178,6 +179,7 @@ export {
   IconStarFilled as Star,
   IconSunMoon as SunMoon,
   IconTarget as Target,
+  IconTool as Wrench,
   IconTerminal as Terminal,
   IconTrash as Trash2,
   IconUser as UserRound,

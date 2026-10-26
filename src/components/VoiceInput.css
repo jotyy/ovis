@@ -13,7 +13,7 @@
 .voice-mic-ring {
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   background: var(--status-blocked);
   opacity: 0;
   pointer-events: none;
@@ -45,12 +45,12 @@
   animation: pulse var(--dur-pulse) var(--ease-pulse) infinite;
 }
 
-/* a bare disc the size of the composer's round controls */
+/* a ghost square the size of the composer's other tools (Composer.css) */
 .voice-mic {
   position: relative;
   width: var(--control-h);
   height: var(--control-h);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   color: var(--text-dim);
   touch-action: manipulation;
 }

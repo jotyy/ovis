@@ -17,7 +17,9 @@ bound to the same tokens). Edges are never drawn lines: a surface is a ring of s
 and a pixel of light inside its top edge, dividers are etched, and depth is a stack of translucent
 layers over whatever surface a palette gives (§7). Agent states carry the remaining saturated
 colors (cyan working, red blocked, green done, amber for a notice) and none of them is violet.
-The user's chat turns are neutral raised cards, so a long thread never turns into a wall of color.
+The chat is drawn after AI Elements (shadcn's chat components): the user's turns are neutral
+bubbles on the secondary surface and the agent's work a bordered tool card, so a long thread
+never turns into a wall of color.
 Dark is the default. Light is [Blob0](https://blob0.com)'s light system, read off its stylesheet:
 white content on a neutral-100 chrome, every edge neutral-200, text neutral-950 over neutral-500,
 blue for the accent and the primary action (a blue-600 face lit to blue-500 at its top, rimmed in
@@ -2026,7 +2028,8 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   never behind the fold.
 - Space separates exchanges, not a rule: the transcript's gap is `--space-3`, so an answer sits
   close under its prompt, and a user turn that follows an assistant turn takes `--space-5` more.
-  The one rule of an exchange is the hairline under its folded work block.
+  The one card of an exchange is its work block: a bordered tool card (AI Elements' Tool) whose
+  head and rows carry a glyph, a medium title and a chevron at the row's end, parted by dividers.
 - Meta (time, copy) fades in on hover or focus and takes no click or tap while unseen; with any
   coarse pointer (a phone, or a touch screen beside a mouse) it is always visible. With a mouse and no touch screen (`(hover: hover) and
   (pointer: fine) and (not (any-pointer: coarse))`): from 481px a user turn's time and copy sit
@@ -2127,9 +2130,8 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   A link keeps `--accent` and a file chip reads in `--text-strong` with a dotted underline; both
   underlines are `--text-dim` at rest and both take the accent on hover and focus-visible.
   Code blocks are `--radius-lg` and never scroll inside: one longer than 30 lines opens at its
-  first 20 behind **Show all N lines**. On touch a block has a header strip (language, copy);
-  with a mouse and no touch screen the strip becomes a corner control over the block's top right,
-  shown on hover or focus-within (no transition under reduced motion).
+  first 20 behind **Show all N lines**. A block is a bordered card on the content surface with a
+  header strip (language, copy) on the secondary surface, always drawn, with a mouse too.
   Fenced code is colored by role (`--syntax-*`) up to 100 KB, in a worker past 2 KB; a longer block,
   or one the worker cannot color within 2 s, stays plain with a note under it. Past 20 000 lines
   code is drawn as one text rather than an element per line, so it never holds the page.

@@ -1,7 +1,7 @@
 import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { createPortal } from "react-dom";
 import {
-  ArrowDown, BookOpen, Check, ChevronDown, ChevronRight, Circle, CircleAlert, CircleCheck, CircleDot, CircleQuestionMark, CircleSlash, CircleX, Copy, Layers, SquareTerminal, Target, Undo2,
+  ArrowDown, BookOpen, Brain, Check, ChevronDown, Circle, CircleAlert, CircleCheck, CircleDot, CircleQuestionMark, CircleSlash, CircleX, Copy, Layers, SquareTerminal, Target, Undo2, Wrench,
   type IconProps,
 } from "../lib/icons.ts";
 import { Badge, Button, Collapsible, CollapsibleContent, CollapsibleTrigger, IconButton, TooltipProvider } from "./ui/index.ts";
@@ -491,7 +491,6 @@ function WorkRow({ paneId, part, stateKey, state }: { paneId: string; part: Tool
   return <Collapsible open={open} onOpenChange={setOpen} className={`work-row${part.error ? " is-error" : ""}`}>
     <CollapsibleTrigger asChild>
       <button type="button" className="work-row-head" title={narration || verb !== null ? `${part.name} · ${summary}` : undefined}>
-        <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
         <Glyph className={`work-row-glyph ${glyphTone}`} aria-hidden="true" />
         {!narration && (verb !== null ? <span className="work-row-name is-verb">{t(verb)}</span> : <span className="work-row-name">{part.name}</span>)}
         {/* the spaces are for a screen reader: the row is read as words, not "Ranbun test" */}
@@ -500,6 +499,7 @@ function WorkRow({ paneId, part, stateKey, state }: { paneId: string; part: Tool
         {/* after a verb, or the agent's own sentence, the word follows it: "Ran pnpm test failed", not "Ran failed pnpm test" */}
         {part.error && (narration || verb !== null) && <>{" "}<Badge tone="blocked" className="work-row-failed">{t("failed")}</Badge></>}
         {stateWord !== null && <>{" "}<Badge tone={state === "error" ? "blocked" : state === "ok" ? "done" : state === "pending" ? "working" : "idle"} className={state === "error" ? "work-row-failed" : `work-row-state is-${state}`}>{stateWord}</Badge></>}
+        <span className="work-row-caret" aria-hidden="true"><ChevronDown /></span>
       </button>
     </CollapsibleTrigger>
     <CollapsibleContent className="work-row-detail">{verb !== null && <p className="work-row-tool">{part.name}</p>}<ToolInputView part={part} /><ToolImages paneId={paneId} part={part} />{output.length > 0 && <section className="chat-tool-output"><h4>{t(part.error ? "Error" : "Output")}</h4><pre className={`chat-tool-io${whole.text !== null ? " is-whole" : ""}`}>{linkFilePaths(output, openFile)}</pre>
@@ -533,13 +533,13 @@ function TodoGroupRow({ paneId, group, stateKeyOf }: { paneId: string; group: To
   return <Collapsible open={open} onOpenChange={setOpen} className="work-row work-todo-group" data-todo-group={group.id}>
     <CollapsibleTrigger asChild>
       <button type="button" className="work-row-head">
-        <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
         {group.failed > 0 ? <CircleX className="work-row-glyph is-blocked" aria-hidden="true" /> : allDone ? <CircleCheck className="work-row-glyph is-done" aria-hidden="true" /> : <CircleDot className="work-row-glyph is-working" aria-hidden="true" />}
         <span className="work-row-name is-verb">{t("Plan")}</span>
         {" "}<span className="work-row-summary">{t("{n} updates", { n: group.attempts.length })} · {status}</span>
         {/* the counts beside it are never the part a narrow row cuts */}
         {group.pending > 0 && <>{" "}<Badge tone="working" className="work-row-state is-pending">{t("{n} pending", { n: group.pending })}</Badge></>}
         {group.failed > 0 && <>{" "}<Badge tone="blocked" className="work-row-failed">{t("{n} failed", { n: group.failed })}</Badge></>}
+        <span className="work-row-caret" aria-hidden="true"><ChevronDown /></span>
       </button>
     </CollapsibleTrigger>
     <CollapsibleContent className="work-row-detail work-todo-detail">
@@ -560,8 +560,9 @@ function ThinkingRow({ text, stateKey }: { text: string; stateKey: string }) {
   return <Collapsible open={open} onOpenChange={setOpen} className="work-row work-row-thinking">
     <CollapsibleTrigger asChild>
       <button type="button" className="work-row-head">
-        <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
+        <Brain className="work-row-glyph is-idle" aria-hidden="true" />
         <span className="work-row-name">{t("thinking")}</span>
+        <span className="work-row-caret" aria-hidden="true"><ChevronDown /></span>
       </button>
     </CollapsibleTrigger>
     <CollapsibleContent className="work-row-detail work-thinking-text">{text}</CollapsibleContent>
@@ -581,7 +582,7 @@ function ThinkingRow({ text, stateKey }: { text: string; stateKey: string }) {
  */
 function PendingWorkHead({ title, className = "" }: { title: string; className?: string }) {
   return <div className={`work-block is-live is-pending ${className}`} role="status">
-    <div className="work-block-head"><span className="work-row-caret" aria-hidden="true" /><span className="work-block-title">{title}</span></div>
+    <div className="work-block-head"><Wrench className="work-block-glyph" aria-hidden="true" /><span className="work-block-title">{title}</span></div>
   </div>;
 }
 
@@ -606,11 +607,12 @@ function WorkBlockView({ paneId, parts, turnParts, rowKey, duration, live, waiti
     <section className={`work-block${live ? " is-live" : ""}${waiting ? " is-waiting" : ""}${open ? "" : " is-folded"}`}>
       <CollapsibleTrigger asChild>
         <button type="button" className="work-block-head">
-          <span className="work-row-caret" aria-hidden="true">{open ? <ChevronDown /> : <ChevronRight />}</span>
+          <Wrench className="work-block-glyph" aria-hidden="true" />
           <span className="work-block-title">{title}</span>
           {summary.length > 0 && <span className="work-block-summary">· {summary}</span>}
           {/* its own badge: the counts before it are cut on a narrow screen, a failure never is */}
           {failed > 0 && <Badge tone="blocked" className="work-block-failed">{t("{n} failed", { n: failed })}</Badge>}
+          <span className="work-row-caret" aria-hidden="true"><ChevronDown /></span>
         </button>
       </CollapsibleTrigger>
       {/* the rows open and fold at the block's measured height (forceMount: the fold is the box's
