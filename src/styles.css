@@ -2179,15 +2179,10 @@ button {
   flex: 0 0 auto;
 }
 
-/* From 769px the lens switch is its two words and nothing around them: no track, no glyphs, the
-   chosen lens on the hover fill. Files follows it as an action of its own, after a hairline. */
+/* From 769px the lens switch is its two words in the segmented well, no glyphs: the well is what
+   sets the chosen lens's raised face apart from the header's own chrome. Files follows it as an
+   action of its own, after a hairline. */
 @media (min-width: 769px) {
-  .app-header .view-switch {
-    padding: 0;
-    background: transparent;
-    border-color: transparent;
-  }
-
   .app-header .view-switch > button svg {
     display: none;
   }

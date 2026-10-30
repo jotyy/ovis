@@ -14,7 +14,11 @@ const COLORS = [
   "ink-1", "ink-2", "ink-3", "edge",
 ];
 
-const twMerge = extendTailwindMerge({ override: { theme: { color: COLORS } } });
+/* the control sizes of src/tailwind.css (h-control, h-chip, size-icon…): without them a caller's
+   `h-chip` would not replace a variant's `h-full`, and both would be kept */
+const SPACING = ["control", "input", "chip", "touch", "icon"];
+
+const twMerge = extendTailwindMerge({ override: { theme: { color: COLORS } }, extend: { theme: { spacing: SPACING } } });
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));

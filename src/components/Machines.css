@@ -72,11 +72,12 @@
   display: none;
 }
 
-/* the state on the monitor's lower corner, cut out of the panel by a ring of it */
+/* the state on the monitor's lower corner, cut out of the panel by a ring of it. The mark is the
+   cell's width but only the glyph's height, so only the side offset takes the cell's margin. */
 .machine-dot {
   position: absolute;
   right: calc((var(--side-box) - var(--icon-size)) / 2 - var(--hairline) * 2);
-  bottom: calc((var(--side-box) - var(--icon-size)) / 2 - var(--hairline) * 2);
+  bottom: calc(var(--hairline) * -2);
   width: var(--dot-size);
   height: var(--dot-size);
   border-radius: var(--radius-pill);
