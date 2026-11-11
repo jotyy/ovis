@@ -110,7 +110,7 @@ function storeFoldedGroups(keys: ReadonlySet<string>): void {
 /**
  * All PCs' live agents form a second list; workspace and PC folds do not hide these rows.
  * Past the pinned ones they stand under the workspace they run in, as the Codex app files threads
- * under their project: a head names the workspace once, so a row says only what it is working on.
+ * under their project: a head names the workspace once (never its PC), so a row says only what it is working on.
  * A head folds its group (kept on this browser) and, folded, still says how many and the loudest state.
  * In the phone's drawer the list starts folded, leaving the room to the workspaces.
  * The pinned agents stand first, in a card; on a desktop only a
@@ -183,7 +183,7 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
   useEffect(() => {
     if (menu && (menuRow === undefined || !menu.anchor.isConnected)) setMenu(null);
   }, [menu, menuRow]);
-  // herdr names a PC only beside another: the rows' line does the same
+  // which PC runs an agent is not what the list is read for: only a tooltip names it, beside another PC
   const machineName = (machine: Machine): string | null => machines.length > 1 ? machine.name : null;
 
   // what a row says of its agent, for the row and for its open menu; under a group head the row
@@ -198,7 +198,7 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
     const tabs = machine.snapshot?.tabs.filter((candidate) => candidate.workspace_id === workspace.workspace_id) ?? [];
     const mark = paneMark(entry);
     const markAgent = mark && hasAgentMark(mark) ? mark : null;
-    const parts = { agentLabel: kindLabel, title, markAgent, machineName: grouped ? null : machineName(machine), workspaceLabel: grouped ? null : workspace.label, tabName: agentTabName(tab, tabs, t) };
+    const parts = { agentLabel: kindLabel, title, markAgent, machineName: null, workspaceLabel: grouped ? null : workspace.label, tabName: agentTabName(tab, tabs, t) };
     const contextParts = agentContext(parts);
     const context = contextParts.join(" · ");
     const kind = kindLabel?.trim() || null;
@@ -216,7 +216,7 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
     const filterContext = filter.active && machineFilter(filter, machine.id)?.matchedPanes.has(pane.pane_id) !== true;
     const { online, title, name, mark, context, markKind, tokens } = describe(row, grouped);
     // the row cuts a long value: the tooltip, and a phone's menu sheet, say each in full, its place too
-    const tooltip = [...new Set([pane.pane_id, title, grouped ? describe(row).context : context, ...tokens, markKind, name, agent?.display_agent, pane.cwd, online ? null : stateWord(machine)].filter(Boolean))].join("\n");
+    const tooltip = [...new Set([pane.pane_id, title, grouped ? describe(row).context : context, machineName(machine), ...tokens, markKind, name, agent?.display_agent, pane.cwd, online ? null : stateWord(machine)].filter(Boolean))].join("\n");
     const pinKey = sidebarPinKey(machine.id, pane.pane_id);
     const menuOpen = menu?.key === pinKey;
     // one menu for the ⋯ and a right-click, which opens it at the pointer and leaves the focus where it was
@@ -251,11 +251,11 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
     // folded, the head stands for its rows: their count and the state that most asks for a look
     const state = online ? rollupStatus(group.rows.map(({ machine, entry }) => activity.status(machine.id, entry.pane))) : "unknown";
     const holdsSelected = group.machine.id === selectedMachineId && group.rows.some(({ entry }) => entry.pane.pane_id === selectedPaneId);
+    // which PC runs it is not news here: only the tooltip says it, beside another PC
     const pc = machineName(group.machine);
     return <li className={`agent-group${groupFolded ? " is-folded" : ""}${holdsSelected ? " holds-selected" : ""}${online ? "" : " is-offline"}`} key={group.key}>
       <button type="button" className="agent-group-head" aria-expanded={!groupFolded} aria-controls={groupId} title={[group.workspace.label, pc].filter(Boolean).join(" · ")} onClick={() => toggleGroup(group.key)}>
         <span className="agent-group-name">{group.workspace.label}</span>
-        {pc && <span className="agent-group-machine">{pc}</span>}
         {groupFolded && <span className="agent-group-count">{group.rows.length}</span>}
         <span className="agent-group-end">
           {groupFolded ? <ChevronRight className="agent-group-caret" aria-hidden="true" /> : <ChevronDown className="agent-group-caret" aria-hidden="true" />}

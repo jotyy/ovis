@@ -130,17 +130,6 @@
   white-space: nowrap;
 }
 
-/* the PC, beside another PC only: dim and regular after the workspace */
-.agent-group-machine {
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  font-weight: var(--fw-regular);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  opacity: 0.8;
-}
-
 .agent-group-count {
   margin-left: auto;
   font-variant-numeric: tabular-nums;

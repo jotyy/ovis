@@ -1319,8 +1319,9 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   from that list, including a recognized OmO pane. Each row opens that agent's pane: the agent's
   bare brand mark, the pane's title, and one dim line naming the agent, then the tab (only when
   the workspace has two or more tabs or the tab was renamed, and never when it repeats the
-  workspace); the PC and the workspace are its group head's to say, below, and a pinned row, which
-  stands outside the groups, names them itself (the PC only when two or more are registered). An agent with a live name
+  workspace); the workspace is its group head's to say, below, and the PC is not said (which PC
+  runs an agent is not what the list is read for; a row's tooltip names it beside another PC). A pinned row, which stands outside the groups,
+  names its workspace itself. An agent with a live name
   leads that line with it in `--font-mono` and `--text` (`.agent-name`); the kind takes the label's
   place beside it, and the tooltip keeps the name. Its background-task count and
   compact status sit at the right. A pane that waits for an answer is not listed apart or moved
@@ -1346,8 +1347,8 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 - The Agents list is grouped by workspace, as the Codex app files its threads under their
   project: with several agents running, a flat list of titles did not say which project each
   worked on. Past the pinned card, each workspace's agents stand under a head
-  (`.agent-group-head`) naming the workspace, and its PC dim beside it when two or more are
-  registered; a group stands where its first row would, so **Agents order** still decides which
+  (`.agent-group-head`) naming the workspace alone: the PC, which crowded the name out, is left to
+  the head's tooltip (two PCs' workspaces of one name stay two groups); a group stands where its first row would, so **Agents order** still decides which
   workspace leads. A head is a caption on the rows' inset (`--fs-xs` medium in `--text-dim`,
   `--text` on hover and for the group holding the open pane), `--space-6` tall (`--side-row` on
   touch), with a fold caret in the rows' state cell; groups are parted by `--space-2`, never a
