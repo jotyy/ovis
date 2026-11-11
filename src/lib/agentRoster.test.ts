@@ -46,4 +46,13 @@ describe("agent groups", () => {
       ["remote", workspace.workspace_id, ["d"]],
     ]);
   });
+
+  it("raises the groups with an active agent above the rest, each side in its order", () => {
+    const local = machine("local", "connected", [["a", "idle"], ["b", "idle"], ["c", "working"], ["d", "blocked"]]);
+    const rows = agentRoster([local], { byActivity: false, seqs: () => new Map(), pinned: [] }).rest
+      .map((row, index) => ({ ...row, entry: { ...row.entry, workspace: { ...workspace, workspace_id: `w${index}` } } }));
+    const active = (row: (typeof rows)[number]) => row.entry.pane.agent_status !== "idle";
+    expect(agentGroups(rows, active).map((group) => group.workspace.workspace_id)).toEqual(["w2", "w3", "w0", "w1"]);
+    expect(agentGroups(rows).map((group) => group.workspace.workspace_id)).toEqual(["w0", "w1", "w2", "w3"]);
+  });
 });

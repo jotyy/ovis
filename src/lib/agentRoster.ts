@@ -33,10 +33,11 @@ export interface AgentGroup { key: string; machine: Machine; workspace: AgentRow
 
 /**
  * The unpinned rows gathered by the workspace they run in, as the Codex app gathers threads under
- * their project: a group stands where its first row stood, so herdr's order or the Activity order
- * still decides which workspace comes first, and each keeps its rows in the same order.
+ * their project: the groups with an agent that is active (`active`: working, asking, or done and
+ * not yet looked at) stand first, then the rest; within each, a group stands where its first row
+ * stood, so herdr's order or the Activity order still decides, and each keeps its rows in order.
  */
-export function agentGroups(rows: readonly AgentRow[]): AgentGroup[] {
+export function agentGroups(rows: readonly AgentRow[], active: (row: AgentRow) => boolean = () => false): AgentGroup[] {
   const groups = new Map<string, AgentGroup>();
   for (const row of rows) {
     const key = agentGroupKey(row.machine.id, row.entry.workspace.workspace_id);
@@ -44,7 +45,9 @@ export function agentGroups(rows: readonly AgentRow[]): AgentGroup[] {
     if (group) group.rows.push(row);
     else groups.set(key, { key, machine: row.machine, workspace: row.entry.workspace, rows: [row] });
   }
-  return [...groups.values()];
+  const all = [...groups.values()];
+  const lively = new Set(all.filter((group) => group.rows.some(active)));
+  return [...all.filter((group) => lively.has(group)), ...all.filter((group) => !lively.has(group))];
 }
 
 /** a group's key: two PCs may reuse a workspace id */

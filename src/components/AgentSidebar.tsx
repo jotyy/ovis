@@ -17,7 +17,7 @@ import { machineFilter } from "../lib/sidebarFilter.ts";
 import { useSidebarFilter } from "../lib/sidebarFilterContext.ts";
 import { currentSidebarPins, pruneSidebarPins, setSidebarPins, sidebarPinKey, subscribeSidebarPins, toggleSidebarPin } from "../lib/sidebarPins.ts";
 import { PANE_DRAG_TYPE, paneDragData } from "../lib/split.ts";
-import { rollupStatus } from "../lib/status.ts";
+import { knownStatus, rollupStatus } from "../lib/status.ts";
 import { AgentMark, hasAgentMark } from "./AgentMark.tsx";
 import { RowMenu } from "./RowMenu.tsx";
 import { BackgroundBadge, displayPaneTitle, onRowContextMenu, PlanBadge, StatusBadge } from "./Sidebar.tsx";
@@ -95,6 +95,9 @@ const DRAWER_QUERY = "(max-width: 768px)";
  */
 interface PinMenu { key: string; anchor: HTMLElement; point?: { x: number; y: number }; previousFocus?: HTMLElement | null }
 
+/** the states that raise an agent's workspace group above the quiet ones */
+const ACTIVE_STATES: ReadonlySet<string> = new Set(["working", "blocked", "waiting", "done"]);
+
 /** the workspace groups folded on this browser, by their keys (lib/agentRoster.ts agentGroupKey) */
 const FOLDED_GROUPS_KEY = "ovis:agent-groups-folded";
 function storedFoldedGroups(): Set<string> {
@@ -143,7 +146,9 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
     return { pinned: roster.pinned.filter(kept), rest: roster.rest.filter(kept) };
   }, [roster, filter]);
   const rows = useMemo(() => [...split.pinned, ...split.rest], [split]);
-  const groups = useMemo(() => agentGroups(split.rest), [split]);
+  // the workspaces with an agent at work, asking, or done and not looked at stand first
+  const groups = useMemo(() => agentGroups(split.rest, ({ machine, entry }) =>
+    machine.state === "connected" && ACTIVE_STATES.has(knownStatus(activity.status(machine.id, entry.pane)))), [split, activity]);
   const [foldedGroups, setFoldedGroups] = useState(storedFoldedGroups);
   const toggleGroup = (key: string): void => {
     const next = new Set(foldedGroups);

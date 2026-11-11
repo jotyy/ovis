@@ -1348,8 +1348,10 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   project: with several agents running, a flat list of titles did not say which project each
   worked on. Past the pinned card, each workspace's agents stand under a head
   (`.agent-group-head`) naming the workspace alone: the PC, which crowded the name out, is left to
-  the head's tooltip (two PCs' workspaces of one name stay two groups); a group stands where its first row would, so **Agents order** still decides which
-  workspace leads. A head is a caption on the rows' inset (`--fs-xs` medium in `--text-dim`,
+  the head's tooltip (two PCs' workspaces of one name stay two groups); the groups with an agent working, asking, waiting on background work or done and not yet
+  looked at stand first, then the quiet ones; on each side a group stands where its first row
+  would, so **Agents order** still decides which workspace leads. The open pane's group is not
+  raised: a click would make the list jump. A head is a caption on the rows' inset (`--fs-xs` medium in `--text-dim`,
   `--text` on hover and for the group holding the open pane), `--space-6` tall (`--side-row` on
   touch), with a fold caret in the rows' state cell; groups are parted by `--space-2`, never a
   rule. A folded group (kept per browser, `ovis:agent-groups-folded`) says its count and, in
