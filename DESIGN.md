@@ -1272,7 +1272,8 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   the pinned card's caption) do.
 - The PC/workspace list and the lower Agents list scroll independently above the fixed footer.
   Agents takes the height of its rows, at most half the sidebar, docked above the footer; the
-  workspace list has the rest. The Agents heading stays outside its scroll area and shows its
+  workspace list has the rest. With every PC folded there is no workspace list to share with, and
+  Agents takes all the room down to the footer. The Agents heading stays outside its scroll area and shows its
   count only while folded. A list that is cut fades out at its lower edge. An empty or folded
   Agents list gives its space back; PC and workspace folds do not hide agent rows. In the drawer
   (`max-width: 768px`) the list starts folded. Until the PCs are in and every connected PC's

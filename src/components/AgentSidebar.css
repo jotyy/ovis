@@ -12,9 +12,11 @@
 .agents-sidebar.is-collapsed,
 .agents-sidebar.is-empty { flex: 0 0 auto; }
 
-/* A visible Agents list fills the space released by folded PC groups, up to its existing cap. */
+/* With every PC folded there is no workspace list to share the room with: a visible Agents list
+   takes all of it down to the footer, past its half-sidebar cap, rather than leaving it empty. */
 .sidebar-shell:not(:has(.machine-list .machine-workspaces)):has(.agents-sidebar:not(.is-collapsed):not(.is-empty)) .agents-sidebar {
   flex: 1 1 auto;
+  max-height: none;
 }
 
 /* positioned: a row's visually hidden label is absolute, and must not size the page instead. The
