@@ -91,8 +91,10 @@ describe("AgentSidebar plugin tokens", () => {
       pane("w1:p2", { display_agent: "Claude", title: "Refactor" }),
     ])]);
     const lines = [...html.matchAll(/<span class="agent-context">(.*?)<\/span>/g)].map((match) => match[1]);
-    expect(lines[0]).toStartWith("needs a login · 8m ago · checkout-api");
-    // the mark already draws Claude: the line does not say it again
-    expect(lines[1]).toBe("checkout-api");
+    // the workspace is said once, by the group head the rows stand under
+    expect(html.match(/<span class="agent-group-name">(.*?)<\/span>/g)).toEqual(['<span class="agent-group-name">checkout-api</span>']);
+    expect(lines[0]).toBe("needs a login · 8m ago");
+    // the mark already draws Claude: the second row has no line to say it again
+    expect(lines).toHaveLength(1);
   });
 });

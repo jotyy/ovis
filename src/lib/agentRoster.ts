@@ -27,3 +27,27 @@ export function agentRoster(machines: readonly Machine[], options: AgentRosterOp
   });
   return splitPinnedRows(rows, options.pinned, ({ machine, entry }) => sidebarPinKey(machine.id, entry.pane.pane_id));
 }
+
+/** One workspace's agents in the Agents list, under a head that names the workspace (and its PC beside another). */
+export interface AgentGroup { key: string; machine: Machine; workspace: AgentRow["entry"]["workspace"]; rows: AgentRow[] }
+
+/**
+ * The unpinned rows gathered by the workspace they run in, as the Codex app gathers threads under
+ * their project: a group stands where its first row stood, so herdr's order or the Activity order
+ * still decides which workspace comes first, and each keeps its rows in the same order.
+ */
+export function agentGroups(rows: readonly AgentRow[]): AgentGroup[] {
+  const groups = new Map<string, AgentGroup>();
+  for (const row of rows) {
+    const key = agentGroupKey(row.machine.id, row.entry.workspace.workspace_id);
+    const group = groups.get(key);
+    if (group) group.rows.push(row);
+    else groups.set(key, { key, machine: row.machine, workspace: row.entry.workspace, rows: [row] });
+  }
+  return [...groups.values()];
+}
+
+/** a group's key: two PCs may reuse a workspace id */
+export function agentGroupKey(machineId: string, workspaceId: string): string {
+  return `${machineId}\u0000${workspaceId}`;
+}

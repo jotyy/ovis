@@ -83,7 +83,113 @@
   list-style: none;
 }
 
-/* Pinned agents stand first in a card (Sidebar.css); the Agents head stays the list's only head. */
+/* Pinned agents stand first (Sidebar.css); the rest stand under the workspace they run in. */
+
+/* A workspace's group: its head is a caption on the rows' inset, as the Pinned one is (Sidebar.css),
+   and also a fold. Groups are parted by a breath, never a rule. */
+.agent-groups {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.agent-group + .agent-group { margin-top: var(--space-2); }
+
+.agent-group-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  min-height: var(--space-6);
+  margin: 0;
+  padding: 0 0 0 var(--space-2);
+  border: 0;
+  border-radius: var(--side-radius);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-tight);
+  text-align: left;
+  cursor: pointer;
+}
+
+.agent-group-head:focus-visible { outline-offset: calc(var(--ring-offset) * -1); }
+
+/* the head of the group the open pane is in reads a step stronger, so a folded one still says it */
+.agent-group.holds-selected > .agent-group-head { color: var(--text); }
+.agent-group.is-offline > .agent-group-head { opacity: 0.5; }
+
+.agent-group-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* the PC, beside another PC only: dim and regular after the workspace */
+.agent-group-machine {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: var(--fw-regular);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.8;
+}
+
+.agent-group-count {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the trailing cell lines up with the rows' state cell: the caret shows when it is of use; a
+   folded group draws its loudest state there instead, and the caret on hover or focus */
+.agent-group-end {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: var(--side-box);
+  margin-left: auto;
+}
+
+.agent-group-count + .agent-group-end { margin-left: 0; }
+
+.agent-group-caret {
+  width: var(--space-4);
+  height: var(--space-4);
+  opacity: 0;
+}
+
+.agent-group-head:focus-visible .agent-group-caret,
+.agent-group.is-folded .agent-group-caret { opacity: 1; }
+
+.agent-group-state {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agent-group.is-folded .agent-group-end:has(.agent-group-state) .agent-group-caret { opacity: 0; }
+.agent-group-head:focus-visible .agent-group-state { visibility: hidden; }
+.agent-group .agent-group-head:focus-visible .agent-group-end .agent-group-caret { opacity: 1; }
+
+@media (hover: hover) {
+  .agent-group-head:hover { color: var(--text); }
+  .agent-group .agent-group-head:hover .agent-group-end .agent-group-caret { opacity: 1; }
+  .agent-group-head:hover .agent-group-state { visibility: hidden; }
+}
+
+@media (pointer: coarse) {
+  .agent-group-head { min-height: var(--side-row); }
+}
 
 /* The agent row selects its pane; its ⋯ (or a right-click) opens its pin menu. */
 /* The trailing padding keeps the state cell, which the row draws at its right edge after the ⋯, as
@@ -283,6 +389,7 @@
 
 @media (pointer: coarse) {
   .agent-section-caret { opacity: 1; }
+  .agent-group-caret { opacity: 1; }
 
   /* Row menus stay visible on touch. */
   .agent-actions {

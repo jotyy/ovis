@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import type { Machine, MachineState } from "../../shared/machines.ts";
 import type { AgentStatus, HerdrPane, SessionSnapshot } from "../../shared/protocol.ts";
 import fixture from "../../site/demo/fixtures/machines.json";
-import { agentRoster } from "./agentRoster.ts";
+import { agentGroups, agentRoster } from "./agentRoster.ts";
 import { sidebarPinKey } from "./sidebarPins.ts";
 
 const template = fixture.machines[0]!.snapshot as SessionSnapshot;
@@ -28,5 +28,22 @@ describe("agent roster", () => {
     expect(split.pinned.map(key)).toEqual(["remote/d", "local/c"]);
     // blocked first, then the latest change, within each PC; the PCs keep their order
     expect(split.rest.map(key)).toEqual(["local/b", "local/a", "remote/e"]);
+  });
+});
+
+describe("agent groups", () => {
+  it("gathers each PC's workspaces where their first row stood, the rows in their order", () => {
+    const local = machine("local", "connected", [["a", "idle"], ["b", "idle"], ["c", "idle"]]);
+    const remote = machine("remote", "connected", [["d", "idle"]]);
+    const rows = [...agentRoster([local, remote], { byActivity: false, seqs: () => new Map(), pinned: [] }).rest];
+    // b runs in another workspace of the same PC
+    const other = { ...workspace, workspace_id: "other", label: "other" };
+    rows[1] = { ...rows[1]!, entry: { ...rows[1]!.entry, workspace: other } };
+    const groups = agentGroups([rows[1]!, rows[0]!, rows[3]!, rows[2]!]);
+    expect(groups.map((group) => [group.machine.id, group.workspace.workspace_id, group.rows.map((row) => row.entry.pane.pane_id)])).toEqual([
+      ["local", "other", ["b"]],
+      ["local", workspace.workspace_id, ["a", "c"]],
+      ["remote", workspace.workspace_id, ["d"]],
+    ]);
   });
 });

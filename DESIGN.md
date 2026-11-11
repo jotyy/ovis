@@ -1317,9 +1317,10 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
 - **Agents** is an independent pane list: agents from each PC's `snapshot.agents`
   join the matching pane in `snapshot.panes`; pane agent metadata supplies entries missing
   from that list, including a recognized OmO pane. Each row opens that agent's pane: the agent's
-  bare brand mark, the pane's title, and one dim line naming the agent, then the PC (only when two
-  or more are registered), the workspace and the tab (only when the workspace has two or more tabs
-  or the tab was renamed, and never when it repeats the workspace). An agent with a live name
+  bare brand mark, the pane's title, and one dim line naming the agent, then the tab (only when
+  the workspace has two or more tabs or the tab was renamed, and never when it repeats the
+  workspace); the PC and the workspace are its group head's to say, below, and a pinned row, which
+  stands outside the groups, names them itself (the PC only when two or more are registered). An agent with a live name
   leads that line with it in `--font-mono` and `--text` (`.agent-name`); the kind takes the label's
   place beside it, and the tooltip keeps the name. Its background-task count and
   compact status sit at the right. A pane that waits for an answer is not listed apart or moved
@@ -1342,7 +1343,17 @@ holding one value, so its options stay `<button aria-pressed>` for the same scri
   reach, and following the row while open), say each whole. A PC that is away draws none, as it draws no
   state. A plugin's line for the agent (`display_agent`) leads the place, as before, where it says
   more than the mark and the title; it changes live like the tokens.
-- The Agents list is flat and every row names its own place. Pinned agents (pinned from a row's
+- The Agents list is grouped by workspace, as the Codex app files its threads under their
+  project: with several agents running, a flat list of titles did not say which project each
+  worked on. Past the pinned card, each workspace's agents stand under a head
+  (`.agent-group-head`) naming the workspace, and its PC dim beside it when two or more are
+  registered; a group stands where its first row would, so **Agents order** still decides which
+  workspace leads. A head is a caption on the rows' inset (`--fs-xs` medium in `--text-dim`,
+  `--text` on hover and for the group holding the open pane), `--space-6` tall (`--side-row` on
+  touch), with a fold caret in the rows' state cell; groups are parted by `--space-2`, never a
+  rule. A folded group (kept per browser, `ovis:agent-groups-folded`) says its count and, in
+  that cell, the rolled-up state when it asks for a look (blocked, done, working), the caret
+  taking its place on hover or focus. The filter opens every group it keeps rows in. Pinned agents (pinned from a row's
   menu) stand first, in the order they were pinned, in a card (a `--hairline` `--border` edge,
   `--radius-lg`, no fill, so hover and selection read inside it as elsewhere),
   with no mark of their own (the card says so); the rest follow `--space-2` below in the

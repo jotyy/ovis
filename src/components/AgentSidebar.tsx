@@ -8,7 +8,7 @@ import type { AgentStatus, PlanSummary } from "../../shared/protocol.ts";
 import { currentAgentRowTokens, subscribeAgentRowTokens } from "../lib/agentRowTokens.ts";
 import { useT } from "../lib/i18n.ts";
 import { useAnnouncedText } from "../lib/useAnnouncedText.ts";
-import { agentRoster, type AgentRow } from "../lib/agentRoster.ts";
+import { agentGroups, agentRoster, type AgentGroup, type AgentRow } from "../lib/agentRoster.ts";
 import { currentPaneMutes, paneMuteKey, prunePaneMutes, setPaneMutes, subscribePaneMutes, togglePaneMute } from "../lib/paneMutes.ts";
 import { agentContext, agentTabName, paneMark } from "../lib/sidebarAgents.ts";
 import { useSettings } from "../lib/settings.ts";
@@ -17,6 +17,7 @@ import { machineFilter } from "../lib/sidebarFilter.ts";
 import { useSidebarFilter } from "../lib/sidebarFilterContext.ts";
 import { currentSidebarPins, pruneSidebarPins, setSidebarPins, sidebarPinKey, subscribeSidebarPins, toggleSidebarPin } from "../lib/sidebarPins.ts";
 import { PANE_DRAG_TYPE, paneDragData } from "../lib/split.ts";
+import { rollupStatus } from "../lib/status.ts";
 import { AgentMark, hasAgentMark } from "./AgentMark.tsx";
 import { RowMenu } from "./RowMenu.tsx";
 import { BackgroundBadge, displayPaneTitle, onRowContextMenu, PlanBadge, StatusBadge } from "./Sidebar.tsx";
@@ -94,8 +95,23 @@ const DRAWER_QUERY = "(max-width: 768px)";
  */
 interface PinMenu { key: string; anchor: HTMLElement; point?: { x: number; y: number }; previousFocus?: HTMLElement | null }
 
+/** the workspace groups folded on this browser, by their keys (lib/agentRoster.ts agentGroupKey) */
+const FOLDED_GROUPS_KEY = "ovis:agent-groups-folded";
+function storedFoldedGroups(): Set<string> {
+  try {
+    const stored: unknown = JSON.parse(localStorage.getItem(FOLDED_GROUPS_KEY) ?? "[]");
+    return new Set(Array.isArray(stored) ? stored.filter((key): key is string => typeof key === "string") : []);
+  } catch { return new Set(); } // storage denied or spoiled: nothing is folded
+}
+function storeFoldedGroups(keys: ReadonlySet<string>): void {
+  try { localStorage.setItem(FOLDED_GROUPS_KEY, JSON.stringify([...keys])); } catch { /* storage denied: the fold lasts the page */ }
+}
+
 /**
  * All PCs' live agents form a second list; workspace and PC folds do not hide these rows.
+ * Past the pinned ones they stand under the workspace they run in, as the Codex app files threads
+ * under their project: a head names the workspace once, so a row says only what it is working on.
+ * A head folds its group (kept on this browser) and, folded, still says how many and the loudest state.
  * In the phone's drawer the list starts folded, leaving the room to the workspaces.
  * The pinned agents stand first, in a card; on a desktop only a
  * right-click (or the context-menu key) opens the menu. A row's ⋯, or a right-click on it, opens its
@@ -127,6 +143,14 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
     return { pinned: roster.pinned.filter(kept), rest: roster.rest.filter(kept) };
   }, [roster, filter]);
   const rows = useMemo(() => [...split.pinned, ...split.rest], [split]);
+  const groups = useMemo(() => agentGroups(split.rest), [split]);
+  const [foldedGroups, setFoldedGroups] = useState(storedFoldedGroups);
+  const toggleGroup = (key: string): void => {
+    const next = new Set(foldedGroups);
+    if (!next.delete(key)) next.add(key);
+    setFoldedGroups(next);
+    storeFoldedGroups(next);
+  };
   // a folded list (a phone's starts so) opens while the filter keeps rows in it, so a match or the selection is
   // seen, not only kept; its caret then folds and opens it for the filter's time, the list's own fold untouched
   const [filterFold, setFilterFold] = useState<boolean | null>(null);
@@ -162,8 +186,9 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
   // herdr names a PC only beside another: the rows' line does the same
   const machineName = (machine: Machine): string | null => machines.length > 1 ? machine.name : null;
 
-  // what a row says of its agent, for the row and for its open menu
-  const describe = ({ machine, entry }: AgentRow) => {
+  // what a row says of its agent, for the row and for its open menu; under a group head the row
+  // leaves out the workspace and PC the head names
+  const describe = ({ machine, entry }: AgentRow, grouped = false) => {
     const { pane, workspace, tab, agent, agentLabel } = entry;
     const online = machine.state === "connected";
     const title = pane.label?.trim() || agent?.title?.trim() || pane.title?.trim() || displayPaneTitle(pane);
@@ -173,7 +198,7 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
     const tabs = machine.snapshot?.tabs.filter((candidate) => candidate.workspace_id === workspace.workspace_id) ?? [];
     const mark = paneMark(entry);
     const markAgent = mark && hasAgentMark(mark) ? mark : null;
-    const parts = { agentLabel: kindLabel, title, markAgent, machineName: machineName(machine), workspaceLabel: workspace.label, tabName: agentTabName(tab, tabs, t) };
+    const parts = { agentLabel: kindLabel, title, markAgent, machineName: grouped ? null : machineName(machine), workspaceLabel: grouped ? null : workspace.label, tabName: agentTabName(tab, tabs, t) };
     const contextParts = agentContext(parts);
     const context = contextParts.join(" · ");
     const kind = kindLabel?.trim() || null;
@@ -183,15 +208,15 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
     return { online, title, name, mark, context, markKind, tokens };
   };
 
-  const agentItem = (row: AgentRow) => {
+  const agentItem = (row: AgentRow, grouped = false) => {
     const { machine, entry } = row;
     const { pane, agent } = entry;
     const selected = machine.id === selectedMachineId && pane.pane_id === selectedPaneId;
     // under the filter a row it did not match is there for the selection: drawn as context, and said so
     const filterContext = filter.active && machineFilter(filter, machine.id)?.matchedPanes.has(pane.pane_id) !== true;
-    const { online, title, name, mark, context, markKind, tokens } = describe(row);
-    // the row cuts a long value: the tooltip, and a phone's menu sheet, say each in full
-    const tooltip = [...new Set([pane.pane_id, title, context, ...tokens, markKind, name, agent?.display_agent, pane.cwd, online ? null : stateWord(machine)].filter(Boolean))].join("\n");
+    const { online, title, name, mark, context, markKind, tokens } = describe(row, grouped);
+    // the row cuts a long value: the tooltip, and a phone's menu sheet, say each in full, its place too
+    const tooltip = [...new Set([pane.pane_id, title, grouped ? describe(row).context : context, ...tokens, markKind, name, agent?.display_agent, pane.cwd, online ? null : stateWord(machine)].filter(Boolean))].join("\n");
     const pinKey = sidebarPinKey(machine.id, pane.pane_id);
     const menuOpen = menu?.key === pinKey;
     // one menu for the ⋯ and a right-click, which opens it at the pointer and leaves the focus where it was
@@ -215,6 +240,29 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
           <Ellipsis aria-hidden="true" />
         </button>
       </div>
+    </li>;
+  };
+
+  const groupItem = (group: AgentGroup, index: number) => {
+    // the filter shows every group it keeps rows in, its folds untouched
+    const groupFolded = !filter.active && foldedGroups.has(group.key);
+    const groupId = `${listId}-group-${index}`;
+    const online = group.machine.state === "connected";
+    // folded, the head stands for its rows: their count and the state that most asks for a look
+    const state = online ? rollupStatus(group.rows.map(({ machine, entry }) => activity.status(machine.id, entry.pane))) : "unknown";
+    const holdsSelected = group.machine.id === selectedMachineId && group.rows.some(({ entry }) => entry.pane.pane_id === selectedPaneId);
+    const pc = machineName(group.machine);
+    return <li className={`agent-group${groupFolded ? " is-folded" : ""}${holdsSelected ? " holds-selected" : ""}${online ? "" : " is-offline"}`} key={group.key}>
+      <button type="button" className="agent-group-head" aria-expanded={!groupFolded} aria-controls={groupId} title={[group.workspace.label, pc].filter(Boolean).join(" · ")} onClick={() => toggleGroup(group.key)}>
+        <span className="agent-group-name">{group.workspace.label}</span>
+        {pc && <span className="agent-group-machine">{pc}</span>}
+        {groupFolded && <span className="agent-group-count">{group.rows.length}</span>}
+        <span className="agent-group-end">
+          {groupFolded ? <ChevronRight className="agent-group-caret" aria-hidden="true" /> : <ChevronDown className="agent-group-caret" aria-hidden="true" />}
+          {groupFolded && state !== "idle" && state !== "unknown" && <span className="agent-group-state"><StatusBadge status={state} compact /></span>}
+        </span>
+      </button>
+      <ul className="agent-list" id={groupId} hidden={groupFolded}>{group.rows.map((row) => agentItem(row, true))}</ul>
     </li>;
   };
 
@@ -248,9 +296,9 @@ export function AgentSidebar({ machines, selectedMachineId, selectedPaneId, stat
       {rows.length > 0 && <>
         {split.pinned.length > 0 && <>
           <p className="sidebar-pinned-label" aria-hidden="true">{t("Pinned")}</p>
-          <ul className="agent-list agent-list-pinned sidebar-pinned" aria-label={t("Pinned")}>{split.pinned.map(agentItem)}</ul>
+          <ul className="agent-list agent-list-pinned sidebar-pinned" aria-label={t("Pinned")}>{split.pinned.map((row) => agentItem(row))}</ul>
         </>}
-        {split.rest.length > 0 && <ul className="agent-list">{split.rest.map(agentItem)}</ul>}
+        {groups.length > 0 && <ul className="agent-groups">{groups.map(groupItem)}</ul>}
       </>}
     </div>
     {menu && menuShown && <RowMenu anchor={menu.anchor} point={menu.point} restoreFocusTo={menu.previousFocus} title={menuShown.title} subtitle={menuShown.context} detail={menuShown.tokens.join(" · ") || undefined} onClose={closeMenu} items={[

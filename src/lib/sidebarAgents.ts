@@ -101,7 +101,8 @@ export interface AgentContextParts {
   markAgent: string | null;
   /** null with a single PC: herdr does not name a lone machine either */
   machineName: string | null;
-  workspaceLabel: string;
+  /** null under a workspace's group head, which already names it (and its PC) */
+  workspaceLabel: string | null;
   tabName: string | null;
 }
 
@@ -112,7 +113,7 @@ export function agentContext({ agentLabel, title, markAgent, machineName, worksp
   return [
     agent && agent !== title.trim() && agent.toLowerCase() !== markAgent?.toLowerCase() ? agent : null,
     nonblank(machineName),
-    workspaceLabel,
+    nonblank(workspaceLabel),
     tab && tab !== workspaceLabel ? tab : null,
   ].filter((part): part is string => Boolean(part));
 }

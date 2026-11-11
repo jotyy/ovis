@@ -128,6 +128,11 @@ describe("agentContext", () => {
     expect(agentContext({ ...base, agentLabel: "Claude", markAgent: "claude" })).toEqual(["checkout-api"]);
     expect(agentContext({ ...base, agentLabel: "reviewer-bot", markAgent: "claude" })).toEqual(["reviewer-bot", "checkout-api"]);
   });
+
+  it("leaves the place to a group head that says it", () => {
+    expect(agentContext({ ...base, workspaceLabel: null, tabName: "Review" })).toEqual(["claude", "Review"]);
+    expect(agentContext({ ...base, markAgent: "claude", workspaceLabel: null })).toEqual([]);
+  });
 });
 
 describe("agentTabName", () => {
